@@ -1,0 +1,27 @@
+<div class="modal-header">
+    <h2>Response info</h2>
+</div>
+<div class="modal-body">
+    <div ng-show="ctrl.info==null" class="text-center">
+        <h4>Waiting for response...</h4>
+        <span class="fa fa-spinner fa-4x fa-spin">
+    </div>
+    <div ng-show="ctrl.info!==null">
+        <h2>{{ctrl.info.statusText}}</h2>
+        <div class="form-group">
+            <label>status:</label>
+            <code>{{ctrl.info.status}}</code>
+        </div
+        <div class="form-group">
+            <label>data:</label>
+            <pre>{{ctrl.info.data}}</pre>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-warning"
+            ng-click="ctrl.close()"
+            ng-disabled="ctrl.info==null">
+        Cancel
+    </button>
+</div>

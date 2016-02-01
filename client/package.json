@@ -1,0 +1,32 @@
+{
+    "name": "bril_web_configurator",
+    "version": "0.0.0",
+    "description": "BRIL applications configurator",
+    "main": "index.html",
+    "scripts": {
+        "lint": "jshint app",
+        "oldinstall": "browserify main.js > bundle.js",
+        "install": "browserify main.js -t [babelify --global --presets es2015] | uglifyjs > bundle.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Jonas Daugalas",
+    "license": "UNLICENSED",
+    "devDependencies": {
+        "minifyify": "latest",
+        "babel-preset-es2015": "latest",
+        "babelify": "latest",
+        "browserify": "latest",
+        "jshint": "latest",
+        "uglify-js": "latest"
+    },
+    "dependencies": {
+        "angular": "latest",
+        "bootstrap": "latest",
+        "angular-ui-router": "latest",
+        "angular-ui-bootstrap": "latest",
+        "ace-builds": "latest",
+        "angular-ui-ace": "latest",
+        "angular-pretty-xml": "latest",
+        "font-awesome": "latest"
+    }
+}

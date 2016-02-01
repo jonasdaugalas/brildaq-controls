@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- base href: static_base -->
+        <base href="/" />
+        <meta charset="UTF-8"/>
+        <title>Web Configurator (BRIL)</title>
+        <link href="node_modules/bootstrap/dist/css/bootstrap.min.css"
+              rel="stylesheet"/>
+        <link href="node_modules/font-awesome/css/font-awesome.min.css"
+              rel="stylesheet"/>
+        <link href="styles/wc-styles.css" rel="stylesheet"/>
+    </head>
+
+    <body class="container-fluid" ng-app="web-config">
+        <!-- <a ui-sref="overview">overview</a> -->
+        <!-- <a ui-sref="editor({configid: 12345})">editor</a> -->
+        <!-- view -->
+        <ui-view/>
+        <!-- end view -->
+
+        <script src="bundle.js"></script>
+
+    </body>
+
+</html>

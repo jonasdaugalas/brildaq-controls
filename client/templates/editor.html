@@ -1,0 +1,89 @@
+<h2>
+    {{ctrl.configPath}}
+    <span class="label label-info label-as-badge">
+        v{{ctrl.selectedVersion}}
+    </span>
+</h2>
+<div class="row">
+    <div class="col-md-6">
+        <h3 ng-class="ctrl.expertMode ? 'text-danger' : ''">
+            Editor
+            <button ng-click="ctrl.switchEditingMode()"
+                    style="border-style:none; background: none">
+                <small>
+                    expert mode
+                    <span class="fa fa-2"
+                          ng-class="ctrl.expertMode ?
+                                    'fa-toggle-on text-danger' :
+                                    'fa-toggle-off'"></span>
+                </small>
+            </button>
+        </h3>
+        <div ng-show="!ctrl.expertMode">
+            <div style="height: 300px; background: yellow">
+                placeholder
+            </div>
+            <form class="form-inline" role="form"
+                  style="margin-top: 12px">
+                <button class="btn btn-info"
+                        ng-click="ctrl.showOrigXML()">
+                    Show original XML
+                </button>
+                <button class="btn btn-info disabled"
+                        ng-click="">
+                    Preview modifications
+                </button>
+                <button class="btn btn-primary disabled pull-right"
+                        ng-click="">
+                    Submit modifications as new version
+                </button>
+            </form>
+        </div>
+        <div ng-show="ctrl.expertMode">
+            <div ui-ace="{onLoad: ctrl.editorLoaded, mode: 'xml'}"
+                 style="min-height:660px; border: solid 1px grey">
+            </div>
+            <form class="form-inline" role="form"
+                  style="margin-top: 12px">
+                <button class="btn btn-default"
+                        ng-click="ctrl.showEditorBindings()">
+                    <!-- <span class="fa fa-keyboard-o"></span> -->
+                    Bindings
+                    <span class="fa fa-question-circle"></span>
+                </button>
+                <button class="btn btn-default"
+                        ng-click="ctrl.beautify()">
+                    Beautify
+                </button>
+                <button class="btn btn-info"
+                        ng-click="ctrl.showFinalXML()">
+                    Preview final XML
+                </button>
+                <button class="btn btn-primary pull-right"
+                        ng-click="ctrl.submit()">
+                    Submit modifications as new version
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h3>History table</h3>
+        <table class="table table-condensed table-bordered">
+            <tr>
+                <th class="col-md-2">Version</th>
+                <th class="col-md-4">Modified</th>
+                <th>Comment</th>
+            </tr>
+            <tr ng-repeat="v in ctrl.versions"
+                ng-class="v[0]==ctrl.selectedVersion ? 'info' : ''">
+                <td align="center">
+                    <button class="btn btn-xs"
+                            ng-click="ctrl.selectVersion(v[0])">select</button>
+                    {{v[0]}}
+                </td>
+                <td>{{v[1] | date:'yyyy-MM-dd HH:mm:ss': 'UTC'}} UTC</td>
+                <td>{{v[2]}}</td>
+            </tr>
+        </table>
+    </div>
+</div>

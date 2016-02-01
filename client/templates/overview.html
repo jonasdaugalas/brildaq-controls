@@ -1,0 +1,80 @@
+<div class="row form-inline">
+    <select class="form-control"
+            ng-options="own for own in ctrl.owners"
+            ng-model="ctrl.owner"></select>
+
+    <button class="btn btn-default"
+            ng-click="ctrl.refreshConfigurations()">
+        <span class="fa fa-refresh"></span>Refresh
+    </button>
+</div>
+
+<div class="row">
+    <div class="wc-tree-view col-lg-2 col-md-3">
+        <h2>Configuration tree</h2>
+        <script type="text/ng-template" id="tree_item.html">
+            <div style="white-space: nowrap">
+                <div ng-if="node._isLeaf">
+                    <span ng-show="ctrl.getRunningSuccess"
+                          ng-class="node._running ?
+                                    'fa fa-heartbeat text-success' :
+                                    'fa fa-stop text-muted'">
+                    </span>
+
+                    <a ui-sref="editor({path: node._path})">{{name}}</a>
+                </div>
+
+                <div ng-if="!node._isLeaf" ng-init="isExpanded = true">
+                    <span ng-class="isExpanded ?
+                                    'glyphicon glyphicon-folder-open' :
+                                    'glyphicon glyphicon-folder-close'">
+                    </span>
+
+                    <a href="" ng-click="isExpanded = !isExpanded">
+                        {{name}}
+                    </a>
+                    <div ng-show="isExpanded"
+                         class="wc-tree-expanded"
+                         ng-repeat="(name,node) in node"
+                         ng-include="'tree_item.html'"></div>
+                </div>
+            </div>
+        </script>
+
+        <table>
+            <tr ng-repeat="(name,node) in ctrl.configTree[ctrl.owner]">
+                <td ng-include="'tree_item.html'"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="col-lg-10 col-md-9" ng-init="dirfilter = 'global'">
+        <div class="row form-inline">
+            <h2>Running configurations</h2>
+            <label for="dirfilter">Filter:</label>
+            <select class="form-control"
+                    id="dirfilter"
+                    ng-options="v as k for (k, v) in
+                                {global: 'global',
+                                local:'local',
+                                'no filter': ''}"
+                    ng-model="dirfilter"
+                    style="margin: auto;"></select>
+        </div>
+
+        <div class="col-lg-3 wc-config-block-container"
+             ng-repeat="(dirkey,dir) in ctrl.configTree[ctrl.owner]">
+            <h3>{{dirkey}}</h3>
+            <div ng-repeat="c in ctrl.running | filter :
+                            (ctrl.owner + '/' + dirkey + '/' + dirfilter)"
+                 class="wc-config-block">
+                <div class="wc-config-block-header">
+                    {{c[0]}}
+                </div>
+                <div class="wc-config-block-body">
+                    here should be some interesting info about this configuration
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

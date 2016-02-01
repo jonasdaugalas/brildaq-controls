@@ -1,0 +1,43 @@
+.wc-tree-expanded {
+  margin-left: 16px;
+}
+
+.wc-tree-item {
+  cursor: pointer;
+}
+
+.wc-tree-view {
+  /* max-width: 200px; */
+  overflow-x: auto;
+}
+
+.wc-config-block {
+  margin: 6px;
+  margin-bottom: 12px;
+  box-shadow: 0px 0px 6px 0px rgba(0,0,0,0.66);
+  background-color: #EDF5E8;
+}
+
+.wc-config-block-header {
+  font-size: small;
+  padding: 3px;
+  border-bottom: solid 1px grey;
+  word-wrap: break-word;
+}
+
+.wc-config-block-body {
+  padding: 3px;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.wc-config-block-container {
+  border-bottom: dashed 1px grey;
+  border-left: dashed 1px grey;
+  /* box-shadow: inset 0px 0px 6px 0px rgba(0,0,0,0.1); */
+  /* background-color: #FCF7E9; */
+}
+
+.label-as-badge {
+  border-radius: 1em;
+}
