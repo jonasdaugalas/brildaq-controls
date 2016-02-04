@@ -3,6 +3,7 @@ import flask
 import utils
 import re
 import time
+import rcmsws
 
 
 dbcon = None
@@ -54,8 +55,12 @@ def get_configurations():
 @app.route('/running/')
 @app.route('/running')
 def get_running():
-    r = json.dumps(utils.get_running_configurations())
-    return flask.Response(r, mimetype='application/json')
+    try:
+        r = json.dumps(rcmsws.get_running())
+        return flask.Response(r, mimetype='application/json')
+    except rcmsws.RequestFailed as e:
+        flask.Response('RCMS ws failed:{}'.format(e.message),
+                       status=e.status_code)
 
 
 @app.route('/history/<path:path>')
@@ -91,7 +96,7 @@ def submit_xml():
     if final:
         r = utils.populate_RSDB_with_DUCK(final, comment)
         if r[0]:
-            return flask.Response("Successfully submitted", status=201)
+            return flask.Response('Successfully submitted', status=201)
         else:
             return flask.Response(r[1], status=500)
     else:

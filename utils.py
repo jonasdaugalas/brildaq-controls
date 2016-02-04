@@ -14,11 +14,6 @@ import javabinary
 import configbuilder
 
 
-GET_RUNNING_CONF_URL = 'http://cmsrc-lumi.cms:46000/rcms/services/FMLifeCycle'
-GET_RUNNING_CONF_SOAP_XML = '<?xml version="1.0" encoding="UTF-8"?><soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" soap:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><ns1:getRunningConfigurations xsi:nil="true" xmlns:ns1="urn:FMLifeCycle"/></soap:Body></soap:Envelope>'
-RUNNING_CONF_SOAP_RESPONSE_RE = re.compile(
-    r'<multiRef .*?<directoryFullPath.*?>(.+?)<.*?<resourceGroupID.*?>([0-9]+)<', flags=re.DOTALL)
-
 RE_GET_CONFIGS_PARSE = re.compile(
     '.*?fullpath=(.*?),')
 
@@ -76,20 +71,6 @@ def get_configurations(dbcon):
         'host': x[2]}
          for x in r}
     return r
-
-
-def get_running_configurations():
-    headers = {'SOAPAction': ''}
-    r = requests.post(GET_RUNNING_CONF_URL, headers=headers,
-                      data=GET_RUNNING_CONF_SOAP_XML)
-    if (r.status_code == requests.codes.ok):
-        print(r.text)
-        ## match: (path, id)
-        matches = re.findall(RUNNING_CONF_SOAP_RESPONSE_RE, r.text)
-        matches = [(x[0], int(x[1])) for x in matches]
-        return matches
-    else:
-        return[]
 
 
 def get_versions(dbcon, path):

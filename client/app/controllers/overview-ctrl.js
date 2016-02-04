@@ -53,7 +53,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
             console.log(me.getRunningSuccess);
             var running, paths = [];
             for (running of me.running) {
-                paths.push(running[0]);
+                paths.push(running);
             }
             var putRunningFlag = function(leaf) {
                 leaf._running = (

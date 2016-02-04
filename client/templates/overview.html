@@ -72,26 +72,26 @@
 
         <script type="text/ng-template" id="config-block-container.html">
             <h3>{{dirkey}}</h3>
-            <div ng-repeat="c in ctrl.running
+            <div ng-repeat="path in ctrl.running
                             | filter: (ctrl.owner+'/'+dirkey+'/'+dirfilter)"
-                 class="wc-config-block">
-                <div class="wc-config-block-header">
-                    {{c[0]}}
+                 class="panel panel-success">
+                <div class="panel-heading">
+                    {{path}}
                 </div>
-                <div class="wc-config-block-body">
+                <div class="panel-body">
                     here should be some interesting info about this configuration
                 </div>
             </div>
         </script>
 
         <!-- hack again to keep 'central' first -->
-        <div class="col-lg-3 wc-config-block-container"
+        <div class="col-lg-3 wc-config-panel-group panel-group"
              ng-repeat="(dirkey,dir) in ctrl.configTree[ctrl.owner]"
              ng-if="dirkey==='central'"
              ng-include="'config-block-container.html'">
         </div>
 
-        <div class="col-lg-3 wc-config-block-container"
+        <div class="col-lg-3 wc-config-panel-group panel-group"
              ng-repeat="(dirkey,dir) in ctrl.configTree[ctrl.owner]"
              ng-if="dirkey!=='central'"
              ng-include="'config-block-container.html'">
