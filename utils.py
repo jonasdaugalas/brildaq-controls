@@ -19,6 +19,9 @@ GET_RUNNING_CONF_SOAP_XML = '<?xml version="1.0" encoding="UTF-8"?><soap:Envelop
 RUNNING_CONF_SOAP_RESPONSE_RE = re.compile(
     r'<multiRef .*?<directoryFullPath.*?>(.+?)<.*?<resourceGroupID.*?>([0-9]+)<', flags=re.DOTALL)
 
+RE_GET_CONFIGS_PARSE = re.compile(
+    '.*?fullpath=(.*?),')
+
 
 def parse_service_map(path):
     '''
@@ -48,6 +51,31 @@ def dbconnect(servicemap):
         dbuser, dbpass, dbdesc)
     engine = sql.create_engine(dburl)
     return engine.connect()
+
+
+def get_configurations(dbcon):
+    select = (
+        'select res.urn, res.portnumber, hst.hostname '
+        'from CMS_LUMI_RS.CONFIGRESOURCES res,'
+        ' CMS_LUMI_RS.CONFIGURATIONS cfg,'
+        ' CMS_LUMI_RS.CONFIGHOSTS hst,'
+        ' (select name, max(version) as version'
+        ' from CMS_LUMI_RS.CONFIGURATIONS'
+        ' where type=:cfgtype group by name) newest '
+        'where cfg.name=newest.name and'
+        ' cfg.version=newest.version and'
+        ' res.configurationid=cfg.configurationid and'
+        ' hst.configurationid=cfg.configurationid and'
+        ' res.name=:resname')
+    var = {'cfgtype': 'lightConfiguration',
+           'resname': 'BrilDAQFunctionManager'}
+    r = dbcon.execute(select, var).fetchall()
+    r = {RE_GET_CONFIGS_PARSE.search(x[0]).group(1): {
+        'urn': x[0],
+        'port': x[1],
+        'host': x[2]}
+         for x in r}
+    return r
 
 
 def get_running_configurations():

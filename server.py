@@ -46,13 +46,8 @@ def get_endpoints():
 
 @app.route('/configurations/')
 @app.route('/configurations')
-def get_configurations(path=None):
-    ## would be nice to also get CONFIGRESOURCEID but it depends on
-    ## CONFIGHOSTID.. So we identify configurations only by path
-    select = ('select URN from CMS_LUMI_RS.CONFIGRESOURCES '
-              'where name=:fmname GROUP BY URN')
-    r = dbcon.execute(select, {'fmname': 'BrilDAQFunctionManager'}).fetchall()
-    r = [re.search('=(.*?)(?:,|$)', x[0]).group(1) for x in r]
+def get_configurations():
+    r = utils.get_configurations(dbcon)
     return flask.Response(json.dumps(r), mimetype='application/json')
 
 
@@ -106,8 +101,8 @@ def submit_xml():
 if __name__ == '__main__':
     init()
     try:
-        app.run(host='0.0.0.0')
-        # app.run(host='0.0.0.0', debug=True)
-    except e:
+        # app.run(host='0.0.0.0')
+        app.run(host='0.0.0.0', debug=True)
+    except BaseException as e:
         print e
     finalize()

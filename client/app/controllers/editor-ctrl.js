@@ -145,11 +145,11 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
                 me.selectedVersion,
                 xml: editor.getValue(),
                 comment: comment});
-    };
+    }
 
     function submitChanges(comment) {
         return;
-    };
+    }
 
     me.init();
 

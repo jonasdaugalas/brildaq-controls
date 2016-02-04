@@ -12,7 +12,7 @@
 <div class="row">
     <div class="wc-tree-view col-lg-2 col-md-3">
         <h2>Configuration tree</h2>
-        <script type="text/ng-template" id="tree_item.html">
+        <script type="text/ng-template" id="tree-item.html">
             <div style="white-space: nowrap">
                 <div ng-if="node._isLeaf">
                     <span ng-show="ctrl.getRunningSuccess"
@@ -36,14 +36,22 @@
                     <div ng-show="isExpanded"
                          class="wc-tree-expanded"
                          ng-repeat="(name,node) in node"
-                         ng-include="'tree_item.html'"></div>
+                         ng-include="'tree-item.html'"></div>
                 </div>
             </div>
         </script>
 
         <table>
-            <tr ng-repeat="(name,node) in ctrl.configTree[ctrl.owner]">
-                <td ng-include="'tree_item.html'"></td>
+            <!-- simple workaround to have 'central' on top
+                 (cannot easily set order for object keys) -->
+            <tr ng-repeat="(name,node) in ctrl.configTree[ctrl.owner]"
+                ng-if="name==='central'">
+                <td ng-include="'tree-item.html'"></td>
+            </tr>
+
+            <tr ng-repeat="(name,node) in ctrl.configTree[ctrl.owner]"
+                ng-if="name!=='central'">
+                <td ng-include="'tree-item.html'"></td>
             </tr>
         </table>
     </div>
@@ -62,11 +70,10 @@
                     style="margin: auto;"></select>
         </div>
 
-        <div class="col-lg-3 wc-config-block-container"
-             ng-repeat="(dirkey,dir) in ctrl.configTree[ctrl.owner]">
+        <script type="text/ng-template" id="config-block-container.html">
             <h3>{{dirkey}}</h3>
-            <div ng-repeat="c in ctrl.running | filter :
-                            (ctrl.owner + '/' + dirkey + '/' + dirfilter)"
+            <div ng-repeat="c in ctrl.running
+                            | filter: (ctrl.owner+'/'+dirkey+'/'+dirfilter)"
                  class="wc-config-block">
                 <div class="wc-config-block-header">
                     {{c[0]}}
@@ -75,6 +82,20 @@
                     here should be some interesting info about this configuration
                 </div>
             </div>
+        </script>
+
+        <!-- hack again to keep 'central' first -->
+        <div class="col-lg-3 wc-config-block-container"
+             ng-repeat="(dirkey,dir) in ctrl.configTree[ctrl.owner]"
+             ng-if="dirkey==='central'"
+             ng-include="'config-block-container.html'">
         </div>
+
+        <div class="col-lg-3 wc-config-block-container"
+             ng-repeat="(dirkey,dir) in ctrl.configTree[ctrl.owner]"
+             ng-if="dirkey!=='central'"
+             ng-include="'config-block-container.html'">
+        </div>
+
     </div>
 </div>

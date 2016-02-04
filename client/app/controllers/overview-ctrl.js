@@ -1,5 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("OverviewCtrl", ["$http", function($http) {
+angular.module("web-config").controller("OverviewCtrl", ["$http", "Configurations", function($http, Cfgs) {
 
     var me = this;
     this.configurations = [];
@@ -16,10 +16,10 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", function($http
     };
 
     this.refreshConfigurations = function() {
-        return $http.get("/configurations").then(function(response) {
+        return Cfgs.update().then(function(paths) {
             var path, parr, node, head;
-            me.configurations = response.data;
-            for (path of response.data) {
+            me.configurations = paths;
+            for (path of paths) {
                 parr = path.split("/");
                 parr.shift();
                 head = me.configTree;

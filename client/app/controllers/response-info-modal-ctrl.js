@@ -10,7 +10,7 @@ angular.module("web-config").controller("ResponseInfoModalCtrl", ["$uibModalInst
 
     function setInfo(response) {
         me.info = response;
-    };
+    }
 
     $scope.request.then(setInfo).catch(setInfo);
     $scope.$on("modal.closing", function(event) {
