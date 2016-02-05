@@ -8,6 +8,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
     this.owner = "";
     this.running = [];
     this.getRunningSuccess = true;
+    this.states = {};
 
     this.init = function() {
         me.refreshConfigurations().then(function() {
@@ -37,9 +38,24 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
         });
     };
 
-    this.refreshStatuses = function(soft) {
-        var url = soft ? "/running_soft" : "/running";
-        $http.get(url).then(function(response) {
+    this.refreshStatuses = function() {
+        return getRunning().then(function() {
+            return getStates(me.running);
+        }).then(function() {
+            var putRunningFlag = function(leaf) {
+                if (me.getRunningSuccess) {
+                    leaf._running = me.running.indexOf(leaf._path) > -1;
+                    leaf._state = me.states[leaf._path];
+                } else {
+                    leaf._running = null;
+                }
+            };
+            itterateConfigTree(me.configTree, putRunningFlag);
+        });
+    };
+
+    function getRunning() {
+        return $http.get("/running").then(function(response) {
             me.running = response.data;
             me.getRunningSuccess = true;
             return true;
@@ -47,21 +63,26 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
             me.running = [];
             me.getRunningSuccess = false;
             return false;
-        }).then(function(success) {
-            console.log(success);
-            console.log(me.running);
-            console.log(me.getRunningSuccess);
-            var running, paths = [];
-            for (running of me.running) {
-                paths.push(running);
-            }
-            var putRunningFlag = function(leaf) {
-                leaf._running = (
-                    success ? paths.indexOf(leaf._path) > -1 : null);
-            };
-            itterateConfigTree(me.configTree, putRunningFlag);
         });
-    };
+    }
+
+    function getStates(paths) {
+        var running, uris =[];
+        for (running of paths) {
+            uris.push(Cfgs.path2URI(running));
+        }
+        return $http.post('/states', uris).then(function(response) {
+            var uri;
+            me.states = {};
+            for (uri in response.data) {
+                if (response.data.hasOwnProperty(uri)) {
+                    me.states[Cfgs.URI2path(uri)] = response.data[uri];
+                }
+            }
+        }).catch(function(response) {
+            console.log("Failed getting states", response);
+        });
+    }
 
     this.getConfigXML = function(path) {
         $http.get("/configxml" + path).then(function(response) {

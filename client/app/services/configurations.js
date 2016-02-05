@@ -4,6 +4,8 @@ angular.module("web-config").service("Configurations", ["$http", function($http)
     this.configurations = {};
     this.paths = [];
 
+    var RE_FULPATH = /.*?fullpath=(.*?),/;
+
     this.update = function() {
         return $http.get("/configurations").then(function(response) {
             var path, parr, node, head;
@@ -22,9 +24,13 @@ angular.module("web-config").service("Configurations", ["$http", function($http)
         return me.configurations[path]; // ORIGINAL OBJECT
     };
 
-    this.getURI = function(path) {
+    this.path2URI = function(path) {
         var cfg = me.configurations[path];
         return "http://" + cfg.host + ":" + cfg.port + cfg.urn;
+    };
+
+    this.URI2path = function(uri) {
+        return RE_FULPATH.exec(uri)[1];
     };
 
     this.getPaths = function() {

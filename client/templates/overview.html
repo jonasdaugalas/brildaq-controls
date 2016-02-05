@@ -12,34 +12,6 @@
 <div class="row">
     <div class="wc-tree-view col-lg-2 col-md-3">
         <h2>Configuration tree</h2>
-        <script type="text/ng-template" id="tree-item.html">
-            <div style="white-space: nowrap">
-                <div ng-if="node._isLeaf">
-                    <span ng-show="ctrl.getRunningSuccess"
-                          ng-class="node._running ?
-                                    'fa fa-heartbeat text-success' :
-                                    'fa fa-stop text-muted'">
-                    </span>
-
-                    <a ui-sref="editor({path: node._path})">{{name}}</a>
-                </div>
-
-                <div ng-if="!node._isLeaf" ng-init="isExpanded = true">
-                    <span ng-class="isExpanded ?
-                                    'glyphicon glyphicon-folder-open' :
-                                    'glyphicon glyphicon-folder-close'">
-                    </span>
-
-                    <a href="" ng-click="isExpanded = !isExpanded">
-                        {{name}}
-                    </a>
-                    <div ng-show="isExpanded"
-                         class="wc-tree-expanded"
-                         ng-repeat="(name,node) in node"
-                         ng-include="'tree-item.html'"></div>
-                </div>
-            </div>
-        </script>
 
         <table>
             <!-- simple workaround to have 'central' on top
@@ -70,20 +42,6 @@
                     style="margin: auto;"></select>
         </div>
 
-        <script type="text/ng-template" id="config-block-container.html">
-            <h3>{{dirkey}}</h3>
-            <div ng-repeat="path in ctrl.running
-                            | filter: (ctrl.owner+'/'+dirkey+'/'+dirfilter)"
-                 class="panel panel-success">
-                <div class="panel-heading">
-                    {{path}}
-                </div>
-                <div class="panel-body">
-                    here should be some interesting info about this configuration
-                </div>
-            </div>
-        </script>
-
         <!-- hack again to keep 'central' first -->
         <div class="col-lg-3 wc-config-panel-group panel-group"
              ng-repeat="(dirkey,dir) in ctrl.configTree[ctrl.owner]"
@@ -99,3 +57,87 @@
 
     </div>
 </div>
+
+<script type="text/ng-template" id="tree-item.html">
+    <div style="white-space: nowrap">
+
+        <div ng-if="node._isLeaf">
+            <span ng-if="ctrl.getRunningSuccess">
+                <span ng-if="node._running">
+                    <span ng-if="node._state==='ON'"
+                          class="fa fa-heartbeat text-success"
+                          uib-tooltip="Running. State: ON"
+                          tooltip-placement="top-left"></span>
+                    <span ng-if="node._state==='OFF'"
+                          class="fa fa-cog"
+                          uib-tooltip="Running. State: OFF"
+                          tooltip-placement="top-left"></span>
+                    <span ng-if="node._state!=='ON' && node._state!=='OFF'"
+                          class="fa-exclamation-circle text-danger"
+                          uib-tooltip="Running. Error or unknown state."
+                          tooltip-placement="top-left"></span>
+                </span>
+                <span ng-if="!node._running"
+                      class="fa fa-stop text-muted"
+                      uib-tooltip="Not running (not created)"
+                      tooltip-placement="top-left">
+                </span>
+            </span>
+            <span ng-if="!ctrl.getRunningSuccess"
+                  class="fa fa-exclamation-triangle text-warning"
+                  uib-tooltip="Failed RCMS web service 'getRunningConfigurations'"
+                  tooltip-placement="top-left">
+            </span>
+
+            <!-- ui-sref="editor({path: node._path})" -->
+
+            <a href=""
+               uib-popover-template="'action-popover.html'"
+               popover-append-to-body="true"
+               popover-placement="right"
+               popover-title="{{name}}"
+               popover-trigger="outsideClick">
+                {{name}}
+            </a>
+        </div>
+
+        <div ng-if="!node._isLeaf" ng-init="isExpanded = true">
+            <span ng-class="isExpanded ?
+                            'glyphicon glyphicon-folder-open' :
+                            'glyphicon glyphicon-folder-close'">
+            </span>
+
+            <a href="" ng-click="isExpanded = !isExpanded">{{name}}</a>
+
+            <div ng-show="isExpanded"
+                 class="wc-tree-expanded"
+                 ng-repeat="(name,node) in node"
+                 ng-include="'tree-item.html'"></div>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="config-block-container.html">
+    <h3>{{dirkey}}</h3>
+    <div ng-repeat="path in ctrl.running
+                    | filter: (ctrl.owner+'/'+dirkey+'/'+dirfilter)"
+         class="panel panel-success">
+        <div class="panel-heading">
+            {{path}}
+        </div>
+        <div class="panel-body">
+            here should be some interesting info about this configuration
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="action-popover.html">
+    <div>
+        <a class="list-group-item" ui-sref="editor({path: node._path})">Edit</a>
+        <button class="list-group-item">TurnON</button>
+        <button class="list-group-item" href="#">TurnOFF</button>
+        <button class="list-group-item">Reset</button>
+        <button class="list-group-item">Create</button>
+        <button class="list-group-item">Destroy</button>
+    </div>
+</script>

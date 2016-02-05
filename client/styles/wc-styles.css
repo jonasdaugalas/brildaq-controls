@@ -22,3 +22,7 @@
 .label-as-badge {
   border-radius: 1em;
 }
+
+.popover-content {
+  padding: 0px;
+}

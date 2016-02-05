@@ -59,8 +59,19 @@ def get_running():
         r = json.dumps(rcmsws.get_running())
         return flask.Response(r, mimetype='application/json')
     except rcmsws.RequestFailed as e:
-        flask.Response('RCMS ws failed:{}'.format(e.message),
-                       status=e.status_code)
+        return flask.Response('RCMS ws failed:{}'.format(e.message),
+                              status=e.status_code)
+
+
+@app.route('/states/', methods=['GET', 'POST'])
+@app.route('/states', methods=['GET', 'POST'])
+def get_states():
+    if flask.request.method == 'GET':
+        return flask.Response('Use POST method. Request body: json array '
+                              'of configuration URIs (string)', status=405)
+    data = flask.request.json
+    r = rcmsws.get_states(data)
+    return flask.Response(json.dumps(r), mimetype='application/json')
 
 
 @app.route('/history/<path:path>')

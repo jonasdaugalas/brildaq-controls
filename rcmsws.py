@@ -4,7 +4,8 @@ import logging
 
 log = logging.getLogger(__name__)
 
-RCMS_FMLIFECYCLE_URL = 'http://cmsrc-lumi.cms:46000/rcms/services/FMLifeCycle'
+FMLIFECYCLE_URL = 'http://cmsrc-lumi.cms:46000/rcms/services/FMLifeCycle'
+COMMANDSERVICE_URL = 'http://cmsrc-lumi.cms:46000/rcms/services/CommandService'
 
 TPL_SOAP_ENVELOPE = (
     '<?xml version="1.0" encoding="UTF-8"?>'
@@ -74,11 +75,33 @@ def is_ok(resp):
 
 
 def get_running():
-    resp = post_soap_body(RCMS_FMLIFECYCLE_URL, TPL_GET_RUNNING)
+    """Return running (created) configurations."""
+    resp = post_soap_body(FMLIFECYCLE_URL, TPL_GET_RUNNING)
     if is_ok(resp):
         ## match: (path, id)
         matches = RE_GET_RUNNING_PARSE.findall(resp.text)
-        return matches
+        return matches or []
     else:
         log.error("Failed get running configurations: %s", resp.text)
         raise RequestFailed(resp.text, resp.status_code)
+
+
+def get_states(uris):
+    """Return state for each uri in uris list."""
+    result = {}
+    some_good = False
+    for uri in uris:
+        print(uri)
+        body = TPL_GET_STATE.format(uri=uri)
+        resp = post_soap_body(COMMANDSERVICE_URL, body)
+        if is_ok(resp):
+            found = RE_GET_STATE_PARSE.search(resp.text)
+            result[uri] = found.group(1) if found else None
+            some_good = True if found else False
+        else:
+            result[uri] =  None
+    if not some_good:
+        log.error("Failed get running configurations: %s", resp.text)
+        raise RequestFailed(resp.text, resp.status_code)
+    print(result)
+    return result
