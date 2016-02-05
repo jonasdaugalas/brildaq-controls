@@ -135,9 +135,12 @@
 <script type="text/ng-template" id="action-popover.html">
     <div>
         <a class="list-group-item" ui-sref="editor({path: node._path})">Edit</a>
-        <button class="list-group-item">TurnON</button>
-        <button class="list-group-item" href="#">TurnOFF</button>
-        <button class="list-group-item">Reset</button>
+        <button class="list-group-item"
+                ng-click="ctrl.sendCommand('TurnON', node._path)">TurnON</button>
+        <button class="list-group-item"
+                ng-click="ctrl.sendCommand('TurnOFF', node._path)">TurnOFF</button>
+        <button class="list-group-item"
+                ng-click="ctrl.sendCommand('Reset', node._path)">Reset</button>
         <button class="list-group-item">Create</button>
         <button class="list-group-item">Destroy</button>
     </div>

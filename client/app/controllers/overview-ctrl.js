@@ -79,9 +79,10 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
         for (running of paths) {
             uris.push(Cfgs.path2URI(running));
         }
+        me.states = {};
+        me.active = [];
         return $http.post('/states', uris).then(function(response) {
             var uri, path;
-            me.states = {};
             for (uri in response.data) {
                 if (response.data.hasOwnProperty(uri)) {
                     path = Cfgs.URI2path(uri);
@@ -121,6 +122,19 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
             }
         }
     }
+
+    this.sendCommand = function(cmd, path) {
+        return $http.post("/send/" + cmd,
+                          JSON.stringify(Cfgs.path2URI(path)))
+            .then(function(response) {
+                console.log(response);
+                me.refreshStatuses();
+            })
+            .catch(function(response) {
+                console.log(response);
+                me.refreshStatuses();
+            });
+    };
 
     this.init();
 }]);

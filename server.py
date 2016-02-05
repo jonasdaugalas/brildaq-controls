@@ -74,6 +74,13 @@ def get_states():
     return flask.Response(json.dumps(r), mimetype='application/json')
 
 
+@app.route('/send/<string:command>', methods=['POST'])
+def send_command(command):
+    data = flask.request.json
+    print(data)
+    return ('', 200) if rcmsws.send_command(command, data) else flask.abort(400)
+
+
 @app.route('/history/<path:path>')
 def get_versions(path):
     r = utils.get_versions(dbcon, '/' + path)

@@ -3,6 +3,7 @@ import requests
 import logging
 
 log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 FMLIFECYCLE_URL = 'http://cmsrc-lumi.cms:46000/rcms/services/FMLifeCycle'
 COMMANDSERVICE_URL = 'http://cmsrc-lumi.cms:46000/rcms/services/CommandService'
@@ -105,3 +106,26 @@ def get_states(uris):
         raise RequestFailed(resp.text, resp.status_code)
     print(result)
     return result
+
+
+def send_command(command, uri):
+    log.info('SEND "%s" %s', command, uri)
+    body = TPL_COMMAND.format(uri=uri, cmd=command)
+    resp = post_soap_body(COMMANDSERVICE_URL, body)
+    if is_ok(resp):
+        log.info('SUCCESS "%s" %s', command, uri)
+        return True
+    else:
+        log.info('FAIL "%s" %s', command, uri)
+
+
+def turn_on(uri):
+    return send_command('TurnON', uri)
+
+
+def turn_off(uri):
+    return send_command('TurnOFF', uri)
+
+
+def reset(uri):
+    return send_command('Reset', uri)
