@@ -2,13 +2,20 @@
 angular.module("web-config").controller("OverviewCtrl", ["$http", "Configurations", function($http, Cfgs) {
 
     var me = this;
+    // all configurations' paths
     this.configurations = [];
     this.configTree = {};
     this.owners = [];
+    // selected owner
     this.owner = "";
+    // running configurations' paths
     this.running = [];
+    // Running query was successful
     this.getRunningSuccess = true;
+    // map path to state
     this.states = {};
+    // array of active (running and state is not "OFF") cfg paths
+    this.active = [];
 
     this.init = function() {
         me.refreshConfigurations().then(function() {
@@ -42,6 +49,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
         return getRunning().then(function() {
             return getStates(me.running);
         }).then(function() {
+            var path;
             var putRunningFlag = function(leaf) {
                 if (me.getRunningSuccess) {
                     leaf._running = me.running.indexOf(leaf._path) > -1;
@@ -72,11 +80,15 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
             uris.push(Cfgs.path2URI(running));
         }
         return $http.post('/states', uris).then(function(response) {
-            var uri;
+            var uri, path;
             me.states = {};
             for (uri in response.data) {
                 if (response.data.hasOwnProperty(uri)) {
-                    me.states[Cfgs.URI2path(uri)] = response.data[uri];
+                    path = Cfgs.URI2path(uri);
+                    me.states[path] = response.data[uri];
+                    if (response.data[uri] !== "OFF") {
+                        me.active.push(path);
+                    }
                 }
             }
         }).catch(function(response) {

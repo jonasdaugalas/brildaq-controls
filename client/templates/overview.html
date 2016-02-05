@@ -30,7 +30,7 @@
 
     <div class="col-lg-10 col-md-9" ng-init="dirfilter = 'global'">
         <div class="row form-inline">
-            <h2>Running configurations</h2>
+            <h2>Active configurations</h2>
             <label for="dirfilter">Filter:</label>
             <select class="form-control"
                     id="dirfilter"
@@ -119,9 +119,10 @@
 
 <script type="text/ng-template" id="config-block-container.html">
     <h3>{{dirkey}}</h3>
-    <div ng-repeat="path in ctrl.running
+    <div ng-repeat="path in ctrl.active
                     | filter: (ctrl.owner+'/'+dirkey+'/'+dirfilter)"
-         class="panel panel-success">
+         class="panel"
+         ng-class="ctrl.states[path]==='ON' ? 'panel-success' : 'panel-danger'">
         <div class="panel-heading">
             {{path}}
         </div>
