@@ -68,11 +68,20 @@
                           class="fa fa-heartbeat text-success"
                           uib-tooltip="Running. State: ON"
                           tooltip-placement="top-left"></span>
+                    <span ng-if="node._state==='GoingOn'"
+                          class="fa fa-spinner text-success"
+                          uib-tooltip="Running. State: GoingOn"
+                          tooltip-placement="top-left"></span>
                     <span ng-if="node._state==='OFF'"
                           class="fa fa-cog"
                           uib-tooltip="Running. State: OFF"
                           tooltip-placement="top-left"></span>
-                    <span ng-if="node._state!=='ON' && node._state!=='OFF'"
+                    <span ng-if="node._state==='GoingOff'"
+                          class="fa fa-stop text-muted"
+                          uib-tooltip="Running. State: GoingOff "
+                          tooltip-placement="top-left">
+                    </span>
+                    <span ng-if="node._state==='Error'"
                           class="fa-exclamation-circle text-danger"
                           uib-tooltip="Running. Error or unknown state."
                           tooltip-placement="top-left"></span>

@@ -87,7 +87,8 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
                 if (response.data.hasOwnProperty(uri)) {
                     path = Cfgs.URI2path(uri);
                     me.states[path] = response.data[uri];
-                    if (response.data[uri] !== "OFF") {
+                    if (response.data[uri] === "ON" ||
+                        response.data[uri] === "Error") {
                         me.active.push(path);
                     }
                 }
