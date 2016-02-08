@@ -78,6 +78,7 @@ def is_ok(resp):
 def get_running():
     """Return running (created) configurations."""
     resp = post_soap_body(FMLIFECYCLE_URL, TPL_GET_RUNNING)
+    print(resp.text)
     if is_ok(resp):
         ## match: (path, id)
         matches = RE_GET_RUNNING_PARSE.findall(resp.text)

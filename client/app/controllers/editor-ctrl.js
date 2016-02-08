@@ -5,7 +5,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     this.configPath = $stateParams.path;
     this.versions = [];
     this.selectedVersion = null;
-    this.currentXML = "";
+    this.config = {xml: ""};
     this.expertMode = false;
 
     var initPromise = Promise.resolve();
@@ -37,23 +37,23 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
 
     this.selectVersion = function(version) {
         me.selectedVersion = version;
-        return $http.get("/configxml" + me.configPath + "/v=" + me.selectedVersion)
+        return $http.get("/config" + me.configPath + "/v=" + me.selectedVersion)
             .then(function(response) {
-                me.currentXML = response.data;
+                me.config = response.data;
                 console.log(editor);
                 if (editor) {
                     console.log("setting xml");
-                    editor.setValue(me.currentXML);
+                    editor.setValue(me.config.xml);
                 }
             }, function(response) {
-                console.log("Failed to get xml");
+                console.log("Failed to get config");
             });
     };
 
     this.showOrigXML = function() {
         var title = ("Original configuration: " + me.configPath +
                      " v" + me.selectedVersion);
-        showXML(title, me.currentXML);
+        showXML(title, me.config.xml);
     };
 
     this.showFinalXML = function() {
@@ -69,7 +69,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
         editor.getSession().setUseSoftTabs(true);
         editor.setReadOnly(false);
         // editor.setKeyboardHandler("ace/keyboard/emacs");
-        editor.setValue(me.currentXML);
+        editor.setValue(me.config.xml);
         ace.config.loadModule("ace/ext/keybinding_menu", function(module) {
             module.init(editor);
         });

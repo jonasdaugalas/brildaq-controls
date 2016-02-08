@@ -137,7 +137,7 @@ def get_config(dbcon, path, version):
     xml = get_config_xml(dbcon, path, version)
     if not xml:
         return None
-    result = {'xml': 'much xml here...'}
+    result = {'xml': xml}
     # print(result)
     result['fields'] = parse_fields(easyconfig, xml) if easyconfig else None
     print(result)
@@ -149,7 +149,12 @@ def parse_fields(easyconfig, xml):
     root = ET.fromstring(xml)
     for field in easyconfig['fields']:
         node = root.find(field['xpath'], ns)
-        field['value'] = node.text
+        if field['type'] in ('Integer', 'unsignedInt'):
+            field['value'] = int(node.text)
+        elif field['type'] == 'commaSeparatedString':
+            field['value'] = node.text.split(',')
+        else:
+            field['value'] = node.text
     return easyconfig['fields']
 
 

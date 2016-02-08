@@ -11,7 +11,7 @@
         },
         {
             "name": "Bestlumi priority",
-            "type": "string",
+            "type": "commaSeparatedString",
             "xpath": ".//xc:Application[@class='bril::supervisor::BestLumiProcessor']/bl:properties/bl:lumiPriority"
         }
     ]

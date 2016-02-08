@@ -16,6 +16,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
     this.states = {};
     // array of active (running and state is not "OFF") cfg paths
     this.active = [];
+    this.activeConfigs = {};
 
     this.init = function() {
         me.refreshConfigurations().then(function() {
@@ -49,6 +50,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
         return getRunning().then(function() {
             return getStates(me.running);
         }).then(function() {
+            me.getActiveConfigs();
             var path;
             var putRunningFlag = function(leaf) {
                 if (me.getRunningSuccess) {
@@ -98,14 +100,29 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
         });
     }
 
-    this.getConfigXML = function(path) {
-        $http.get("/configxml" + path).then(function(response) {
-            return response.data;
-        }, function(response) {
-            //TODO: ALERT
-            console.error("Failed getting configuration xml", path);
-        });
+
+    this.getActiveConfigs = function() {
+        var path;
+        for (path of me.active) {
+            (function (p) {
+                $http.get("/config" + p).then(function(response) {
+                    me.activeConfigs[p] = response.data;
+                }).catch(function(response) {
+                    console.log(response);
+                    me.activeConfigs[p] = null;
+                });
+            })(path);
+        }
     };
+
+    // this.getConfigXML = function(path) {
+    //     $http.get("/configxml" + path).then(function(response) {
+    //         return response.data;
+    //     }, function(response) {
+    //         //TODO: ALERT
+    //         console.error("Failed getting configuration xml", path);
+    //     });
+    // };
 
     function itterateConfigTree(node, visit) {
         var stack = [node];

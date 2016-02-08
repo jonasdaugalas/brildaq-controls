@@ -1,0 +1,53 @@
+<div ng-repeat="field in ctrl.fields" ng-switch="field.type" class="form-group">
+    <label>{{field.name}}:</label>
+
+        <span ng-switch-when="unsignedInt">
+            <span ng-include="'unsigned-int.html'"></span>
+        </span>
+
+        <span ng-switch-when="commaSeparatedString">
+            <span ng-include="'comma-separated-string.html'"></span>
+        </span>
+</div>
+
+<script type="text/ng-template" id="unsigned-int.html">
+    <input type="number" class="form-control" min="0" ng-model="field.value"></script>
+</script>
+
+<script type="text/ng-template" id="string.html">
+    <input type="text" class="form-control" ng-model="field.value"></script>
+</script>
+
+<script type="text/ng-template" id="comma-separated-string.html">
+    <table class="table table-sm">
+        <tr ng-repeat="item in field.value track by $index">
+            <td>{{$index}}</td>
+            <td>{{item}}</td>
+            <td>
+                <button class="btn btn-sm"
+                        ng-disabled="$index===0"
+                        ng-click="ctrl.swap(field.value, $index, $index-1)">
+                    <span class="fa fa-arrow-up">
+                </button>
+                <button class="btn btn-sm"
+                        ng-disabled="$index===field.value.length-1"
+                        ng-click="ctrl.swap(field.value, $index, $index+1)">
+                    <span class="fa fa-arrow-down">
+                </button>
+                <button class="btn btn-sm" ng-click="field.value.splice($index, 1)">
+                    <span class="fa fa-minus">
+                </button>
+            </td>
+        </tr>
+
+        <tr>
+            <td></td>
+            <td><input type="text" class="form-control input-sm" ng-model="newItem"></td>
+            <td>
+                <button class="btn btn-sm" ng-click="field.value.push(newItem)">
+                    <span class="fa fa-plus">
+                </button>
+            </td>
+        </tr>
+    </table>
+</script>

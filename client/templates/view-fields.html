@@ -1,0 +1,18 @@
+<div ng-repeat="field in fields" ng-switch="field.type">
+    <label>{{field.name}}:</label>
+    <span ng-switch-when="unsignedInt"><span ng-include="'unsigned-int.html'"></span></span>
+    <span ng-switch-when="string"><span ng-include="'string.html'"></span></span>
+    <span ng-switch-when="commaSeparatedString"><span ng-include="'comma-separated-string.html'"></span></span>
+</div>
+
+<script type="text/ng-template" id="unsigned-int.html">
+    <code>{{field.value}}</code>
+</script>
+
+<script type="text/ng-template" id="string.html">
+    {{field.value}}
+</script>
+
+<script type="text/ng-template" id="comma-separated-string.html">
+    <span class="text-info">{{field.value.join()}}</span>
+</script>
