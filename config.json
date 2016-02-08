@@ -1,3 +1,5 @@
 {
-    "authfile": "../../utils/db.ini"
+    "authfile": "../../utils/db.ini",
+    "easyconfigmap": "easyconfigmap.json",
+    "easyconfigdir": "easyconfig"
 }

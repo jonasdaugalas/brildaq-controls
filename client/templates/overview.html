@@ -77,7 +77,7 @@
                           uib-tooltip="Running. State: OFF"
                           tooltip-placement="top-left"></span>
                     <span ng-if="node._state==='GoingOff'"
-                          class="fa fa-stop text-muted"
+                          class="fa fa-cog"
                           uib-tooltip="Running. State: GoingOff "
                           tooltip-placement="top-left">
                     </span>
@@ -103,7 +103,7 @@
             <a href=""
                uib-popover-template="'action-popover.html'"
                popover-append-to-body="true"
-               popover-placement="right"
+               popover-placement="right-top"
                popover-title="{{name}}"
                popover-trigger="outsideClick">
                 {{name}}

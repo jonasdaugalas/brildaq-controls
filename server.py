@@ -4,19 +4,17 @@ import utils
 import re
 import time
 import rcmsws
+import config
 
 
 dbcon = None
-config = None
+
 # static_url_path: static_base
 app = flask.Flask(__name__, static_folder='client', static_url_path='')
 
 
 def init():
-    global config
-    with open('config.json', 'r') as f:
-        config = json.load(f)
-    servicemap = utils.parse_service_map(config['authfile'])
+    servicemap = utils.parse_service_map(config.authfile)
     global dbcon
     dbcon = utils.dbconnect(servicemap)
 
@@ -96,6 +94,15 @@ def get_config_xml(path, version=None):
     if r is None:
         flask.abort(404)
     return flask.Response(r, mimetype='text/xml')
+
+
+@app.route('/config/<path:path>')
+@app.route('/config/<path:path>/v=<int:version>')
+def get_config(path, version=None):
+    r = utils.get_config(dbcon, '/' + path, version)
+    if r is None:
+        flask.abort(404)
+    return flask.Response(json.dumps(r), mimetype='application/json')
 
 
 @app.route('/buildfinalxml', methods=['POST'])

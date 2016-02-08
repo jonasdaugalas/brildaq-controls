@@ -1,0 +1,18 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "bl": "urn:xdaq-application:bril::supervisor::BestLumiProcessor"
+    },
+    "fields": [
+        {
+            "name": "Minbias",
+            "type": "unsignedInt",
+            "xpath": ".//xc:Application[@class='bril::supervisor::BestLumiProcessor']/bl:properties/bl:minbias"
+        },
+        {
+            "name": "Bestlumi priority",
+            "type": "string",
+            "xpath": ".//xc:Application[@class='bril::supervisor::BestLumiProcessor']/bl:properties/bl:lumiPriority"
+        }
+    ]
+}

@@ -3,6 +3,7 @@ Configurator server utilities.
 '''
 import ConfigParser
 import sqlalchemy as sql
+import xml.etree.ElementTree as ET
 import requests
 import re
 import gzip
@@ -12,6 +13,7 @@ import subprocess
 import tempfile
 import javabinary
 import configbuilder
+from easyconfig import easyconfigmap
 
 
 RE_GET_CONFIGS_PARSE = re.compile(
@@ -124,6 +126,31 @@ def get_config_xml(dbcon, path, version):
         return None
     configxml =  group[0]['childrenResources']['data'][0]['configFile']
     return configxml
+
+
+def get_config(dbcon, path, version):
+    print(path)
+    easyconfig = None
+    if path in easyconfigmap:
+        easyconfig = easyconfigmap[path]
+    print(easyconfig)
+    xml = get_config_xml(dbcon, path, version)
+    if not xml:
+        return None
+    result = {'xml': 'much xml here...'}
+    # print(result)
+    result['fields'] = parse_fields(easyconfig, xml) if easyconfig else None
+    print(result)
+    return result
+
+
+def parse_fields(easyconfig, xml):
+    ns = easyconfig['namespaces']
+    root = ET.fromstring(xml)
+    for field in easyconfig['fields']:
+        node = root.find(field['xpath'], ns)
+        field['value'] = node.text
+    return easyconfig['fields']
 
 
 def build_final_xml(dbcon, path, xml, version=None):
