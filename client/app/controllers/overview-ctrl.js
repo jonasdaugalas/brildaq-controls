@@ -14,7 +14,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
     this.getRunningSuccess = true;
     // map path to state
     this.states = {};
-    // array of active (running and state is not "OFF") cfg paths
+    // array of active (running and state is "ON" or "Error) cfg paths
     this.active = [];
     this.activeConfigs = {};
 

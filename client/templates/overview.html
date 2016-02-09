@@ -100,7 +100,7 @@
 
             <!-- ui-sref="editor({path: node._path})" -->
 
-            <a href=""
+            <a href="" ng-init="path=node._path"
                uib-popover-template="'action-popover.html'"
                popover-append-to-body="true"
                popover-placement="right-top"
@@ -132,8 +132,12 @@
                     | filter: (ctrl.owner+'/'+dirkey+'/'+dirfilter)"
          class="panel"
          ng-class="ctrl.states[path]==='ON' ? 'panel-success' : 'panel-danger'">
-        <div class="panel-heading">
-            {{path}}
+        <div class="panel-heading" style="cursor:pointer"
+             uib-popover-template="'action-popover.html'"
+             popover-append-to-body="true"
+             popover-placement="bottom-right"
+             popover-trigger="outsideClick">
+                {{path}}
         </div>
         <div class="panel-body">
             <wc-view-fields fields="ctrl.activeConfigs[path].fields"></wc-view-fields>
@@ -143,13 +147,13 @@
 
 <script type="text/ng-template" id="action-popover.html">
     <div>
-        <a class="list-group-item" ui-sref="editor({path: node._path})">Edit</a>
+        <a class="list-group-item" ui-sref="editor({path:path})">Edit</a>
         <button class="list-group-item"
-                ng-click="ctrl.sendCommand('TurnON', node._path)">TurnON</button>
+                ng-click="ctrl.sendCommand('TurnON', path)">TurnON</button>
         <button class="list-group-item"
-                ng-click="ctrl.sendCommand('TurnOFF', node._path)">TurnOFF</button>
+                ng-click="ctrl.sendCommand('TurnOFF', path)">TurnOFF</button>
         <button class="list-group-item"
-                ng-click="ctrl.sendCommand('Reset', node._path)">Reset</button>
+                ng-click="ctrl.sendCommand('Reset', path)">Reset</button>
         <button class="list-group-item">Create</button>
         <button class="list-group-item">Destroy</button>
     </div>
