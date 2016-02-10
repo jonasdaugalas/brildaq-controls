@@ -74,6 +74,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
         return $http.get("/running").then(function(response) {
             var path;
             me.runningDetails = response.data;
+            me.running = [];
             for (path in response.data) {
                 if (response.data.hasOwnProperty(path)) {
                     me.running.push(path);
@@ -156,15 +157,27 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
     this.sendCommand = function(cmd, path) {
         return $http.post("/send/" + cmd,
                           JSON.stringify(Cfgs.path2URI(path)))
-            .then(function(response) {
-                console.log(response);
-                me.refreshStatuses();
-            })
-            .catch(function(response) {
-                console.log(response);
-                me.refreshStatuses();
-            });
+            .then(dummyHttpHandler)
+            .catch(dummyHttpHandler);
     };
+
+    this.create = function(path) {
+        return $http.post("/create", JSON.stringify(Cfgs.path2URI(path)))
+            .then(dummyHttpHandler)
+            .catch(dummyHttpHandler);
+    };
+
+
+    this.destroy = function(path) {
+        return $http.post("/destroy", JSON.stringify(Cfgs.path2URI(path)))
+            .then(dummyHttpHandler)
+            .catch(dummyHttpHandler);
+    };
+
+    function dummyHttpHandler(response) {
+        console.log(response);
+        me.refreshStatuses();
+    }
 
     this.init();
 }]);

@@ -1,3 +1,6 @@
 {
-    "/lumidev/central/local/bestLumiProcessorTest": "bestlumitest.json"
+    "/lumidev/central/local/bestLumiProcessorTest": "bestlumitest.json",
+    "/lumidev/central/global/bestLumiProcessor": "bestlumitest.json",
+    "/lumidev/central/global/bestLumiProcessor_lowEpp": "bestlumitest.json",
+    "/lumidev/central/global/bestLumiProcessor_pbpb": "bestlumitest.json"
 }

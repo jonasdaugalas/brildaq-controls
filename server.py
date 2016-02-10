@@ -81,6 +81,18 @@ def send_command(command):
     return ('', 200) if rcmsws.send_command(command, data) else flask.abort(400)
 
 
+@app.route('/create', methods=['POST'])
+def create_fm():
+    data = flask.request.json
+    return ('', 200) if rcmsws.create(data) else flask.abort(400)
+
+
+@app.route('/destroy', methods=['POST'])
+def destroy_fm():
+    data = flask.request.json
+    return ('', 200) if rcmsws.destroy(data) else flask.abort(400)
+
+
 @app.route('/history/<path:path>')
 def get_versions(path):
     r = utils.get_versions(dbcon, '/' + path)
@@ -112,6 +124,15 @@ def make_full_xml():
     data = flask.request.json
     r = utils.build_final_xml(dbcon, data['path'], data['xml'], data['version'])
     return flask.Response(r, mimetype='text/xml')
+
+
+# @app.route('/buildxml', methods=['POST'])
+# def make_easy_xml():
+#     """Take configuration fields from POST data and construct xml
+
+#     :returns: constructed xml configuration
+#     :rtype: flask.Response
+#     """
 
 
 @app.route('/submitxml', methods=['POST'])

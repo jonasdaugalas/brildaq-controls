@@ -93,6 +93,8 @@ def version_by_resGID(dbcon, cfgs):
     # (Jonas) Unable to pass list as parameter to oracle
     # Could potentially be security problem: non-parameterized query!
     resgids = [str(int(x)) for x in resgids]
+    if not resgids:
+        return None
     select = (
         'select res.configresourceid , res.configurationid, cfg.version '
         'from CMS_LUMI_RS.CONFIGRESOURCES res, CMS_LUMI_RS.CONFIGURATIONS cfg '

@@ -79,13 +79,12 @@ def get_running():
     """Return running (created) configurations."""
     resp = post_soap_body(FMLIFECYCLE_URL, TPL_GET_RUNNING)
     if is_ok(resp):
-        ## match: (path, id)
         matches = RE_GET_RUNNING_PARSE.findall(resp.text)
         if matches:
             matches = {
                 x[1]: {
-                    'URI': x[0], 'resGID':
-                    int(x[2])}
+                    'URI': x[0],
+                    'resGID': int(x[2])}
                 for x in matches}
         return matches or {}
     else:
@@ -95,6 +94,8 @@ def get_running():
 
 def get_states(uris):
     """Return state for each uri in uris list."""
+    if not uris:
+        return {}
     result = {}
     some_good = False
     for uri in uris:
@@ -107,7 +108,7 @@ def get_states(uris):
         else:
             result[uri] =  None
     if not some_good:
-        log.error("Failed get running configurations: %s", resp.text)
+        log.error("Failed to get states for all uris: %s", uris)
         raise RequestFailed(resp.text, resp.status_code)
     return result
 
@@ -133,3 +134,25 @@ def turn_off(uri):
 
 def reset(uri):
     return send_command('Reset', uri)
+
+
+def create(uri):
+    log.info('CREATE %s', uri)
+    body = TPL_CREATE.format(uri=uri)
+    resp = post_soap_body(FMLIFECYCLE_URL, body)
+    if is_ok(resp):
+        log.info('CREATED %s', uri)
+        return True
+    else:
+        log.info('FAILED to CREATE %s', uri)
+
+
+def destroy(uri):
+    log.info('DESTROY %s', uri)
+    body = TPL_DESTROY.format(uri=uri)
+    resp = post_soap_body(FMLIFECYCLE_URL, body)
+    if is_ok(resp):
+        log.info('DESTROYED %s', uri)
+        return True
+    else:
+        log.info('FAILED to DESTROY %s', uri)

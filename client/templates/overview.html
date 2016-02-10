@@ -124,8 +124,8 @@
                 ng-click="ctrl.sendCommand('TurnOFF', path)">TurnOFF</button>
         <button class="list-group-item"
                 ng-click="ctrl.sendCommand('Reset', path)">Reset</button>
-        <button class="list-group-item">Create</button>
-        <button class="list-group-item">Destroy</button>
+        <button class="list-group-item" ng-click="ctrl.create(path)">Create</button>
+        <button class="list-group-item" ng-click="ctrl.destroy(path)">Destroy</button>
     </div>
 </script>
 
