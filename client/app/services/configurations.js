@@ -8,7 +8,7 @@ angular.module("web-config").service("Configurations", ["$http", function($http)
 
     this.update = function() {
         return $http.get("/configurations").then(function(response) {
-            var path, parr, node, head;
+            var path;
             me.configurations = response.data;
             me.paths = [];
             for (path in response.data) {
@@ -18,6 +18,10 @@ angular.module("web-config").service("Configurations", ["$http", function($http)
             }
             return me.paths.slice(); //copy
         });
+    };
+
+    this.getVersion = function(path) {
+        return me.configurations[path].version;
     };
 
     this.get = function(path) {

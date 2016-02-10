@@ -61,46 +61,13 @@
 <script type="text/ng-template" id="tree-item.html">
     <div style="white-space: nowrap">
 
-        <div ng-if="node._isLeaf">
-            <span ng-if="ctrl.getRunningSuccess">
-                <span ng-if="node._running">
-                    <span ng-if="node._state==='ON'"
-                          class="fa fa-heartbeat text-success"
-                          uib-tooltip="Running. State: ON"
-                          tooltip-placement="top-left"></span>
-                    <span ng-if="node._state==='GoingOn'"
-                          class="fa fa-spinner text-success"
-                          uib-tooltip="Running. State: GoingOn"
-                          tooltip-placement="top-left"></span>
-                    <span ng-if="node._state==='OFF'"
-                          class="fa fa-cog"
-                          uib-tooltip="Running. State: OFF"
-                          tooltip-placement="top-left"></span>
-                    <span ng-if="node._state==='GoingOff'"
-                          class="fa fa-cog"
-                          uib-tooltip="Running. State: GoingOff "
-                          tooltip-placement="top-left">
-                    </span>
-                    <span ng-if="node._state==='Error'"
-                          class="fa-exclamation-circle text-danger"
-                          uib-tooltip="Running. Error or unknown state."
-                          tooltip-placement="top-left"></span>
-                </span>
-                <span ng-if="!node._running"
-                      class="fa fa-stop text-muted"
-                      uib-tooltip="Not running (not created)"
-                      tooltip-placement="top-left">
-                </span>
-            </span>
-            <span ng-if="!ctrl.getRunningSuccess"
-                  class="fa fa-exclamation-triangle text-warning"
-                  uib-tooltip="Failed RCMS web service 'getRunningConfigurations'"
-                  tooltip-placement="top-left">
-            </span>
+        <div ng-if="node._isLeaf" ng-init="path=node._path">
 
-            <!-- ui-sref="editor({path: node._path})" -->
+            <span ng-include="'status-indicator.html'"></span>
 
-            <a href="" ng-init="path=node._path"
+            <span ng-include="'old-version-indicator.html'"></span>
+
+            <a href=""
                uib-popover-template="'action-popover.html'"
                popover-append-to-body="true"
                popover-placement="right-top"
@@ -108,6 +75,7 @@
                popover-trigger="outsideClick">
                 {{name}}
             </a>
+
         </div>
 
         <div ng-if="!node._isLeaf" ng-init="isExpanded = true">
@@ -137,7 +105,9 @@
              popover-append-to-body="true"
              popover-placement="bottom-right"
              popover-trigger="outsideClick">
-                {{path}}
+            {{path}}
+            <span class="pull-right"
+                  ng-include="'old-version-indicator.html'"></span>
         </div>
         <div class="panel-body">
             <wc-view-fields fields="ctrl.activeConfigs[path].fields"></wc-view-fields>
@@ -157,4 +127,54 @@
         <button class="list-group-item">Create</button>
         <button class="list-group-item">Destroy</button>
     </div>
+</script>
+
+<script type="text/ng-template" id="status-indicator.html">
+    <span ng-if="ctrl.getRunningSuccess">
+        <span ng-if="node._running">
+            <span ng-if="node._state==='ON'"
+                  class="fa fa-heartbeat text-success"
+                  uib-tooltip="Running. State: ON"
+                  tooltip-placement="top-left"></span>
+            <span ng-if="node._state==='GoingOn'"
+                  class="fa fa-spinner text-success"
+                  uib-tooltip="Running. State: GoingOn"
+                  tooltip-placement="top-left"></span>
+            <span ng-if="node._state==='OFF'"
+                  class="fa fa-cog"
+                  uib-tooltip="Running. State: OFF"
+                  tooltip-placement="top-left"></span>
+            <span ng-if="node._state==='GoingOff'"
+                  class="fa fa-cog"
+                  uib-tooltip="Running. State: GoingOff "
+                  tooltip-placement="top-left">
+            </span>
+            <span ng-if="node._state==='Error'"
+                  class="fa-exclamation-circle text-danger"
+                  uib-tooltip="Running. Error or unknown state."
+                  tooltip-placement="top-left"></span>
+        </span>
+        <span ng-if="!node._running"
+              class="fa fa-stop text-muted"
+              uib-tooltip="Not running (not created)"
+              tooltip-placement="top-left">
+        </span>
+    </span>
+    <span ng-if="!ctrl.getRunningSuccess"
+          class="fa fa-exclamation-triangle text-warning"
+          uib-tooltip="Failed RCMS web service 'getRunningConfigurations'"
+          tooltip-placement="top-left">
+    </span>
+</script>
+
+<script type="text/ng-template" id="old-version-indicator.html">
+    <span ng-if="ctrl.runningDetails[path].version < ctrl.versions[path]"
+          class="fa fa-exclamation-triangle text-warning"
+          uib-tooltip="Running configuration
+                       (v{{ctrl.runningDetails[path].version}}) is not
+                       the newest configuration (v{{ctrl.versions[path]}}).
+                       Do 'Destroy' then 'Create'"
+          tooltip-placement="top-left"
+          tooltip-append-to-body="true"
+    </span>
 </script>

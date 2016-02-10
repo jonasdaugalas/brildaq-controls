@@ -13,7 +13,10 @@ import subprocess
 import tempfile
 import javabinary
 import configbuilder
+import logging
 from easyconfig import easyconfigmap
+
+log = logging.getLogger(__name__)
 
 
 RE_GET_CONFIGS_PARSE = re.compile(
@@ -52,7 +55,7 @@ def dbconnect(servicemap):
 
 def get_configurations(dbcon):
     select = (
-        'select res.urn, res.portnumber, hst.hostname '
+        'select res.urn, res.portnumber, hst.hostname, newest.version '
         'from CMS_LUMI_RS.CONFIGRESOURCES res,'
         ' CMS_LUMI_RS.CONFIGURATIONS cfg,'
         ' CMS_LUMI_RS.CONFIGHOSTS hst,'
@@ -70,9 +73,38 @@ def get_configurations(dbcon):
     r = {RE_GET_CONFIGS_PARSE.search(x[0]).group(1): {
         'urn': x[0],
         'port': x[1],
-        'host': x[2]}
+        'host': x[2],
+        'version': x[3]}
          for x in r}
     return r
+
+
+def version_by_resGID(dbcon, cfgs):
+    """Set 'version' by 'resGID' for each configuration in 'cfgs'.
+
+    :param dbcon:
+    :param cfgs: dict 'path'->'cfg', where 'cfg' is dict having
+      attribute 'resGID'.
+    :returns: same 'cfgs' list with 'version' attribute set for each
+      dictionary depending on 'resGID' attribute.
+    :rtype: list or None
+    """
+    resgids = [x['resGID'] for x in cfgs.values()]
+    # (Jonas) Unable to pass list as parameter to oracle
+    # Could potentially be security problem: non-parameterized query!
+    resgids = [str(int(x)) for x in resgids]
+    select = (
+        'select res.configresourceid , res.configurationid, cfg.version '
+        'from CMS_LUMI_RS.CONFIGRESOURCES res, CMS_LUMI_RS.CONFIGURATIONS cfg '
+        'where res.configresourceid in (' + ','.join(resgids) +') and '
+        'res.configurationid=cfg.configurationid')
+    res = dbcon.execute(select).fetchall()
+    for r in res:
+        for v in cfgs.values():
+            if int(r[0]) == v['resGID']:
+                v['cfgID'] = int(r[1])
+                v['version'] = int(r[2])
+    return cfgs
 
 
 def get_versions(dbcon, path):
@@ -129,18 +161,14 @@ def get_config_xml(dbcon, path, version):
 
 
 def get_config(dbcon, path, version):
-    print(path)
     easyconfig = None
     if path in easyconfigmap:
         easyconfig = easyconfigmap[path]
-    print(easyconfig)
     xml = get_config_xml(dbcon, path, version)
     if not xml:
         return None
     result = {'xml': xml}
-    # print(result)
     result['fields'] = parse_fields(easyconfig, xml) if easyconfig else None
-    print(result)
     return result
 
 
@@ -166,17 +194,15 @@ def build_final_xml(dbcon, path, xml, version=None):
 
 def populate_RSDB_with_DUCK(xml, comment=None):
     with tempfile.NamedTemporaryFile(mode='w') as f:
-        print(f.name)
         f.write(xml)
         f.flush()
         cmd = ['java', '-jar', 'duck.jar', f.name]
         if comment:
             cmd += ['-c', str(comment)]
-        print("Subprocess: {}".format(' '.join(cmd)))
+        log.log("Subprocess: {}".format(' '.join(cmd)))
         out = subprocess.check_output(cmd, cwd='tools')
         if 'ERROR' in out:
             skip = out.find('Continueing...')
-            print(skip)
             if skip < 0:
                 return False, ""
             out = out[(skip+15):]

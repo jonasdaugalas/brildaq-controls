@@ -54,11 +54,14 @@ def get_configurations():
 @app.route('/running')
 def get_running():
     try:
-        r = json.dumps(rcmsws.get_running())
-        return flask.Response(r, mimetype='application/json')
+        intermediate = rcmsws.get_running()
     except rcmsws.RequestFailed as e:
         return flask.Response('RCMS ws failed:{}'.format(e.message),
                               status=e.status_code)
+    else:
+        r = utils.version_by_resGID(dbcon, intermediate)
+        r = json.dumps(r)
+        return flask.Response(r, mimetype='application/json')
 
 
 @app.route('/states/', methods=['GET', 'POST'])
@@ -75,7 +78,6 @@ def get_states():
 @app.route('/send/<string:command>', methods=['POST'])
 def send_command(command):
     data = flask.request.json
-    print(data)
     return ('', 200) if rcmsws.send_command(command, data) else flask.abort(400)
 
 

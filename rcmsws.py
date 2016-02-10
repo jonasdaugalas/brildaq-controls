@@ -48,7 +48,7 @@ TPL_GET_RUNNING = (
     'xsi:nil="true" xmlns:ns1="urn:FMLifeCycle"/>')
 
 RE_GET_RUNNING_PARSE = re.compile(
-    r'<multiRef .*?<directoryFullPath.*?>(.+?)<', flags=re.DOTALL)
+    r'<multiRef .*?<URI .*?>(.+?)<.*?<directoryFullPath.*?>(.+?)<.*?<resourceGroupID .*?>(.+?)<', flags=re.DOTALL)
 
 RE_GET_CREATED_PARSE = re.compile(
     r'<multiRef .*?<directoryFullPath.*?>(.+?)<.*?'
@@ -78,11 +78,16 @@ def is_ok(resp):
 def get_running():
     """Return running (created) configurations."""
     resp = post_soap_body(FMLIFECYCLE_URL, TPL_GET_RUNNING)
-    print(resp.text)
     if is_ok(resp):
         ## match: (path, id)
         matches = RE_GET_RUNNING_PARSE.findall(resp.text)
-        return matches or []
+        if matches:
+            matches = {
+                x[1]: {
+                    'URI': x[0], 'resGID':
+                    int(x[2])}
+                for x in matches}
+        return matches or {}
     else:
         log.error("Failed get running configurations: %s", resp.text)
         raise RequestFailed(resp.text, resp.status_code)
@@ -93,7 +98,6 @@ def get_states(uris):
     result = {}
     some_good = False
     for uri in uris:
-        print(uri)
         body = TPL_GET_STATE.format(uri=uri)
         resp = post_soap_body(COMMANDSERVICE_URL, body)
         if is_ok(resp):
@@ -105,7 +109,6 @@ def get_states(uris):
     if not some_good:
         log.error("Failed get running configurations: %s", resp.text)
         raise RequestFailed(resp.text, resp.status_code)
-    print(result)
     return result
 
 

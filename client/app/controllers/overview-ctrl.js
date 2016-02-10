@@ -4,12 +4,16 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
     var me = this;
     // all configurations' paths
     this.configurations = [];
+    // map path to newest configuration version
+    this.versions = {};
     this.configTree = {};
     this.owners = [];
     // selected owner
     this.owner = "";
     // running configurations' paths
     this.running = [];
+    // map path to {URI: ..., version: ..., cfgID: ..., resGID: ... }
+    this.runningDetails = {};
     // Running query was successful
     this.getRunningSuccess = true;
     // map path to state
@@ -21,6 +25,11 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
     this.init = function() {
         me.refreshConfigurations().then(function() {
             me.owner = me.owners[0];
+            console.log(me.runningDetails);
+            var d = me.runningDetails["/lumidev/central/local/bestLumiProcessorTest"];
+            d.version = d.version -1;
+            me.active.push("/lumidev/central/local/bestLumiProcessorTest");
+            me.states["/lumidev/central/local/bestLumiProcessorTest"] = "ON";
         });
     };
 
@@ -28,7 +37,9 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
         return Cfgs.update().then(function(paths) {
             var path, parr, node, head;
             me.configurations = paths;
+            me.versions = {};
             for (path of paths) {
+                me.versions[path] = Cfgs.getVersion(path);
                 parr = path.split("/");
                 parr.shift();
                 head = me.configTree;
@@ -42,7 +53,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
                 head._path = path;
             }
             me.owners = Object.keys(me.configTree);
-            me.refreshStatuses();
+            return me.refreshStatuses();
         });
     };
 
@@ -66,7 +77,13 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
 
     function getRunning() {
         return $http.get("/running").then(function(response) {
-            me.running = response.data;
+            var path;
+            me.runningDetails = response.data;
+            for (path in response.data) {
+                if (response.data.hasOwnProperty(path)) {
+                    me.running.push(path);
+                }
+            }
             me.getRunningSuccess = true;
             return true;
         }, function(response) {
