@@ -1,3 +1,22 @@
+GOOD_EXECUTIVE_KEYS =[
+    'qualifiedResourceType', 'role', 'instance', 'logLevel',
+    'pathToExecutive', 'unixUser', 'environmentString']
+
+def get_executive(group):
+    data = group[0]['childrenResources']['data'][0]
+    uri = data['uri']['string'][7:]       # drop 'http://'
+    e = {
+        'host': uri.split(':')[0],
+        'urn': '/' + uri.split('/')[1],
+        'port': int(uri.split('/')[0].split(':')[1]),
+        'logURL': data['logURL']['string']
+    }
+    for key in GOOD_EXECUTIVE_KEYS:
+        e[key] = data[key]
+
+    return e
+
+
 def build_final(fullpath, xml, group):
     service = build_service(group)
     executive = build_executive(group, xml)
@@ -43,22 +62,14 @@ def build_service(group):
 
 def build_executive(group, xml):
     tpl = ('<XdaqExecutive hostname="{host}" port="{port}" urn="{urn}" '
-           'qualifiedResourceType="{qrt}" role="{role}" instance="{inst}" '
-           'logURL="{logurl}" logLevel="{loglevel}" pathToExecutive="{path}" '
-           'unixUser="{unixuser}" environmentString="{envstr}">'
+           'qualifiedResourceType="{qualifiedResourceType}" role="{role}" '
+           'instance="{instance}" logURL="{logURL}" logLevel="{logLevel}" '
+           'pathToExecutive="{pathToExecutive}" unixUser="{unixUser}" '
+           'environmentString="{environmentString}">'
            '<configFile>{xml}</configFile></XdaqExecutive>')
-    data = group[0]['childrenResources']['data'][0]
-    uri = data['uri']['string'][7:]       # drop 'http://'
-    host = uri.split(':')[0]
-    urn = '/' + uri.split('/')[1]
-    port = uri.split('/')[0].split(':')[1]
-    logurl = data['logURL']['string']
+    e = get_executive(group)
     xml = unxmlify(xml)
-    return tpl.format(
-        host=host, port=port, urn=urn, qrt=data['qualifiedResourceType'],
-        role=data['role'], inst=data['instance'], logurl=logurl,
-        loglevel=data['logLevel'], path=data['pathToExecutive'],
-        unixuser=data['unixUser'], envstr=data['environmentString'], xml=xml)
+    return tpl.format(xml=xml, **e)
 
 
 def unxmlify(xml):
