@@ -25,11 +25,6 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
     this.init = function() {
         me.refreshConfigurations().then(function() {
             me.owner = me.owners[0];
-            console.log(me.runningDetails);
-            var d = me.runningDetails["/lumidev/central/local/bestLumiProcessorTest"];
-            d.version = d.version -1;
-            me.active.push("/lumidev/central/local/bestLumiProcessorTest");
-            me.states["/lumidev/central/local/bestLumiProcessorTest"] = "ON";
         });
     };
 
