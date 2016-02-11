@@ -6,6 +6,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     this.versions = [];
     this.selectedVersion = null;
     this.config = {xml: ""};
+    this.configExecutiveCopy = {};
     this.expertMode = false;
 
     var initPromise = Promise.resolve();
@@ -40,6 +41,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
         return $http.get("/config" + me.configPath + "/v=" + me.selectedVersion)
             .then(function(response) {
                 me.config = response.data;
+                me.configExecutiveCopy = angular.copy(response.data.executive);
                 console.log(editor);
                 if (editor) {
                     console.log("setting xml");

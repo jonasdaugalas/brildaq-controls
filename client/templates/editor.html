@@ -20,6 +20,11 @@
             </button>
         </h3>
         <div ng-show="!ctrl.expertMode">
+            <h4>Executive info</h4>
+            <wc-executive-info executive="ctrl.configExecutiveCopy"
+                               editable="false">
+            </wc-executive-info>
+            <h4>Configuration fields</h4>
             <div>
                 <wc-edit-fields fields="ctrl.config.fields"></wc-edit-fields>
             </div>
@@ -40,6 +45,11 @@
             </form>
         </div>
         <div ng-show="ctrl.expertMode">
+            <h4>Executive info</h4>
+            <wc-executive-info executive="ctrl.config.executive"
+                               editable="true">
+            </wc-executive-info>
+            <h4>Configuration xml</h4>
             <div ui-ace="{onLoad: ctrl.editorLoaded, mode: 'xml'}"
                  style="min-height:660px; border: solid 1px grey">
             </div>

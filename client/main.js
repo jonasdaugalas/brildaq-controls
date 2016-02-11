@@ -20,3 +20,4 @@ require("./app/controllers/response-info-modal-ctrl");
 require("./app/services/configurations");
 require("./app/directives/view-fields");
 require("./app/directives/edit-fields");
+require("./app/directives/executive-info");
