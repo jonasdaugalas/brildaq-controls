@@ -7,8 +7,10 @@
 <div class="row">
     <div class="col-md-6">
         <h3 ng-class="ctrl.expertMode ? 'text-danger' : ''">
-            Editor
-            <button ng-click="ctrl.switchEditingMode()"
+            Editor {{ctrl.expertMode ? '(expert mode)' : ''}}
+
+            <button class="pull-right"
+                    ng-click="ctrl.switchEditingMode()"
                     style="border-style:none; background: none">
                 <small>
                     expert mode
@@ -20,11 +22,9 @@
             </button>
         </h3>
         <div ng-show="!ctrl.expertMode">
-            <h4>Executive info</h4>
             <wc-executive-info executive="ctrl.configExecutiveCopy"
                                editable="false">
             </wc-executive-info>
-            <h4>Configuration fields</h4>
             <div>
                 <wc-edit-fields fields="ctrl.config.fields"></wc-edit-fields>
             </div>
@@ -45,11 +45,9 @@
             </form>
         </div>
         <div ng-show="ctrl.expertMode">
-            <h4>Executive info</h4>
             <wc-executive-info executive="ctrl.config.executive"
                                editable="true">
             </wc-executive-info>
-            <h4>Configuration xml</h4>
             <div ui-ace="{onLoad: ctrl.editorLoaded, mode: 'xml'}"
                  style="min-height:660px; border: solid 1px grey">
             </div>
