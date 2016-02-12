@@ -12,7 +12,27 @@ angular.module("web-config").controller("ResponseInfoModalCtrl", ["$uibModalInst
         me.info = response;
     }
 
-    $scope.request.then(setInfo).catch(setInfo);
+    if (typeof $scope.requestPromise.then === "function") {
+
+        $scope.requestPromise.then(function(response) {
+            console.log(response);
+            if ($scope.insteadResolve) {
+                me.info = true;
+                $uibModalInstance.close(response);
+            } else {
+                setInfo(response);
+            }
+        }).catch(function(response) {
+            if ($scope.insteadReject) {
+                $uibModalInstance.dismiss(response);
+            } else {
+                setInfo(response);
+            }
+        });
+    } else {
+        setInfo($scope.requestPromise);
+    }
+
     $scope.$on("modal.closing", function(event) {
         if (me.info === null) {
             event.preventDefault();

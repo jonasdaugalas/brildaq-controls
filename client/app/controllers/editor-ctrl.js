@@ -1,5 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stateParams", "$filter", "$uibModal", function($scope, $http, $stateParams, $filter, $uibModal) {
+angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stateParams", "$filter", "$uibModal", "Modals", function($scope, $http, $stateParams, $filter, $uibModal, Modals) {
 
     var me = this;
     this.configPath = $stateParams.path;
@@ -55,12 +55,14 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     this.showOrigXML = function() {
         var title = ("Original configuration: " + me.configPath +
                      " v" + me.selectedVersion);
-        showXML(title, me.config.xml);
+        Modals.showXML(title, me.config.xml);
     };
 
     this.showFinalXML = function() {
-        me.buildFinalXML().then(function(response) {
-            showXML("Generated final XML", response.data);
+        //show if success, else default message
+        var modal = Modals.responseModal(me.buildFinalXML(), true, false);
+        modal.result.then(function(response) {
+            Modals.showXML("Generated final XML", response.data);
         });
     };
 
@@ -93,13 +95,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
                 path: me.configPath,
                 version: me.selectedVersion,
                 xml: editor.getValue(),
-                executive: me.config.executive})
-            .then(function(response) {
-                return response;
-            }, function(response) {
-                console.log(response);
-                return Promise.reject();
-            });
+                executive: me.config.executive});
     };
 
     this.submit = function() {
@@ -110,17 +106,10 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
 
         submitModal.result.then(function(comment) {
             var infoModal;
-            var isolatedScope = $scope.$new(true); // true for isolated
-            var modalOptions = {
-                templateUrl: "templates/modals/info.html",
-                controller: "ResponseInfoModalCtrl as ctrl",
-                scope: isolatedScope
-            };
-            infoModal = $uibModal.open(modalOptions);
             if (me.expertMode) {
-                isolatedScope.request = submitExpertXML(comment);
+                infoModal = Modals.responseModal(submitExpertXML(comment));
             } else {
-                isolatedScope.request = submitChanges(comment);
+                infoModal = Modals.responseModal(submitChanges(comment));
             }
             return infoModal.closed.then(function() {
                 me.getConfigVersions();
@@ -130,18 +119,6 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
             return Promise.reject();
         });
     };
-
-    function showXML(title, xml) {
-        var modal = $uibModal.open({
-            templateUrl: "templates/modals/view-xml.html",
-            controller: "ViewXmlModalCtrl as ctrl",
-            size: "lg",
-            resolve: {
-                xml: function() {return xml;},
-                title: function() {return title;}
-            }
-        });
-    }
 
     function submitExpertXML(comment) {
         return $http.post(

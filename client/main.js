@@ -18,6 +18,7 @@ require("./app/controllers/view-xml-modal-ctrl");
 require("./app/controllers/submit-modal-ctrl");
 require("./app/controllers/response-info-modal-ctrl");
 require("./app/services/configurations");
+require("./app/services/wc-modals");
 require("./app/directives/view-fields");
 require("./app/directives/edit-fields");
 require("./app/directives/executive-info");

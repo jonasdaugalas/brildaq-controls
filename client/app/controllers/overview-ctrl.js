@@ -117,16 +117,17 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
 
     this.getActiveConfigs = function() {
         var path;
+        function getConfigClosure (p) {
+            $http.get("/config" + p + "/v=" + me.runningDetails[p].version)
+                .then(function(response) {
+                    me.activeConfigs[p] = response.data;
+                }).catch(function(response) {
+                    console.log(response);
+                    me.activeConfigs[p] = null;
+                });
+        }
         for (path of me.active) {
-            (function (p) {
-                $http.get("/config" + p + "/v=" + me.runningDetails[p].version)
-                    .then(function(response) {
-                        me.activeConfigs[p] = response.data;
-                    }).catch(function(response) {
-                        console.log(response);
-                        me.activeConfigs[p] = null;
-                    });
-            })(path);
+            getConfigClosure(path);
         }
     };
 
