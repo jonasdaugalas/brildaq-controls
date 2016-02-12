@@ -112,6 +112,10 @@
         <div class="panel-body">
             <b>Host:</b>&nbsp;{{ctrl.activeConfigs[path].executive.host}}
             <b>Port:</b>&nbsp;{{ctrl.activeConfigs[path].executive.port}}
+            <a ng-href="http://{{ctrl.activeConfigs[path].executive.host + ':' + ctrl.activeConfigs[path].executive.port}}"
+               target="_blank">
+                <img src="img/xdaqapplication.png" style="width:2em; height:2em"/>
+            </a>
             <wc-view-fields fields="ctrl.activeConfigs[path].fields"></wc-view-fields>
         </div>
     </div>

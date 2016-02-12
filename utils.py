@@ -232,10 +232,13 @@ def check_hosts_and_ports(executive, xml):
             return True
     raise err.ConfiguratorUserError(
         'Failed hosts&ports check',
-        details=('Some of the following violated:\n'
-                 '1) Executive.host = Context.host = Endpoint.host\n'
-                 '2) Executive.port = Context.port\n'
-                 '3) Context.port != Endpoint.port'))
+        details=(
+            'Some of the following violated:\n'
+            '1) Executive.host ({}) = Context.host ({}) = Endpoint.host ({})\n'
+            '2) Executive.port ({}) = Context.port ({})\n'
+            '3) Context.port ({}) != Endpoint.port ({})').format(
+                executive['host'], contexthost, endpointhost,
+                executive['port'], contextport, contextport,  endpointport))
 
 
 def build_final_xml(dbcon, path, xml, executive=None, version=None):
