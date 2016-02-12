@@ -5,7 +5,7 @@ import re
 import time
 import rcmsws
 import config
-
+import configurator_errors as err
 
 dbcon = None
 
@@ -119,7 +119,12 @@ def get_config(path, version=None):
 @app.route('/buildfinalxml', methods=['POST'])
 def make_full_xml():
     data = flask.request.json
-    r = utils.build_final_xml(dbcon, data['path'], data['xml'], data['version'])
+    try:
+        r = utils.build_final_xml(
+            dbcon, path=data['path'], xml=data['xml'],
+            executive=data['executive'], version=data['version'])
+    except err.ConfiguratorUserError as e:
+        return flask.Response(e.text(), mimetype='text/html', status=400)
     return flask.Response(r, mimetype='text/xml')
 
 
@@ -136,13 +141,17 @@ def make_full_xml():
 def submit_xml():
     data = flask.request.json
     comment = data['comment']
-    final = utils.build_final_xml(dbcon, data['path'], data['xml'],
-                                  data['version'])
+    try:
+        final = utils.build_final_xml(
+            dbcon, path=data['path'], xml=data['xml'],
+            executive=data['executive'], version=data['version'])
+    except err.ConfiguratorUserError as e:
+        return flask.Response(e.text(), mimetype='text/html', status=400)
     if final:
         r = utils.populate_RSDB_with_DUCK(final, comment)
         if r[0]:
-            return flask.Response('Successfully submitted', status=201)
-        else:
+            return flask.Response('Successfully submitted', status=200)
+        else :
             return flask.Response(r[1], status=500)
     else:
         return flask.Response('Failed to build final xml', status=500)

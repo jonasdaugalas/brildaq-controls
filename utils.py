@@ -11,17 +11,18 @@ import datetime
 import cStringIO
 import subprocess
 import tempfile
+import logging
 import javabinary
 import configbuilder
-import logging
 import rcmsws
+import configurator_errors as err
+import config as CONFIG
 from easyconfig import easyconfigmap
 
 log = logging.getLogger(__name__)
 
 
-RE_GET_CONFIGS_PARSE = re.compile(
-    '.*?fullpath=(.*?),')
+RE_GET_CONFIGS_PARSE = re.compile('.*?fullpath=(.*?),')
 
 
 def parse_service_map(path):
@@ -195,9 +196,52 @@ def parse_fields(easyconfig, xml):
     return easyconfig['fields']
 
 
-def build_final_xml(dbcon, path, xml, version=None):
+def check_hosts_and_ports(executive, xml):
+    """Check if needed hosts and ports match between executive and xml.
+
+    :param executive: dict executive fields (important: 'host', 'port')
+    :param xml: str xdaq configuration xml
+    :returns: True if (executive is None) or
+      (executive.host=context.host=endpoint.host and
+      executive.port=context.port and context.port!=endpoint.port)
+      else raise ConfiguratorUserError
+    :rtype: boolean
+
+    """
+    log.debug('In "check_hosts_and_ports"')
+    if executive is None:
+        log.debug('executive is None - all good')
+        return True
+    root = ET.fromstring(xml)
+    context = root.find('.//{' + CONFIG.xdaqxmlnamespace + '}Context')
+    contexturl = context.attrib['url'].split(':')
+    print(contexturl)
+    contexthost = contexturl[-2][2:] # drop two slashes after 'http:'
+    contextport = int(contexturl[-1])
+    endpoint = context.find('.//{' + CONFIG.xdaqxmlnamespace + '}Endpoint')
+    endpointhost = endpoint.attrib['hostname']
+    endpointport = int(endpoint.attrib['port'])
+    print(executive)
+    log.debug(
+        'executive.host: {}, executive.port: {}, context.host: {}, '
+        'context.port: {}, endpoint.host: {}, endpoint.port: {}'.format(
+            executive['host'], executive['port'], contexthost, contextport,
+            endpointhost, endpointport))
+    if executive['host'] == contexthost and executive['host'] == endpointhost:
+        if executive['port'] == contextport and contextport != endpointport:
+            return True
+    raise err.ConfiguratorUserError(
+        'Failed hosts&ports check',
+        details=('Some of the following violated:\n'
+                 '1) Executive.host = Context.host = Endpoint.host\n'
+                 '2) Executive.port = Context.port\n'
+                 '3) Context.port != Endpoint.port'))
+
+
+def build_final_xml(dbcon, path, xml, executive=None, version=None):
+    check_hosts_and_ports(executive, xml)
     group = get_parsed_groupblob(dbcon, path, version)
-    final = configbuilder.build_final(path, xml, group)
+    final = configbuilder.build_final(path, xml, group, executive)
     return final
 
 

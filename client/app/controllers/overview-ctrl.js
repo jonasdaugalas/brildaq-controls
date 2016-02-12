@@ -33,6 +33,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
             var path, parr, node, head;
             me.configurations = paths;
             me.versions = {};
+            me.configTree = {};
             for (path of paths) {
                 me.versions[path] = Cfgs.getVersion(path);
                 parr = path.split("/");

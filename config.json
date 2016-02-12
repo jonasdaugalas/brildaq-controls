@@ -1,5 +1,6 @@
 {
     "authfile": "../../utils/db.ini",
     "easyconfigmap": "easyconfigmap.json",
-    "easyconfigdir": "easyconfig"
+    "easyconfigdir": "easyconfig",
+    "xdaqxmlnamespace": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30"
 }

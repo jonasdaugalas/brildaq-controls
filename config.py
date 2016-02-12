@@ -2,7 +2,7 @@ import sys
 import json
 
 
-REQUIRED = ['authfile', 'easyconfigmap', 'easyconfigdir']
+REQUIRED = ['authfile', 'easyconfigmap', 'easyconfigdir', 'xdaqxmlnamespace']
 
 
 with open('config.json', 'r') as f:

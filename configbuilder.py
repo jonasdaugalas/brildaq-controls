@@ -17,10 +17,10 @@ def get_executive(group):
     return e
 
 
-def build_final(fullpath, xml, group):
-    service = build_service(group)
-    executive = build_executive(group, xml)
-    fm = build_fm(group, executive, service)
+def build_final(fullpath, xml, group, executive=None):
+    service_xml = build_service(group, executive)
+    executive_xml = build_executive(group, xml, executive)
+    fm_xml = build_fm(group, executive_xml, service_xml)
     tpl = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<Configuration '
            'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
@@ -28,7 +28,7 @@ def build_final(fullpath, xml, group):
     fullpath = fullpath.split('/')
     user = fullpath[1]
     path = '/'.join(fullpath[2:])
-    return tpl.format(user=user, path=path, fm=fm)
+    return tpl.format(user=user, path=path, fm=fm_xml)
 
 
 def build_fm(group, executive, service):
@@ -47,7 +47,7 @@ def build_fm(group, executive, service):
         cls=data['className'], executive=executive, service=service)
 
 
-def build_service(group):
+def build_service(group, executive):
     tpl = ('<Service name="{name}" hostname="{host}" port="{port}" '
            'urn="{urn}" qualifiedResourceType="{qrt}" />')
     data = group[0]['childrenResources']['data'][1]
@@ -55,12 +55,16 @@ def build_service(group):
     qrt = data['qualifiedResourceType']
     uri = data['uri']['string'][7:]       # drop 'http://'
     host = uri.split(':')[0]
+    if executive:
+        if executive['host']:
+            # overwrite host
+            host = executive['host']
     urn = '/' + uri.split('/')[1]
     port = uri.split('/')[0].split(':')[1]
     return tpl.format(name=name, host=host, port=port, urn=urn, qrt=qrt)
 
 
-def build_executive(group, xml):
+def build_executive(group, xml, executive=None):
     tpl = ('<XdaqExecutive hostname="{host}" port="{port}" urn="{urn}" '
            'qualifiedResourceType="{qualifiedResourceType}" role="{role}" '
            'instance="{instance}" logURL="{logURL}" logLevel="{logLevel}" '
@@ -68,6 +72,8 @@ def build_executive(group, xml):
            'environmentString="{environmentString}">'
            '<configFile>{xml}</configFile></XdaqExecutive>')
     e = get_executive(group)
+    if executive:
+        e.update(executive)
     xml = unxmlify(xml)
     return tpl.format(xml=xml, **e)
 

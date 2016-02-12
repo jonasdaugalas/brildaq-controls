@@ -3,13 +3,18 @@
         <label>Host:</label>
         <input type="text" class="form-control input-sm"
                ng-disabled="!ctrl.editable"
-               ng-model="ctrl.executive.host"></input>
+               ng-model="ctrl.executive.host"
+               uib-tooltip="Must match Context and Endpoint hosts"
+               tooltip-enable="ctrl.editable"
+        ></input>
     </div>
     <div class="form-group col-sm-6" style="margin-bottom:0px">
         <label>Port:</label>
         <input type="number" class="form-control input-sm"
                ng-disabled="!ctrl.editable"
-               ng-model="ctrl.executive.port"></input>
+               ng-model="ctrl.executive.port"
+               uib-tooltip="Must match Context port"
+               tooltip-enable="ctrl.editable"></input>
     </div>
 </form>
 <form role="form" class="row">

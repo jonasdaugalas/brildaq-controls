@@ -88,9 +88,12 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     };
 
     this.buildFinalXML = function() {
-        return $http.post("/buildfinalxml", {path: me.configPath,
-                                      version: me.selectedVersion,
-                                      xml: editor.getValue()})
+        return $http.post(
+            "/buildfinalxml", {
+                path: me.configPath,
+                version: me.selectedVersion,
+                xml: editor.getValue(),
+                executive: me.config.executive})
             .then(function(response) {
                 return response;
             }, function(response) {
@@ -146,6 +149,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
                 path: me.configPath, version:
                 me.selectedVersion,
                 xml: editor.getValue(),
+                executive: me.config.executive,
                 comment: comment});
     }
 
