@@ -92,14 +92,12 @@ def get_running_configurations(dbcon):
 
     """
     cfgs = rcmsws.get_running()
-    print(cfgs)
     if not cfgs:
         return None
     resgids = [x['resGID'] for x in cfgs.values()]
     # (Jonas) Unable to pass list as parameter to oracle
     # Could potentially be security problem: non-parameterized query!
     resgids = [str(int(x)) for x in resgids]
-    print(resgids)
     if not resgids:
         return None
     select = (
@@ -154,7 +152,7 @@ def get_parsed_groupblob(dbcon, path, version):
         variables['cfgversion'] = version
     r = dbcon.execute(select, variables).fetchone()
     if r is None:
-        raise err.ConfiguratorUserErro(
+        raise err.ConfiguratorUserError(
             'Configuration groupblob not found by path and version in RS DB.',
             details={'path': path, 'version': version})
     r = r[0]
@@ -221,13 +219,11 @@ def check_hosts_and_ports(executive, xml):
     root = ET.fromstring(xml)
     context = root.find('.//{' + CONFIG.xdaqxmlnamespace + '}Context')
     contexturl = context.attrib['url'].split(':')
-    print(contexturl)
     contexthost = contexturl[-2][2:] # drop two slashes after 'http:'
     contextport = int(contexturl[-1])
     endpoint = context.find('.//{' + CONFIG.xdaqxmlnamespace + '}Endpoint')
     endpointhost = endpoint.attrib['hostname']
     endpointport = int(endpoint.attrib['port'])
-    print(executive)
     log.debug(
         'executive.host: {}, executive.port: {}, context.host: {}, '
         'context.port: {}, endpoint.host: {}, endpoint.port: {}'.format(
@@ -282,10 +278,10 @@ def get_easyconfig(path):
     if path in easyconfigmap:
         return easyconfigmap[path]
     else:
-        raise err.ConfigurtorUserError(
-            'Could not find "easyconfig" for given configuration path',
-            details='given path: {},\n"easyconfig" map:{}'
-            .format(path, str(easyconfigmap)))
+        raise err.ConfiguratorUserError(
+            'Could not find easyconfig for given configuration path',
+            details='given path: {},\neasyconfigs exist for:{}'
+            .format(path, str(easyconfigmap.keys())))
 
 
 def modify_xml_by_fields(xml, fields, easyconfig):
