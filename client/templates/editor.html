@@ -34,12 +34,12 @@
                         ng-click="ctrl.showOrigXML()">
                     Show original XML
                 </button>
-                <button class="btn btn-info disabled"
-                        ng-click="">
+                <button class="btn btn-info"
+                        ng-click="ctrl.previewModifications()">
                     Preview modifications
                 </button>
-                <button class="btn btn-primary disabled pull-right"
-                        ng-click="">
+                <button class="btn btn-primary pull-right"
+                        ng-click="ctrl.submit()">
                     Submit modifications as new version
                 </button>
             </form>
@@ -64,7 +64,7 @@
                     Beautify
                 </button>
                 <button class="btn btn-info"
-                        ng-click="ctrl.showFinalXML()">
+                        ng-click="ctrl.previewFinalXML()">
                     Preview final XML
                 </button>
                 <button class="btn btn-primary pull-right"

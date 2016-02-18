@@ -58,11 +58,19 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
         Modals.showXML(title, me.config.xml);
     };
 
-    this.showFinalXML = function() {
+    this.previewFinalXML = function() {
         //show if success, else default message
         var modal = Modals.responseModal(me.buildFinalXML(), true, false);
         modal.result.then(function(response) {
             Modals.showXML("Generated final XML", response.data);
+        });
+    };
+
+    this.previewModifications = function() {
+        //show if success, else default message
+        var modal = Modals.responseModal(me.buildXML(), true, false);
+        modal.result.then(function(response) {
+            Modals.showXML("Parsed modifications", response.data);
         });
     };
 
@@ -98,6 +106,14 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
                 executive: me.config.executive});
     };
 
+    this.buildXML = function() {
+        return $http.post(
+            "/buildxml", {
+                path: me.configPath,
+                version: me.selectedVersion,
+                fields: me.config.fields});
+    };
+
     this.submit = function() {
         var submitModal = $uibModal.open({
             templateUrl: "templates/modals/submit.html",
@@ -123,15 +139,20 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     function submitExpertXML(comment) {
         return $http.post(
             "/submitxml", {
-                path: me.configPath, version:
-                me.selectedVersion,
+                path: me.configPath,
+                version: me.selectedVersion,
                 xml: editor.getValue(),
                 executive: me.config.executive,
                 comment: comment});
     }
 
     function submitChanges(comment) {
-        return;
+        return $http.post(
+            "/submitfields", {
+                path: me.configPath,
+                version: me.selectedVersion,
+                fields: me.config.fields,
+                comment: comment});
     }
 
     me.init();

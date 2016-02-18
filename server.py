@@ -120,7 +120,7 @@ def get_config(path, version=None):
 def make_full_xml():
     data = flask.request.json
     try:
-        r = utils.build_final_xml(
+        r = utils.build_final_from_xml(
             dbcon, path=data['path'], xml=data['xml'],
             executive=data['executive'], version=data['version'])
     except err.ConfiguratorUserError as e:
@@ -128,13 +128,41 @@ def make_full_xml():
     return flask.Response(r, mimetype='text/xml')
 
 
-# @app.route('/buildxml', methods=['POST'])
-# def make_easy_xml():
-#     """Take configuration fields from POST data and construct xml
+@app.route('/buildxml', methods=['POST'])
+def make_easy_xml():
+    """Take configuration fields, version from POST data and construct xml
 
-#     :returns: constructed xml configuration
-#     :rtype: flask.Response
-#     """
+    :returns: constructed xml configuration
+    :rtype: flask.Response
+    """
+    data = flask.request.json
+    try:
+        r = utils.build_from_fields(
+            dbcon, path=data['path'], fields=data['fields'],
+            version=data['version'])
+    except err.ConfiguratorUserError as e:
+        return flask.Response(e.text(), mimetype='text/html', status=400)
+    return flask.Response(r, mimetype='text/xml')
+
+
+@app.route('/submitfields', methods=['POST'])
+def submit_fields():
+    data = flask.request.json
+    comment = data['comment']
+    try:
+        final = utils.build_final_from_fields(
+            dbcon, path=data['path'], fields=data['fields'],
+            version=data['version'])
+    except err.ConfiguratorUserError as e:
+        return flask.Response(e.text(), mimetype='text/html', status=400)
+    if final:
+        r = utils.populate_RSDB_with_DUCK(final, comment)
+        if r[0]:
+            return flask.Response('Successfully submitted', status=200)
+        else :
+            return flask.Response(r[1], status=500)
+    else:
+        return flask.Response('Failed to build final xml', status=500)
 
 
 @app.route('/submitxml', methods=['POST'])
@@ -160,8 +188,8 @@ def submit_xml():
 if __name__ == '__main__':
     init()
     try:
-        # app.run(host='0.0.0.0')
-        app.run(host='0.0.0.0', debug=True, threaded=True)
+        app.run(host='0.0.0.0')
+        # app.run(host='0.0.0.0', debug=True, threaded=True)
     except BaseException as e:
         print e
     finalize()

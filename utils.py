@@ -9,6 +9,7 @@ import re
 import gzip
 import datetime
 import cStringIO
+import StringIO
 import subprocess
 import tempfile
 import logging
@@ -153,7 +154,9 @@ def get_parsed_groupblob(dbcon, path, version):
         variables['cfgversion'] = version
     r = dbcon.execute(select, variables).fetchone()
     if r is None:
-        return None
+        raise err.ConfiguratorUserErro(
+            'Configuration groupblob not found by path and version in RS DB.',
+            details={'path': path, 'version': version})
     r = r[0]
     fobj = cStringIO.StringIO(r)
     gzf = gzip.GzipFile('dummy', 'rb', 9, fobj)
@@ -162,10 +165,11 @@ def get_parsed_groupblob(dbcon, path, version):
 
 def get_config_xml(dbcon, path, version):
     group = get_parsed_groupblob(dbcon, path, version)
-    if not group:
-        return None
-    configxml =  group[0]['childrenResources']['data'][0]['configFile']
-    return configxml
+    return get_config_xml_from_groupblob(group)
+
+
+def get_config_xml_from_groupblob(group):
+    return group[0]['childrenResources']['data'][0]['configFile']
 
 
 def get_config(dbcon, path, version):
@@ -193,7 +197,9 @@ def parse_fields(easyconfig, xml):
             field['value'] = node.text.split(',')
         else:
             field['value'] = node.text
-    return easyconfig['fields']
+    fields = [{'name': f['name'], 'type': f['type'], 'value': f['value']}
+              for f in easyconfig['fields']]
+    return fields
 
 
 def check_hosts_and_ports(executive, xml):
@@ -205,7 +211,7 @@ def check_hosts_and_ports(executive, xml):
       (executive.host=context.host=endpoint.host and
       executive.port=context.port and context.port!=endpoint.port)
       else raise ConfiguratorUserError
-    :rtype: boolean
+    :rtype: Boolean
 
     """
     log.debug('In "check_hosts_and_ports"')
@@ -241,11 +247,83 @@ def check_hosts_and_ports(executive, xml):
                 executive['port'], contextport, contextport,  endpointport))
 
 
-def build_final_xml(dbcon, path, xml, executive=None, version=None):
+def build_final_from_xml(dbcon, path, xml, executive=None, version=None):
     check_hosts_and_ports(executive, xml)
     group = get_parsed_groupblob(dbcon, path, version)
     final = configbuilder.build_final(path, xml, group, executive)
     return final
+
+
+def build_final_from_fields(dbcon, path, fields, version=None):
+    group = get_parsed_groupblob(dbcon, path, version)
+    easyconfig = get_easyconfig(path)
+    xml = get_config_xml_from_groupblob(group)
+    xml = modify_xml_by_fields(xml, fields, easyconfig)
+    final = configbuilder.build_final(path, xml, group)
+    return final
+
+
+def build_from_fields(dbcon, path, fields, version=None):
+    """Construct xml for given path from modification fields and version.
+
+    :param dbcon:
+    :param path: config path
+    :param fields: [{'name': ..., 'value': ..., 'type': ...}]
+    :param version: config version (int)
+    :returns: constructed xml
+    :rtype: str
+    """
+    easyconfig = get_easyconfig(path)
+    xml = get_config_xml(dbcon, path, version)
+    return modify_xml_by_fields(xml, fields, easyconfig)
+
+
+def get_easyconfig(path):
+    if path in easyconfigmap:
+        return easyconfigmap[path]
+    else:
+        raise err.ConfigurtorUserError(
+            'Could not find "easyconfig" for given configuration path',
+            details='given path: {},\n"easyconfig" map:{}'
+            .format(path, str(easyconfigmap)))
+
+
+def modify_xml_by_fields(xml, fields, easyconfig):
+    register_xml_nsprefixes(xml)
+    root = ET.fromstring(xml)
+    for field in fields:
+        field['xpath'] = [f['xpath'] for f in easyconfig['fields']
+                          if f['name'] == field['name']][0]
+        modify_xml_value(root, field['xpath'], field['type'],
+                         field['value'], easyconfig['namespaces'])
+    return ET.tostring(root, encoding='UTF-8')
+
+
+def register_xml_nsprefixes(xml):
+    source = StringIO.StringIO(xml)
+    events = ("end", "start-ns", "end-ns")
+    counter = 0
+    namespaces = []
+    for event, elem in ET.iterparse(source, events=events):
+        if event == "start-ns":
+            if re.match('^ns[0-9]+$', elem[0]):
+                namespaces.append(('', elem[1]))
+            else:
+                namespaces.append(elem)
+    for ns in namespaces:
+        if len(ns[0]) > 0:
+            ET.register_namespace(ns[0], ns[1])
+    return namespaces
+
+
+def modify_xml_value(root, xpath, dtype, val, ns):
+    node = root.find(xpath, ns)
+    if dtype in ('Integer', 'unsignedInt'):
+        node.text = str(int(val))
+    elif dtype == 'commaSeparatedString':
+        node.text = ','.join(val)
+    else:
+        node.text = str(val)
 
 
 def populate_RSDB_with_DUCK(xml, comment=None):

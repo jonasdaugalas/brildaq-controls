@@ -3,6 +3,7 @@ angular.module("web-config").service("Modals", ["$rootScope", "$uibModal", funct
     var me = this;
 
     this.responseModal = function(requestPromise, insteadResolve, insteadReject) {
+        console.log(requestPromise);
         var infoModal;
         var isolatedScope = $rootScope.$new(true); // true for isolated
         var modalOptions = {
