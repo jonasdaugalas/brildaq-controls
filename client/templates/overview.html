@@ -1,13 +1,24 @@
-<div class="row form-inline">
-    <select class="form-control"
-            ng-options="own for own in ctrl.owners"
-            ng-model="ctrl.owner"></select>
+<nav class="navbar navbar-default navbar-static-top"
+     style="margin-bottom: 0px">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" ui-sref="overview">
+                BRILDAQ configurator
+            </a>
+        </div>
 
-    <button class="btn btn-default"
-            ng-click="ctrl.refreshConfigurations()">
-        <span class="fa fa-refresh"></span>Refresh
-    </button>
-</div>
+        <div class="navbar-form navbar-left">
+            <select class="form-control"
+                    ng-options="own for own in ctrl.owners"
+                    ng-model="ctrl.owner"></select>
+
+            <button class="btn btn-default"
+                    ng-click="ctrl.refreshConfigurations()">
+                <span class="fa fa-refresh"></span>Refresh
+            </button>
+        </div>
+    </div>
+</nav>
 
 <div class="row">
     <div class="wc-tree-view col-lg-2 col-md-3">
