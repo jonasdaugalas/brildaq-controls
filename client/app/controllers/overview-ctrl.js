@@ -1,5 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("OverviewCtrl", ["$http", "Configurations", function($http, Cfgs) {
+angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "Configurations", function($http, $timeout, Cfgs) {
 
     var me = this;
     // all configurations' paths
@@ -12,7 +12,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
     this.owner = "";
     // running configurations' paths
     this.running = [];
-    // map path to {URI: ..., version: ..., cfgID: ..., resGID: ... }
+    // map path to {URI: ..., version: ..., resGID: ... }
     this.runningDetails = {};
     // Running query was successful
     this.getRunningSuccess = true;
@@ -21,6 +21,8 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
     // array of active (running and state is "ON" or "Error) cfg paths
     this.active = [];
     this.activeConfigs = {};
+    // flag if there is configuration in state 'GoingOn', 'GoingOff', 'Resetting'
+    me.hasChangingStates = false;
 
     this.init = function() {
         me.refreshConfigurations().then(function() {
@@ -68,6 +70,9 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
                 }
             };
             itterateConfigTree(me.configTree, putRunningFlag);
+            if (me.hasChangingStates) {
+                $timeout(me.refreshStatuses, 4000);
+            }
         });
     };
 
@@ -99,6 +104,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
         me.active = [];
         return $http.post('/states', uris).then(function(response) {
             var uri, path;
+            me.hasChangingStates = false;
             for (uri in response.data) {
                 if (response.data.hasOwnProperty(uri)) {
                     path = Cfgs.URI2path(uri);
@@ -106,6 +112,11 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "Configuration
                     if (response.data[uri] === "ON" ||
                         response.data[uri] === "Error") {
                         me.active.push(path);
+                    }
+                    if (response.data[uri] === "GoingOn" ||
+                        response.data[uri] === "GoingOff" ||
+                        response.data[uri] === "Resetting") {
+                        me.hasChangingStates = true;;
                     }
                 }
             }
