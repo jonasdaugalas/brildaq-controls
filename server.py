@@ -30,7 +30,6 @@ def finalize():
 
 # route: /static_base/app_base
 @app.route('/gui')
-@app.route('/gui/')
 @app.route('/gui/<path:path>')
 def index(path=None):
     return app.send_static_file('index.html')

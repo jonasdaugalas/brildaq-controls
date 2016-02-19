@@ -1,5 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "Configurations", function($http, $timeout, Cfgs) {
+angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "Timers", "Configurations", function($http, $timeout, Timers, Cfgs) {
 
     var me = this;
     // all configurations' paths
@@ -24,9 +24,13 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
     // flag if there is configuration in state 'GoingOn', 'GoingOff', 'Resetting'
     me.hasChangingStates = false;
 
+    var refreshTimer = null;
+
     this.init = function() {
         me.refreshConfigurations().then(function() {
             me.owner = me.owners[0];
+            refreshTimer = Timers.create(50000);
+            refreshTimer.addAction({callable: refresher});
         });
     };
 
@@ -192,6 +196,21 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
         console.log(response);
         me.refreshStatuses();
     }
+
+    var refresher = (function() {
+        var counter = 0;
+        return function() {
+            counter += 1;
+            if (counter > 240) {
+                counter = 0;
+                console.log("Full refresh");
+                me.refreshConfigurations();
+            } else {
+                console.log("Refreshing states");
+                me.refreshStatuses();
+            }
+        };
+    })();
 
     this.init();
 }]);

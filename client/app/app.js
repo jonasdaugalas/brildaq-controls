@@ -4,7 +4,7 @@ angular.module("web-config", ['ui.router', 'ui.bootstrap', 'ui.ace', 'prettyXml'
 angular.module("web-config").config(["$locationProvider", "$stateProvider", "$urlRouterProvider", "$urlMatcherFactoryProvider", function($locationProvider, $stateProvider, $urlRouterProvider, $urlMatcherFactoryProvider) {
 
     // state urls: /app_base + ...
-    $urlRouterProvider.otherwise("/gui");
+    // $urlRouterProvider.otherwise("/gui");
     $locationProvider.html5Mode(true);
 
     $urlMatcherFactoryProvider.type("raw", {
@@ -24,4 +24,5 @@ angular.module("web-config").config(["$locationProvider", "$stateProvider", "$ur
             templateUrl: "templates/editor.html",
             controller: "EditorCtrl as ctrl"
         });
+
 }]);
