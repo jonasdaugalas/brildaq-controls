@@ -1,4 +1,16 @@
-<h2>
+<h2 class="row">
+    <a ui-sref="overview"
+       style="float: left; padding-right:0.5em;
+              margin-left:0.5em; margin-right:0.5em;
+              border-right: grey dotted">
+        <div>
+            <span class="fa fa-arrow-left"></span>
+            <span style="font-size: 0.5em; float: right">
+                Back to<br/>
+                Overview
+            </span>
+        </div>
+    </a>
     {{ctrl.configPath}}
     <span class="label label-info label-as-badge">
         v{{ctrl.selectedVersion}}

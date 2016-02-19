@@ -3,7 +3,6 @@ import requests
 import logging
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 FMLIFECYCLE_URL = 'http://cmsrc-lumi.cms:46000/rcms/services/FMLifeCycle'
 COMMANDSERVICE_URL = 'http://cmsrc-lumi.cms:46000/rcms/services/CommandService'

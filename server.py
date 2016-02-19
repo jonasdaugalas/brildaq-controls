@@ -6,6 +6,10 @@ import time
 import rcmsws
 import config
 import configurator_errors as err
+import logging
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 dbcon = None
 
