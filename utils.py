@@ -62,10 +62,11 @@ def get_configurations(dbcon):
         'from CMS_LUMI_RS.CONFIGRESOURCES res,'
         ' CMS_LUMI_RS.CONFIGURATIONS cfg,'
         ' CMS_LUMI_RS.CONFIGHOSTS hst,'
-        ' (select name, max(version) as version'
+        ' (select name, user_name, max(version) as version'
         ' from CMS_LUMI_RS.CONFIGURATIONS'
-        ' where type=:cfgtype group by name) newest '
+        ' where type=:cfgtype group by name, user_name) newest '
         'where cfg.name=newest.name and'
+        ' cfg.user_name=newest.user_name and'
         ' cfg.version=newest.version and'
         ' res.configurationid=cfg.configurationid and'
         ' hst.configurationid=cfg.configurationid and'
@@ -77,8 +78,7 @@ def get_configurations(dbcon):
         'urn': x[0],
         'port': x[1],
         'host': x[2],
-        'version': x[3]}
-         for x in r}
+        'version': x[3]} for x in r}
     return r
 
 
