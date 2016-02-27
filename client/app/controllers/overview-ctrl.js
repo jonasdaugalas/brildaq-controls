@@ -1,5 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "Timers", "Configurations", function($http, $timeout, Timers, Cfgs) {
+angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "CLIENT_CONSTS", "Timers", "Configurations", function($http, $timeout, CONSTS, Timers, Cfgs) {
 
     var me = this;
     // all configurations' paths
@@ -24,6 +24,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "T
     // flag if there is configuration in state 'GoingOn', 'GoingOff', 'Resetting'
     me.hasChangingStates = false;
 
+    var srvendp = CONSTS.server_endpoint;
     var refreshTimer = null;
 
     this.init = function() {
@@ -81,7 +82,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "T
     };
 
     function getRunning() {
-        return $http.get("/running").then(function(response) {
+        return $http.get(srvendp + "/running").then(function(response) {
             var path;
             me.runningDetails = response.data;
             me.running = [];
@@ -106,7 +107,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "T
         }
         me.states = {};
         me.active = [];
-        return $http.post('/states', uris).then(function(response) {
+        return $http.post(srvendp + "/states", uris).then(function(response) {
             var uri, path;
             me.hasChangingStates = false;
             for (uri in response.data) {
@@ -133,7 +134,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "T
     this.getActiveConfigs = function() {
         var path;
         function getConfigClosure (p) {
-            $http.get("/config" + p + "/v=" + me.runningDetails[p].version)
+            $http.get(srvendp + "/config" + p + "/v=" + me.runningDetails[p].version)
                 .then(function(response) {
                     me.activeConfigs[p] = response.data;
                 }).catch(function(response) {
@@ -173,21 +174,21 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "T
     }
 
     this.sendCommand = function(cmd, path) {
-        return $http.post("/send/" + cmd,
+        return $http.post(srvendp + "/send/" + cmd,
                           JSON.stringify(Cfgs.path2URI(path)))
             .then(dummyHttpHandler)
             .catch(dummyHttpHandler);
     };
 
     this.create = function(path) {
-        return $http.post("/create", JSON.stringify(Cfgs.path2URI(path)))
+        return $http.post(srvendp + "/create", JSON.stringify(Cfgs.path2URI(path)))
             .then(dummyHttpHandler)
             .catch(dummyHttpHandler);
     };
 
 
     this.destroy = function(path) {
-        return $http.post("/destroy", JSON.stringify(Cfgs.path2URI(path)))
+        return $http.post(srvendp + "/destroy", JSON.stringify(Cfgs.path2URI(path)))
             .then(dummyHttpHandler)
             .catch(dummyHttpHandler);
     };

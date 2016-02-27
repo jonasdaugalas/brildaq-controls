@@ -1,13 +1,14 @@
-angular.module("web-config").service("Configurations", ["$http", function($http) {
+angular.module("web-config").service("Configurations", ["$http", "CLIENT_CONSTS", function($http, CONSTS) {
     var me = this;
 
     this.configurations = {};
     this.paths = [];
 
     var RE_FULPATH = /.*?fullpath=(.*?),/;
+    var srvendp = CONSTS.server_endpoint;
 
     this.update = function() {
-        return $http.get("/configurations").then(function(response) {
+        return $http.get(srvendp + "/configurations").then(function(response) {
             var path;
             me.configurations = response.data;
             me.paths = [];

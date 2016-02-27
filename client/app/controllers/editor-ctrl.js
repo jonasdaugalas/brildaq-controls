@@ -1,5 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stateParams", "$filter", "$uibModal", "Modals", function($scope, $http, $stateParams, $filter, $uibModal, Modals) {
+angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stateParams", "$filter", "$uibModal", "CLIENT_CONSTS", "Modals", function($scope, $http, $stateParams, $filter, $uibModal, CONST, Modals) {
 
     var me = this;
     this.configPath = $stateParams.path;
@@ -9,6 +9,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     this.configExecutiveCopy = {};
     this.expertMode = false;
 
+    var srvendp = CONST.server_endpoint;
     var initPromise = Promise.resolve();
     var editor = null;
 
@@ -29,7 +30,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     };
 
     this.getConfigVersions = function() {
-        return $http.get("/history" + me.configPath).then(function(response) {
+        return $http.get(srvendp + "/history" + me.configPath).then(function(response) {
             me.versions = response.data;
         }, function(response) {
             console.log("Failed to get versions for" + me.configPath);
@@ -38,7 +39,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
 
     this.selectVersion = function(version) {
         me.selectedVersion = version;
-        return $http.get("/config" + me.configPath + "/v=" + me.selectedVersion)
+        return $http.get(srvendp + "/config" + me.configPath + "/v=" + me.selectedVersion)
             .then(function(response) {
                 me.config = response.data;
                 me.configExecutiveCopy = angular.copy(response.data.executive);
@@ -99,7 +100,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
 
     this.buildFinalXML = function() {
         return $http.post(
-            "/buildfinalxml", {
+            srvendp + "/buildfinalxml", {
                 path: me.configPath,
                 version: me.selectedVersion,
                 xml: editor.getValue(),
@@ -108,7 +109,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
 
     this.buildXML = function() {
         return $http.post(
-            "/buildxml", {
+            srvendp + "/buildxml", {
                 path: me.configPath,
                 version: me.selectedVersion,
                 fields: me.config.fields});
@@ -138,7 +139,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
 
     function submitExpertXML(comment) {
         return $http.post(
-            "/submitxml", {
+            srvendp + "/submitxml", {
                 path: me.configPath,
                 version: me.selectedVersion,
                 xml: editor.getValue(),
@@ -148,7 +149,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
 
     function submitChanges(comment) {
         return $http.post(
-            "/submitfields", {
+            srvendp + "/submitfields", {
                 path: me.configPath,
                 version: me.selectedVersion,
                 fields: me.config.fields,

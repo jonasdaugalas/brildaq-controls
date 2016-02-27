@@ -3,6 +3,7 @@ angular.module("web-config", ['ui.router', 'ui.bootstrap', 'ui.ace', 'prettyXml'
 
 angular.module("web-config").config(["$locationProvider", "$stateProvider", "$urlRouterProvider", "$urlMatcherFactoryProvider", function($locationProvider, $stateProvider, $urlRouterProvider, $urlMatcherFactoryProvider) {
 
+    var gui_prefix = "";
     // state urls: /app_base + ...
     // $urlRouterProvider.otherwise("/gui");
     $locationProvider.html5Mode(true);
@@ -15,12 +16,12 @@ angular.module("web-config").config(["$locationProvider", "$stateProvider", "$ur
 
     $stateProvider
         .state("overview", {
-            url: "/gui",
+            url: gui_prefix + "/",
             templateUrl: "templates/overview.html",
             controller: "OverviewCtrl as ctrl"
         })
         .state("editor", {
-            url: "/gui/editor{path:raw}",
+            url: gui_prefix + "/editor{path:raw}",
             templateUrl: "templates/editor.html",
             controller: "EditorCtrl as ctrl"
         });
