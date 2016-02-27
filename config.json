@@ -1,4 +1,5 @@
 {
+    "logfile": "/var/log/flask_configurator.log",
     "authfile": "../../utils/db.ini",
     "easyconfigmap": "easyconfigmap.json",
     "easyconfigdir": "easyconfig",

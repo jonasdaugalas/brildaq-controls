@@ -1,0 +1,30 @@
+* About
+
+* User manual
+** Run
+*** Simple
+- $ cherryd -c cherrypy.config -i wsgi
+
+*** As daemon
+- $ cherryd -d -c cherrypy.config -i wsgi
+
+** Configure
+#FIXME: reduce configuration places
+./cherrypy.config
+./config.json
+./app/index.html [base]
+./client/app/app.js [gui prefix]
+./client/app/constants/const.js [service endpoint]
+nginx
+
+* Administartor manual
+** Requirements
+- npm
+- flask
+- sqlalchemy
+- cx_Oracle
+- cherrypy
+- ...
+
+** Installation
+...
