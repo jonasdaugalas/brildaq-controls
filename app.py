@@ -7,9 +7,14 @@ import rcmsws
 import config
 import configurator_errors as err
 import logging
+import logging.handlers
 
 log = logging.getLogger(__name__)
-logging.basicConfig(filename='app.log',level=logging.DEBUG)
+log.setLevel(logging.DEBUG)
+loghandler = logging.handlers.RotatingFileHandler(
+              config.logfile, maxBytes=10485760, backupCount=5)
+
+log.addHandler(loghandler)
 # logging.basicConfig(level=logging.DEBUG)
 
 dbcon = None
