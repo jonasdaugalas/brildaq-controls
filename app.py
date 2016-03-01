@@ -9,21 +9,26 @@ import configurator_errors as err
 import logging
 import logging.handlers
 
+
+# prepare logging
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
 loghandler = logging.handlers.RotatingFileHandler(
-              config.logfile, maxBytes=10485760, backupCount=5)
-
+    config.logfile, maxBytes=10485760, backupCount=5)
+loglevel = logging.getLevelName(config.loglevel)
+loghandler.setLevel(loglevel)
+loghandler.setFormatter(logging.Formatter(
+    '%(asctime)s %(levelname)s [%(filename)s:%(lineno)d]: %(message)s'
+))
 log.addHandler(loghandler)
-# logging.basicConfig(level=logging.DEBUG)
 
+# module attributes
 dbcon = None
-
-# static_url_path: static_base
+# static_folder - hardcoded, for dev only
 app = flask.Flask(__name__, static_folder='client', static_url_path='')
 
 
 def init():
+    app.logger.addHandler(loghandler)
     servicemap = utils.parse_service_map(config.authfile)
     global dbcon
     dbcon = utils.dbconnect(servicemap)
@@ -63,6 +68,7 @@ def get_configurations():
 @app.route('/running/')
 @app.route('/running')
 def get_running():
+    log.info('getting running')
     try:
         r = utils.get_running_configurations(dbcon)
         return flask.Response(json.dumps(r), mimetype='application/json')
@@ -198,8 +204,8 @@ def submit_xml():
 if __name__ == '__main__':
     init()
     try:
-        app.run(host='0.0.0.0')
-        # app.run(host='0.0.0.0', debug=True, threaded=True)
+        # app.run(host='0.0.0.0')
+        app.run(host='0.0.0.0', debug=True, threaded=True)
     except BaseException as e:
         print e
     finalize()
