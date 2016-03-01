@@ -9,7 +9,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
     this.configTree = {};
     this.owners = [];
     // selected owner
-    this.owner = "";
+    this.owner = CONSTS.default_owner;
     // running configurations' paths
     this.running = [];
     // map path to {URI: ..., version: ..., resGID: ... }
@@ -56,6 +56,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
                 head._path = path;
             }
             me.owners = Object.keys(me.configTree);
+            console.log(me.configTree);
             return me.refreshStatuses();
         });
     };

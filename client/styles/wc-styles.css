@@ -26,3 +26,7 @@
 .popover-content {
   padding: 0px;
 }
+
+.panel-heading {
+  word-wrap: break-word;
+}

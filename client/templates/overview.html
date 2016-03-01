@@ -40,14 +40,20 @@
         <table>
             <!-- simple workaround to have 'central' on top
                  (cannot easily set order for object keys) -->
-            <tr ng-repeat="(name,node) in ctrl.configTree[ctrl.owner]"
-                ng-if="name==='central'">
-                <td ng-include="'tree-item.html'"></td>
-            </tr>
+            <tr ng-repeat="owner in ctrl.owners"
+                ng-show="owner===ctrl.owner"
+                ng-hide="owner!==ctrl.owner">
+                <td>
+                    <div ng-repeat="(name,node) in ctrl.configTree[owner]"
+                         ng-if="name==='central'">
+                        <div ng-include="'tree-item.html'"></div>
+                    </div>
 
-            <tr ng-repeat="(name,node) in ctrl.configTree[ctrl.owner]"
-                ng-if="name!=='central'">
-                <td ng-include="'tree-item.html'"></td>
+                    <div ng-repeat="(name,node) in ctrl.configTree[owner]"
+                         ng-if="name!=='central'">
+                        <div ng-include="'tree-item.html'"></div>
+                    </div>
+                </td>
             </tr>
         </table>
     </div>
@@ -84,9 +90,7 @@
 
 <script type="text/ng-template" id="tree-item.html">
     <div style="white-space: nowrap">
-
         <div ng-if="node._isLeaf" ng-init="path=node._path">
-
             <span ng-include="'status-indicator.html'"></span>
 
             <span ng-include="'old-version-indicator.html'"></span>
@@ -102,7 +106,7 @@
 
         </div>
 
-        <div ng-if="!node._isLeaf" ng-init="isExpanded = true">
+        <div ng-if="!node._isLeaf" ng-init="isExpanded=true">
             <span ng-class="isExpanded ?
                             'glyphicon glyphicon-folder-open' :
                             'glyphicon glyphicon-folder-close'">

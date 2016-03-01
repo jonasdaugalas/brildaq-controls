@@ -3,7 +3,7 @@ angular.module("web-config", ['ui.router', 'ui.bootstrap', 'ui.ace', 'prettyXml'
 
 angular.module("web-config").config(["$locationProvider", "$stateProvider", "$urlRouterProvider", "$urlMatcherFactoryProvider", function($locationProvider, $stateProvider, $urlRouterProvider, $urlMatcherFactoryProvider) {
 
-    var gui_prefix = "";
+    var gui_prefix = "/gui";
     // state urls: /app_base + ...
     // $urlRouterProvider.otherwise("/gui");
     $locationProvider.html5Mode(true);
