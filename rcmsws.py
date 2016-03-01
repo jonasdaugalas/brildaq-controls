@@ -1,11 +1,16 @@
 import re
 import requests
 import logging
+import configurator_errors as err
+
 
 log = logging.getLogger(__name__)
 
-FMLIFECYCLE_URL = 'http://cmsrc-lumi.cms:46000/rcms/services/FMLifeCycle'
-COMMANDSERVICE_URL = 'http://cmsrc-lumi.cms:46000/rcms/services/CommandService'
+SERVICE_OWNERS = {
+    'lumidev': 'http://cmsrc-lumi.cms:46000',
+    'lumipro': 'http://cmsrc-lumi.cms:26000'}
+FMLIFECYCLE_URL = '/rcms/services/FMLifeCycle'
+COMMANDSERVICE_URL = '/rcms/services/CommandService'
 
 TPL_SOAP_ENVELOPE = (
     '<?xml version="1.0" encoding="UTF-8"?>'
@@ -74,21 +79,34 @@ def is_ok(resp):
     return resp.status_code == requests.codes.ok
 
 
+def get_ownwer(uri):
+    if ',owner=lumidev' in uri:
+        return 'lumidev'
+    elif ',owner=lumipro' in uri:
+        return 'lumipro'
+    else:
+        raise err.ConfiguratorUserError('Unrecognized owner in uri.',
+                                        details=uri)
+
+
 def get_running():
     """Return running (created) configurations."""
-    resp = post_soap_body(FMLIFECYCLE_URL, TPL_GET_RUNNING)
-    if is_ok(resp):
-        matches = RE_GET_RUNNING_PARSE.findall(resp.text)
-        if matches:
-            matches = {
-                x[1]: {
-                    'URI': x[0],
-                    'resGID': int(x[2])}
-                for x in matches}
-        return matches or {}
-    else:
-        log.error("Failed get running configurations: %s", resp.text)
-        raise RequestFailed(resp.text, resp.status_code)
+    result = {}
+    for service in SERVICE_OWNERS.itervalues():
+        resp = post_soap_body(service + FMLIFECYCLE_URL, TPL_GET_RUNNING)
+        if is_ok(resp):
+            matches = RE_GET_RUNNING_PARSE.findall(resp.text)
+            if matches:
+                matches = {
+                    x[1]: {
+                        'URI': x[0],
+                        'resGID': int(x[2])}
+                    for x in matches}
+                result.update(matches)
+        else:
+            log.error("Failed get running configurations: %s", resp.text)
+            raise RequestFailed(resp.text, resp.status_code)
+    return result
 
 
 def get_states(uris):
@@ -99,7 +117,8 @@ def get_states(uris):
     some_good = False
     for uri in uris:
         body = TPL_GET_STATE.format(uri=uri)
-        resp = post_soap_body(COMMANDSERVICE_URL, body)
+        service = SERVICE_OWNERS[get_ownwer(uri)]
+        resp = post_soap_body(service + COMMANDSERVICE_URL, body)
         if is_ok(resp):
             found = RE_GET_STATE_PARSE.search(resp.text)
             result[uri] = found.group(1) if found else None
@@ -115,7 +134,8 @@ def get_states(uris):
 def send_command(command, uri):
     log.info('SEND "%s" %s', command, uri)
     body = TPL_COMMAND.format(uri=uri, cmd=command)
-    resp = post_soap_body(COMMANDSERVICE_URL, body)
+    service = SERVICE_OWNERS[get_ownwer(uri)]
+    resp = post_soap_body(service + COMMANDSERVICE_URL, body)
     if is_ok(resp):
         log.info('SUCCESS "%s" %s', command, uri)
         return True
@@ -138,7 +158,8 @@ def reset(uri):
 def create(uri):
     log.info('CREATE %s', uri)
     body = TPL_CREATE.format(uri=uri)
-    resp = post_soap_body(FMLIFECYCLE_URL, body)
+    service = SERVICE_OWNERS[get_ownwer(uri)]
+    resp = post_soap_body(service + FMLIFECYCLE_URL, body)
     if is_ok(resp):
         log.info('CREATED %s', uri)
         return True
@@ -149,7 +170,8 @@ def create(uri):
 def destroy(uri):
     log.info('DESTROY %s', uri)
     body = TPL_DESTROY.format(uri=uri)
-    resp = post_soap_body(FMLIFECYCLE_URL, body)
+    service = SERVICE_OWNERS[get_ownwer(uri)]
+    resp = post_soap_body(service + FMLIFECYCLE_URL, body)
     if is_ok(resp):
         log.info('DESTROYED %s', uri)
         return True
