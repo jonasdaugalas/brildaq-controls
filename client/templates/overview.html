@@ -10,7 +10,7 @@
         <div class="navbar-form navbar-left">
             <select class="form-control"
                     ng-options="own for own in ctrl.owners"
-                    ng-model="ctrl.owner"></select>
+                    ng-model="$root.globals.owner"></select>
 
             <button class="btn btn-default"
                     ng-click="ctrl.refreshConfigurations()">
@@ -41,8 +41,8 @@
             <!-- simple workaround to have 'central' on top
                  (cannot easily set order for object keys) -->
             <tr ng-repeat="owner in ctrl.owners"
-                ng-show="owner===ctrl.owner"
-                ng-hide="owner!==ctrl.owner">
+                ng-show="owner===$root.globals.owner"
+                ng-hide="owner!==$root.globals.owner">
                 <td>
                     <div ng-repeat="(name,node) in ctrl.configTree[owner]"
                          ng-if="name==='central'">
@@ -74,13 +74,13 @@
 
         <!-- hack again to keep 'central' first -->
         <div class="col-lg-3 wc-config-panel-group panel-group"
-             ng-repeat="(dirkey,dir) in ctrl.configTree[ctrl.owner]"
+             ng-repeat="(dirkey,dir) in ctrl.configTree[$root.globals.owner]"
              ng-if="dirkey==='central'"
              ng-include="'config-block-container.html'">
         </div>
 
         <div class="col-lg-3 wc-config-panel-group panel-group"
-             ng-repeat="(dirkey,dir) in ctrl.configTree[ctrl.owner]"
+             ng-repeat="(dirkey,dir) in ctrl.configTree[$root.globals.owner]"
              ng-if="dirkey!=='central'"
              ng-include="'config-block-container.html'">
         </div>
@@ -125,7 +125,7 @@
 <script type="text/ng-template" id="config-block-container.html">
     <h3>{{dirkey}}</h3>
     <div ng-repeat="path in ctrl.active
-                    | filter: (ctrl.owner+'/'+dirkey+'/'+dirfilter)"
+                    | filter: ($root.globals.owner+'/'+dirkey+'/'+dirfilter)"
          class="panel"
          ng-class="ctrl.states[path]==='ON' ? 'panel-success' : 'panel-danger'">
         <div class="panel-heading" style="cursor:pointer"

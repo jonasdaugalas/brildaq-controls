@@ -8,8 +8,6 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
     this.versions = {};
     this.configTree = {};
     this.owners = [];
-    // selected owner
-    this.owner = CONSTS.default_owner;
     // running configurations' paths
     this.running = [];
     // map path to {URI: ..., version: ..., resGID: ... }
@@ -29,7 +27,6 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
 
     this.init = function() {
         me.refreshConfigurations().then(function() {
-            me.owner = me.owners[0];
             refreshTimer = Timers.create(50000);
             refreshTimer.addAction({callable: refresher});
         });
