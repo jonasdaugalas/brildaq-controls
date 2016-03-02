@@ -1,5 +1,5 @@
 {
-    "logfile": "flask_configurator_test.log",
+    "logfile": "/nfshome0/jdaugala/webapp/configurator/flask_configurator_test.log",
     "loglevel": "DEBUG",
     "authfile": "/brildata/db/db.ini",
     "easyconfigmap": "easyconfigmap.json",

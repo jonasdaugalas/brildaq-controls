@@ -1,10 +1,10 @@
 import re
 import requests
-import logging
+import custom_logging
 import configurator_errors as err
 
 
-log = logging.getLogger(__name__)
+log = custom_logging.get_logger(__name__)
 
 SERVICE_OWNERS = {
     'lumidev': 'http://cmsrc-lumi.cms:46000',

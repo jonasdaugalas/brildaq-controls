@@ -6,20 +6,11 @@ import time
 import rcmsws
 import config
 import configurator_errors as err
-import logging
-import logging.handlers
+import custom_logging
 
 
 # prepare logging
-log = logging.getLogger(__name__)
-loghandler = logging.handlers.RotatingFileHandler(
-    config.logfile, maxBytes=10485760, backupCount=5)
-loglevel = logging.getLevelName(config.loglevel)
-loghandler.setLevel(loglevel)
-loghandler.setFormatter(logging.Formatter(
-    '%(asctime)s %(levelname)s [%(filename)s:%(lineno)d]: %(message)s'
-))
-log.addHandler(loghandler)
+log = custom_logging.get_logger(__name__)
 
 # module attributes
 dbcon = None
@@ -28,10 +19,11 @@ app = flask.Flask(__name__, static_folder='client', static_url_path='')
 
 
 def init():
-    app.logger.addHandler(loghandler)
+    app.logger.addHandler(custom_logging.handler)
     servicemap = utils.parse_service_map(config.authfile)
     global dbcon
     dbcon = utils.dbconnect(servicemap)
+    time.sleep(10)
 
 
 def finalize():
@@ -53,7 +45,7 @@ def get_endpoints():
     for rule in app.url_map.iter_rules():
         if (rule.endpoint not in endpoints):
             endpoints[rule.endpoint] = []
-        endpoints[rule.endpoint].append(str(rule))
+            endpoints[rule.endpoint].append(str(rule))
     return flask.Response(json.dumps(endpoints, indent=2),
                           mimetype='application/json')
 
@@ -208,4 +200,4 @@ if __name__ == '__main__':
         app.run(host='0.0.0.0', debug=True, threaded=True)
     except BaseException as e:
         print e
-    finalize()
+        finalize()
