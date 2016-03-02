@@ -1,6 +1,7 @@
 '''
 Configurator server utilities.
 '''
+import os
 import ConfigParser
 import sqlalchemy as sql
 import xml.etree.ElementTree as ET
@@ -12,7 +13,7 @@ import cStringIO
 import StringIO
 import subprocess
 import tempfile
-import logging
+import custom_logging
 import javabinary
 import configbuilder
 import rcmsws
@@ -20,7 +21,7 @@ import configurator_errors as err
 import config as CONFIG
 from easyconfig import easyconfigmap
 
-log = logging.getLogger(__name__)
+log = custom_logging.get_logger(__name__)
 
 
 RE_GET_CONFIGS_PARSE = re.compile('.*?fullpath=(.*?),')
@@ -330,6 +331,7 @@ def populate_RSDB_with_DUCK(xml, comment=None):
         if comment:
             cmd += ['-c', str(comment)]
         log.debug("Subprocess: {}".format(' '.join(cmd)))
+        log.debug('cwd: {}'.format(os.getcwd()))
         out = subprocess.check_output(cmd, cwd='tools')
         if 'ERROR' in out:
             skip = out.find('Continueing...')
