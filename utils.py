@@ -331,9 +331,13 @@ def populate_RSDB_with_DUCK(xml, comment=None):
         if comment:
             cmd += ['-c', str(comment)]
         log.debug("Subprocess: {}".format(' '.join(cmd)))
+        fdir = os.path.dirname(os.path.realpath(__file__))
+        cwd = os.path.join(fdir, 'tools')
+        log.debug('subprocess cwd: {}'.format(cwd))
+        out = subprocess.check_output(cmd, cwd=cwd)
         log.debug('cwd: {}'.format(os.getcwd()))
-        out = subprocess.check_output(cmd, cwd='tools')
         if 'ERROR' in out:
+            log.debug('duck.jar output: {}'.format(out))
             skip = out.find('Continueing...')
             if skip < 0:
                 return False, ""

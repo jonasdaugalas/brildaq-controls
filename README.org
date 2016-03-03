@@ -2,11 +2,20 @@
 
 * User manual
 ** Run
-*** Simple
-- $ cherryd -c cherrypy.config -i wsgi
+$ python brildaqconfiguratord.py <options>
 
-*** As daemon
-- $ cherryd -d -c cherrypy.config -i wsgi
+Options:
+  -h, --help            show this help message and exit
+  -c [CONFIG [CONFIG ...]], --config [CONFIG [CONFIG ...]]
+                        config file(s). default: 'cherrypy.config'
+  -d                    run the server as a daemon
+  -u USER, --user USER  run the server as user
+  -g GROUP, --group GROUP
+                        run the server as group
+  -e ENVIRONMENT, --environment ENVIRONMENT
+                        apply the given config environment
+  -p PID, --pid PID     file to store PID (use absolute path whenrunnung as
+                        daemon)
 
 ** Configure
 #FIXME: reduce configuration places
