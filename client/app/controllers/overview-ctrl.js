@@ -105,7 +105,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
                 }
                 me.isSuccessGetRunning = true;
                 return true;
-            }, function(response) {
+            }).catch(function(response) {
                 me.running = [];
                 me.isSuccessGetRunning = false;
                 return false;
@@ -114,11 +114,14 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
 
     function getStates(paths) {
         var running, uris =[];
+        me.states = {};
+        me.active = [];
+        if (paths.length < 1) {
+            return Promise.resolve();
+        }
         for (running of paths) {
             uris.push(Cfgs.path2URI(running));
         }
-        me.states = {};
-        me.active = [];
         return $http.post(srvendp + "/states", uris).then(function(response) {
             var uri, path;
             me.hasChangingStates = false;
@@ -137,7 +140,9 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
                     }
                 }
             }
+            me.isSuccessGetStates = true;
         }).catch(function(response) {
+            me.isSuccessGetStates = false;
             console.log("Failed getting states", response);
         });
     }

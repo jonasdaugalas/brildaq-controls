@@ -201,6 +201,11 @@
                   class="fa fa-exclamation-circle text-danger"
                   uib-tooltip="Running. Error or unknown state."
                   tooltip-placement="top-left"></span>
+            <span ng-if="!ctrl.isSuccessGetStates"
+                  class="fa fa-exclamation-triangle text-warning"
+                  uib-tooltip="Failed get state"
+                  tooltip-placement="top-left">
+            </span>
         </span>
         <span ng-if="!node._running"
               class="fa fa-stop text-muted"
@@ -210,7 +215,7 @@
     </span>
     <span ng-if="!ctrl.isSuccessGetRunning"
           class="fa fa-exclamation-triangle text-warning"
-          uib-tooltip="Failed RCMS web service 'getRunningConfigurations'"
+          uib-tooltip="Failed 'getRunningConfigurations'"
           tooltip-placement="top-left">
     </span>
     <span ng-if="node._flags.DANGER"

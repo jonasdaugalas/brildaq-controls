@@ -111,9 +111,8 @@ def _set_owner_host_port_flags(obj, owner, fmhostport):
         _set_flag(obj, 'danger', "Unconfigured owner: '{}\'".format(owner))
     elif fmhostport not in CONFIG.owners[owner]['allowed_fm_locations']:
         _set_flag(obj, 'danger',
-                  "Not allowed function manager host/port for owner '{}'"
-                  .format(owner),
-                  desc='Contact Zhen.')
+                  "Owner '{}' is not allowed on {}"
+                  .format(owner, fmhostport))
 
 
 def _set_flag(cfgmeta, flagtype, flagname, desc=''):
@@ -223,7 +222,7 @@ def get_config(dbcon, path, version):
         return None
     result = {'xml': xml}
     owner = path.split('/')[1]
-    fmhostport = group[0]['thisResource']['sourceURL']['authority']
+    fmhostport = group[0]['thisResource']['uri']['string'][7:].split('/')[0]
     _set_owner_host_port_flags(result, owner, fmhostport)
     result['fields'] = _parse_fields(easyconfig, xml) if easyconfig else None
     result['executive'] = configbuilder.get_executive(group)

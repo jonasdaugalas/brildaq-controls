@@ -1,14 +1,12 @@
 import re
 import requests
 import custom_logging
+import config as CONFIG
 import configurator_errors as err
 
 
 log = custom_logging.get_logger(__name__)
 
-SERVICE_OWNERS = {
-    'lumidev': 'http://cmsrc-lumi.cms:46000',
-    'lumipro': 'http://cmsrc-lumi.cms:26000'}
 FMLIFECYCLE_URL = '/rcms/services/FMLifeCycle'
 COMMANDSERVICE_URL = '/rcms/services/CommandService'
 
@@ -62,12 +60,6 @@ RE_GET_STATE_PARSE = re.compile(
     r'<stateString .*?>(.+?)</stateString>', flags=re.DOTALL)
 
 
-class RequestFailed(Exception):
-    def __init__(self, message, status_code):
-        super(RequestFailed, self).__init__(message)
-        self.status_code = status_code
-
-
 def post_soap_body(url, body):
     request = TPL_SOAP_ENVELOPE.format(body=body)
     headers = {'SOAPAction': ''}
@@ -79,33 +71,37 @@ def is_ok(resp):
     return resp.status_code == requests.codes.ok
 
 
-def get_ownwer(uri):
-    if ',owner=lumidev' in uri:
-        return 'lumidev'
-    elif ',owner=lumipro' in uri:
-        return 'lumipro'
-    else:
-        raise err.ConfiguratorUserError('Unrecognized owner in uri.',
-                                        details=uri)
+def get_service_from_uri(uri):
+    return uri[7:].split('/')[0]
 
 
-def get_running():
+def get_running(owner=None):
     """Return running (created) configurations."""
     result = {}
-    for service in SERVICE_OWNERS.itervalues():
-        resp = post_soap_body(service + FMLIFECYCLE_URL, TPL_GET_RUNNING)
-        if is_ok(resp):
-            matches = RE_GET_RUNNING_PARSE.findall(resp.text)
-            if matches:
-                matches = {
-                    x[1]: {
-                        'URI': x[0],
-                        'resGID': int(x[2])}
-                    for x in matches}
-                result.update(matches)
-        else:
-            log.error("Failed get running configurations: %s", resp.text)
-            raise RequestFailed(resp.text, resp.status_code)
+    for key in CONFIG.owners:
+        if owner is not None and key != owner:
+            continue
+        for service in CONFIG.owners[owner]['allowed_fm_locations']:
+            url = 'http://' + service + FMLIFECYCLE_URL
+            try:
+                # ConnectionError
+                resp = post_soap_body(url, TPL_GET_RUNNING)
+                if not is_ok(resp):
+                    raise requests.exceptions.RequestException(resp.text)
+                matches = RE_GET_RUNNING_PARSE.findall(resp.text)
+                if matches:
+                    matches = {
+                        x[1]: {
+                            'URI': x[0],
+                            'resGID': int(x[2])}
+                        for x in matches}
+                    result.update(matches)
+            except (requests.exceptions.ConnectionError,
+                    requests.exceptions.RequestException) as e:
+                log.exception(e)
+                raise err.ConfiguratorInternalError(
+                    'Failed to get running configurations',
+                    details=(str(url) + '\n' + str(e.message)))
     return result
 
 
@@ -117,17 +113,24 @@ def get_states(uris):
     some_good = False
     for uri in uris:
         body = TPL_GET_STATE.format(uri=uri)
-        service = SERVICE_OWNERS[get_ownwer(uri)]
-        resp = post_soap_body(service + COMMANDSERVICE_URL, body)
-        if is_ok(resp):
-            found = RE_GET_STATE_PARSE.search(resp.text)
-            result[uri] = found.group(1) if found else None
-            some_good = True if found else False
-        else:
+        service = get_service_from_uri(uri)
+        url = 'http://' + service + COMMANDSERVICE_URL
+        try:
+            resp = post_soap_body(url, body)
+            if is_ok(resp):
+                found = RE_GET_STATE_PARSE.search(resp.text)
+                result[uri] = found.group(1) if found else None
+                if found:
+                    some_good = True
+            else:
+                raise requests.exceptions.RequestException(resp.text)
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.RequestException) as e:
             result[uri] =  None
     if not some_good:
         log.error("Failed to get states for all uris: %s", uris)
-        raise RequestFailed(resp.text, resp.status_code)
+        raise err.ConfiguratorInternalError(
+            'Failed to get states for all uris', details=uris)
     return result
 
 
