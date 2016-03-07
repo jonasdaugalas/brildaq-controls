@@ -4,5 +4,13 @@
     "authfile": "/brildata/db/db.ini",
     "easyconfigmap": "easyconfigmap.json",
     "easyconfigdir": "easyconfig",
-    "xdaqxmlnamespace": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30"
+    "xdaqxmlnamespace": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+    "owners": {
+        "lumidev": {
+            "allowed_fm_locations": ["cmsrc-lumidev.cms:46000"]
+        },
+        "lumipro": {
+            "allowed_fm_locations": ["cmsrc-lumi.cms:26000"]
+        }
+    }
 }

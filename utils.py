@@ -1,5 +1,5 @@
 '''
-Configurator server utilities.
+Configure server utilities.
 '''
 import os
 import ConfigParser
@@ -57,9 +57,28 @@ def dbconnect(servicemap):
     return engine.connect()
 
 
-def get_configurations(dbcon):
+def get_owners(dbcon):
     select = (
-        'select res.urn, res.portnumber, hst.hostname, newest.version '
+        'select user_name '
+        'from CMS_LUMI_RS.CONFIGRESOURCES res, CMS_LUMI_RS.CONFIGURATIONS cfg '
+        'where cfg.configurationid=res.configurationid'
+        ' and res.name=:resname group by user_name')
+    var = {'resname': 'BrilDAQFunctionManager'}
+    r = dbcon.execute(select, var).fetchall()
+    return [str(x[0]) for x in r]
+
+
+def get_configurations(dbcon, owner=None):
+    var = {'cfgtype': 'lightConfiguration',
+           'resname': 'BrilDAQFunctionManager'}
+    if owner is not None:
+        var['owner'] = owner
+        ownerclause = ' and cfg.user_name=:owner '
+    else:
+        ownerclause = ''
+    select = (
+        'select res.urn, cfg.user_name, res.portnumber,'
+        ' hst.hostname, newest.version '
         'from CMS_LUMI_RS.CONFIGRESOURCES res,'
         ' CMS_LUMI_RS.CONFIGURATIONS cfg,'
         ' CMS_LUMI_RS.CONFIGHOSTS hst,'
@@ -71,19 +90,42 @@ def get_configurations(dbcon):
         ' cfg.version=newest.version and'
         ' res.configurationid=cfg.configurationid and'
         ' hst.configurationid=cfg.configurationid and'
-        ' res.name=:resname')
-    var = {'cfgtype': 'lightConfiguration',
-           'resname': 'BrilDAQFunctionManager'}
-    r = dbcon.execute(select, var).fetchall()
-    r = {RE_GET_CONFIGS_PARSE.search(x[0]).group(1): {
+        ' res.name=:resname {}'.format(ownerclause))
+    result = dbcon.execute(select, var).fetchall()
+    result = {RE_GET_CONFIGS_PARSE.search(x[0]).group(1): {
         'urn': x[0],
-        'port': x[1],
-        'host': x[2],
-        'version': x[3]} for x in r}
-    return r
+        'owner': x[1],
+        'port': x[2],
+        'host': x[3],
+        'version': x[4]} for x in result}
+
+    for r in result.itervalues():
+        _set_owner_host_port_flags(
+            r, r['owner'], r['host'] + ':' + str(r['port']))
+
+    return result
 
 
-def get_running_configurations(dbcon):
+def _set_owner_host_port_flags(obj, owner, fmhostport):
+    if owner not in CONFIG.owners:
+        _set_flag(obj, 'danger', "Unconfigured owner: '{}\'".format(owner))
+    elif fmhostport not in CONFIG.owners[owner]['allowed_fm_locations']:
+        _set_flag(obj, 'danger',
+                  "Not allowed function manager host/port for owner '{}'"
+                  .format(owner),
+                  desc='Contact Zhen.')
+
+
+def _set_flag(cfgmeta, flagtype, flagname, desc=''):
+    flagtype = flagtype.upper()
+    if 'flags' not in cfgmeta:
+        cfgmeta['flags'] = {}
+    if flagtype not in cfgmeta['flags']:
+        cfgmeta['flags'][flagtype] = {}
+    cfgmeta['flags'][flagtype][flagname] = str(desc)
+
+
+def get_running_configurations(dbcon, owner=None):
     """Get dict of running configurations.
 
     :param dbcon:
@@ -92,7 +134,7 @@ def get_running_configurations(dbcon):
     :rtype: dict or None
 
     """
-    cfgs = rcmsws.get_running()
+    cfgs = rcmsws.get_running(owner)
     if not cfgs:
         return None
     resgids = [x['resGID'] for x in cfgs.values()]
@@ -136,7 +178,7 @@ def get_versions(dbcon, path):
     return r
 
 
-def get_parsed_groupblob(dbcon, path, version):
+def _get_parsed_groupblob(dbcon, path, version):
     select = (
         'select res.GROUPBLOB '
         'from CMS_LUMI_RS.CONFIGRESOURCES res, CMS_LUMI_RS.CONFIGURATIONS cfg '
@@ -163,11 +205,11 @@ def get_parsed_groupblob(dbcon, path, version):
 
 
 def get_config_xml(dbcon, path, version):
-    group = get_parsed_groupblob(dbcon, path, version)
-    return get_config_xml_from_groupblob(group)
+    group = _get_parsed_groupblob(dbcon, path, version)
+    return _get_config_xml_from_groupblob(group)
 
 
-def get_config_xml_from_groupblob(group):
+def _get_config_xml_from_groupblob(group):
     return group[0]['childrenResources']['data'][0]['configFile']
 
 
@@ -175,17 +217,20 @@ def get_config(dbcon, path, version):
     easyconfig = None
     if path in easyconfigmap:
         easyconfig = easyconfigmap[path]
-    group = get_parsed_groupblob(dbcon, path, version)
+    group = _get_parsed_groupblob(dbcon, path, version)
     xml = group[0]['childrenResources']['data'][0]['configFile']
     if not xml:
         return None
     result = {'xml': xml}
-    result['fields'] = parse_fields(easyconfig, xml) if easyconfig else None
+    owner = path.split('/')[1]
+    fmhostport = group[0]['thisResource']['sourceURL']['authority']
+    _set_owner_host_port_flags(result, owner, fmhostport)
+    result['fields'] = _parse_fields(easyconfig, xml) if easyconfig else None
     result['executive'] = configbuilder.get_executive(group)
     return result
 
 
-def parse_fields(easyconfig, xml):
+def _parse_fields(easyconfig, xml):
     ns = easyconfig['namespaces']
     root = ET.fromstring(xml)
     for field in easyconfig['fields']:
@@ -201,7 +246,7 @@ def parse_fields(easyconfig, xml):
     return fields
 
 
-def check_hosts_and_ports(executive, xml):
+def _check_hosts_and_ports(executive, xml):
     """Check if needed hosts and ports match between executive and xml.
 
     :param executive: dict executive fields (important: 'host', 'port')
@@ -213,7 +258,7 @@ def check_hosts_and_ports(executive, xml):
     :rtype: Boolean
 
     """
-    log.debug('In "check_hosts_and_ports"')
+    log.debug('In "_check_hosts_and_ports"')
     if executive is None:
         log.debug('executive is None - all good')
         return True
@@ -245,19 +290,31 @@ def check_hosts_and_ports(executive, xml):
 
 
 def build_final_from_xml(dbcon, path, xml, executive=None, version=None):
-    check_hosts_and_ports(executive, xml)
-    group = get_parsed_groupblob(dbcon, path, version)
+    _check_hosts_and_ports(executive, xml)
+    group = _get_parsed_groupblob(dbcon, path, version)
+    _check_danger_flags(path, group) # raises configurator user error
     final = configbuilder.build_final(path, xml, group, executive)
     return final
 
 
 def build_final_from_fields(dbcon, path, fields, version=None):
-    group = get_parsed_groupblob(dbcon, path, version)
-    easyconfig = get_easyconfig(path)
-    xml = get_config_xml_from_groupblob(group)
-    xml = modify_xml_by_fields(xml, fields, easyconfig)
+    group = _get_parsed_groupblob(dbcon, path, version)
+    _check_danger_flags(path, group) # raises configurator user error
+    easyconfig = _get_easyconfig(path)
+    xml = _get_config_xml_from_groupblob(group)
+    xml = _modify_xml_by_fields(xml, fields, easyconfig)
     final = configbuilder.build_final(path, xml, group)
     return final
+
+
+def _check_danger_flags(path, group):
+    owner = path.split('/')[1]
+    fmhostport = group[0]['thisResource']['sourceURL']['authority']
+    tmp = {}
+    _set_owner_host_port_flags(tmp, owner, fmhostport)
+    if tmp:
+        raise err.ConfiguratorUserError('Configuration has DANGER flags.',
+                                        details=tmp)
 
 
 def build_from_fields(dbcon, path, fields, version=None):
@@ -270,12 +327,12 @@ def build_from_fields(dbcon, path, fields, version=None):
     :returns: constructed xml
     :rtype: str
     """
-    easyconfig = get_easyconfig(path)
+    easyconfig = _get_easyconfig(path)
     xml = get_config_xml(dbcon, path, version)
-    return modify_xml_by_fields(xml, fields, easyconfig)
+    return _modify_xml_by_fields(xml, fields, easyconfig)
 
 
-def get_easyconfig(path):
+def _get_easyconfig(path):
     if path in easyconfigmap:
         return easyconfigmap[path]
     else:
@@ -285,18 +342,18 @@ def get_easyconfig(path):
             .format(path, str(easyconfigmap.keys())))
 
 
-def modify_xml_by_fields(xml, fields, easyconfig):
-    register_xml_nsprefixes(xml)
+def _modify_xml_by_fields(xml, fields, easyconfig):
+    _register_xml_nsprefixes(xml)
     root = ET.fromstring(xml)
     for field in fields:
         field['xpath'] = [f['xpath'] for f in easyconfig['fields']
                           if f['name'] == field['name']][0]
-        modify_xml_value(root, field['xpath'], field['type'],
+        _modify_xml_value(root, field['xpath'], field['type'],
                          field['value'], easyconfig['namespaces'])
     return ET.tostring(root, encoding='UTF-8')
 
 
-def register_xml_nsprefixes(xml):
+def _register_xml_nsprefixes(xml):
     source = StringIO.StringIO(xml)
     events = ("end", "start-ns", "end-ns")
     counter = 0
@@ -313,7 +370,7 @@ def register_xml_nsprefixes(xml):
     return namespaces
 
 
-def modify_xml_value(root, xpath, dtype, val, ns):
+def _modify_xml_value(root, xpath, dtype, val, ns):
     node = root.find(xpath, ns)
     if dtype in ('Integer', 'unsignedInt'):
         node.text = str(int(val))

@@ -95,7 +95,10 @@
                 <th>Comment</th>
             </tr>
             <tr ng-repeat="v in ctrl.versions"
-                ng-class="v[0]==ctrl.selectedVersion ? 'info' : ''">
+                ng-class="v[0]==ctrl.selectedVersion ? (ctrl.config.flags.DANGER ? 'danger' : 'info') : ''"
+                tooltip-trigger="none"
+                tooltip-is-open="v[0]==ctrl.selectedVersion && ctrl.config.flags.DANGER"
+                uib-tooltip="flags: {{ctrl.config.flags}}">
                 <td align="center">
                     <button class="btn btn-xs"
                             ng-click="ctrl.selectVersion(v[0])">select</button>

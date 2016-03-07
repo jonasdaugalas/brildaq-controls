@@ -41,9 +41,9 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
         me.selectedVersion = version;
         return $http.get(srvendp + "/config" + me.configPath + "/v=" + me.selectedVersion)
             .then(function(response) {
+                console.log(response);
                 me.config = response.data;
                 me.configExecutiveCopy = angular.copy(response.data.executive);
-                console.log(editor);
                 if (editor) {
                     console.log("setting xml");
                     editor.setValue(me.config.xml);

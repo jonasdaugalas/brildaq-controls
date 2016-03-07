@@ -1,24 +1,25 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "CLIENT_CONSTS", "Timers", "Configurations", function($http, $timeout, CONSTS, Timers, Cfgs) {
+angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CLIENT_CONSTS", "Timers", "Configurations", function($rootScope, $http, $timeout, CONSTS, Timers, Cfgs) {
 
     var me = this;
     // all configurations' paths
-    this.configurations = [];
+    this.paths = [];
     // map path to newest configuration version
     this.versions = {};
-    this.configTree = {};
+    this.tree = {};
     this.owners = [];
     // running configurations' paths
     this.running = [];
     // map path to {URI: ..., version: ..., resGID: ... }
-    this.runningDetails = {};
+    this.runningConfigsDetails = {};
     // Running query was successful
-    this.getRunningSuccess = true;
+    this.isSuccessGetRunning = false;
     // map path to state
     this.states = {};
+    this.isSuccessGetStates = false;
     // array of active (running and state is "ON" or "Error) cfg paths
     this.active = [];
-    this.activeConfigs = {};
+    this.configData = {};
     // flag if there is configuration in state 'GoingOn', 'GoingOff', 'Resetting'
     me.hasChangingStates = false;
 
@@ -33,17 +34,20 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
     };
 
     this.refreshConfigurations = function() {
+        // ask confgigurations service to update info about existing
+        // configurations
         return Cfgs.update().then(function(paths) {
-            var path, parr, node, head;
-            me.configurations = paths;
+            // construct configuration tree
+            var path, pArr, node, head, flags, cfg;
+            me.paths = paths;
             me.versions = {};
-            me.configTree = {};
+            me.tree = {};
             for (path of paths) {
                 me.versions[path] = Cfgs.getVersion(path);
-                parr = path.split("/");
-                parr.shift();
-                head = me.configTree;
-                for (node of parr) {
+                pArr = path.split("/");
+                pArr.shift();
+                head = me.tree;
+                for (node of pArr) {
                     if (!head.hasOwnProperty(node)) {
                         head[node] = {};
                     }
@@ -51,9 +55,18 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
                 }
                 head._isLeaf = true;
                 head._path = path;
+                cfg = Cfgs.get(path);
+                console.log(cfg);
+                flags = cfg.flags;
+                console.log(flags);
+                if (typeof flags !== "undefined") {
+                    head._flags = flags;
+                }
             }
-            me.owners = Object.keys(me.configTree);
-            console.log(me.configTree);
+            // end of construct configuration tree
+            // determine owners
+            me.owners = Object.keys(me.tree);
+            console.log(me.tree);
             return me.refreshStatuses();
         });
     };
@@ -62,17 +75,17 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
         return getRunning().then(function() {
             return getStates(me.running);
         }).then(function() {
-            me.getActiveConfigs();
+            me.getActiveConfigData();
             var path;
             var putRunningFlag = function(leaf) {
-                if (me.getRunningSuccess) {
+                if (me.isSuccessGetRunning) {
                     leaf._running = me.running.indexOf(leaf._path) > -1;
                     leaf._state = me.states[leaf._path];
                 } else {
                     leaf._running = null;
                 }
             };
-            itterateConfigTree(me.configTree, putRunningFlag);
+            itterateConfigTree(me.tree, putRunningFlag);
             if (me.hasChangingStates) {
                 $timeout(me.refreshStatuses, 4000);
             }
@@ -80,22 +93,23 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
     };
 
     function getRunning() {
-        return $http.get(srvendp + "/running").then(function(response) {
-            var path;
-            me.runningDetails = response.data;
-            me.running = [];
-            for (path in response.data) {
-                if (response.data.hasOwnProperty(path)) {
-                    me.running.push(path);
+        return $http.get(srvendp + "/running/" + $rootScope.globals.owner)
+            .then(function(response) {
+                var path;
+                me.runningDetails = response.data;
+                me.running = [];
+                for (path in response.data) {
+                    if (response.data.hasOwnProperty(path)) {
+                        me.running.push(path);
+                    }
                 }
-            }
-            me.getRunningSuccess = true;
-            return true;
-        }, function(response) {
-            me.running = [];
-            me.getRunningSuccess = false;
-            return false;
-        });
+                me.isSuccessGetRunning = true;
+                return true;
+            }, function(response) {
+                me.running = [];
+                me.isSuccessGetRunning = false;
+                return false;
+            });
     }
 
     function getStates(paths) {
@@ -129,15 +143,15 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
     }
 
 
-    this.getActiveConfigs = function() {
+    this.getActiveConfigData = function() {
         var path;
         function getConfigClosure (p) {
             $http.get(srvendp + "/config" + p + "/v=" + me.runningDetails[p].version)
                 .then(function(response) {
-                    me.activeConfigs[p] = response.data;
+                    me.configData[p] = response.data;
                 }).catch(function(response) {
                     console.log(response);
-                    me.activeConfigs[p] = null;
+                    me.configData[p] = null;
                 });
         }
         for (path of me.active) {
@@ -189,6 +203,15 @@ angular.module("web-config").controller("OverviewCtrl", ["$http", "$timeout", "C
         return $http.post(srvendp + "/destroy", JSON.stringify(Cfgs.path2URI(path)))
             .then(dummyHttpHandler)
             .catch(dummyHttpHandler);
+    };
+
+
+    this.getDangerFlags = function(path) {
+        var flags = Cfgs.get(path).flags;
+        if (!flags) {
+            return undefined;
+        }
+        return flags.DANGER;
     };
 
     function dummyHttpHandler(response) {

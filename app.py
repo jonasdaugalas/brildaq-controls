@@ -23,7 +23,6 @@ def init():
     servicemap = utils.parse_service_map(config.authfile)
     global dbcon
     dbcon = utils.dbconnect(servicemap)
-    time.sleep(10)
 
 
 def finalize():
@@ -50,19 +49,26 @@ def get_endpoints():
                           mimetype='application/json')
 
 
-@app.route('/configurations/')
-@app.route('/configurations')
-def get_configurations():
-    r = utils.get_configurations(dbcon)
+@app.route('/owners/')
+@app.route('/owners')
+def get_owners():
+    r = utils.get_owners(dbcon)
     return flask.Response(json.dumps(r), mimetype='application/json')
 
 
-@app.route('/running/')
+@app.route('/configurations/<string:owner>')
+@app.route('/configurations')
+def get_configurations(owner=None):
+    r = utils.get_configurations(dbcon, owner)
+    return flask.Response(json.dumps(r), mimetype='application/json')
+
+
+@app.route('/running/<string:owner>')
 @app.route('/running')
-def get_running():
+def get_running(owner=None):
     log.info('getting running')
     try:
-        r = utils.get_running_configurations(dbcon)
+        r = utils.get_running_configurations(dbcon, owner)
         return flask.Response(json.dumps(r), mimetype='application/json')
     except rcmsws.RequestFailed as e:
         return flask.Response('RCMS ws failed:{}'.format(e.message),
