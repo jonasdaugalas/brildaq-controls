@@ -124,12 +124,20 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
         submitModal.result.then(function(comment) {
             var infoModal;
             if (me.expertMode) {
-                infoModal = Modals.responseModal(submitExpertXML(comment));
+                infoModal = Modals.responseModal(
+                    submitExpertXML(comment), true); // resolve on success
             } else {
-                infoModal = Modals.responseModal(submitChanges(comment));
+                infoModal = Modals.responseModal(
+                    submitChanges(comment), true); // resolve on success
             }
-            return infoModal.closed.then(function() {
-                me.getConfigVersions();
+            infoModal.result.then(function(response) {
+                console.log(response);
+                me.getConfigVersions().then(function() {
+                    console.log(me.versions);
+                    if (me.versions.length > 0) {
+                        me.selectVersion(me.versions[0][0]);
+                    }
+                });
             });
         }).catch(function() {
             console.log("Submit canceled");

@@ -24,6 +24,7 @@ angular.module("web-config").controller("ResponseInfoModalCtrl", ["$uibModalInst
             }
         }).catch(function(response) {
             if ($scope.insteadReject) {
+                me.info = "rejecting"; // to allow closing
                 $uibModalInstance.dismiss(response);
             } else {
                 setInfo(response);
