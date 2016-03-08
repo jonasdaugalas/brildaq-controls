@@ -1,5 +1,5 @@
 <form role="form" class="row">
-    <div class="form-group col-sm-6" style="margin-bottom:0px">
+    <div class="form-group col-sm-4" style="margin-bottom:0px">
         <label>Host:</label>
         <input type="text" class="form-control input-sm"
                ng-disabled="!ctrl.editable"
@@ -8,7 +8,7 @@
                tooltip-enable="ctrl.editable"
         ></input>
     </div>
-    <div class="form-group col-sm-6" style="margin-bottom:0px">
+    <div class="form-group col-sm-4" style="margin-bottom:0px">
         <label>Port:</label>
         <input type="number" class="form-control input-sm"
                ng-disabled="!ctrl.editable"
@@ -16,19 +16,31 @@
                uib-tooltip="Must match Context port"
                tooltip-enable="ctrl.editable"></input>
     </div>
+    <div class="form-group col-sm-4" style="margin-bottom:0px">
+        <label>Role:</label>
+        <input type="text" class="form-control input-sm"
+               ng-disabled="!ctrl.editable"
+               ng-model="ctrl.executive.role"></input>
+    </div>
 </form>
 <form role="form" class="row">
-    <div class="form-group col-sm-6" style="margin-bottom:0px">
+    <div class="form-group col-sm-4" style="margin-bottom:0px">
         <label>Log URL:</label>
         <input type="text" class="form-control input-sm"
                ng-disabled="!ctrl.editable"
                ng-model="ctrl.executive.logURL"></input>
     </div>
-    <div class="form-group col-sm-6" style="margin-bottom:0px">
+    <div class="form-group col-sm-4" style="margin-bottom:0px">
         <label>Log level:</label>
         <input type="text" class="form-control input-sm"
                ng-disabled="!ctrl.editable"
                ng-model="ctrl.executive.logLevel"></input>
+    </div>
+    <div class="form-group col-sm-4" style="margin-bottom:0px">
+        <label>Path to executive:</label>
+        <input type="text" class="form-control input-sm"
+               ng-disabled="!ctrl.editable"
+               ng-model="ctrl.executive.pathToExecutive"></input>
     </div>
 </form>
 <form role="form">
