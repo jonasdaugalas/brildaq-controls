@@ -4,7 +4,7 @@ import requests
 import argparse
 
 
-URL = 'http://srv-s2d16-22-01/wsbrildaqcfgtest'
+URL = 'http://srv-s2d16-22-01/wsbrildaqcfg'
 
 
 def main():
