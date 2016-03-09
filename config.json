@@ -7,10 +7,10 @@
     "xdaqxmlnamespace": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
     "owners": {
         "lumidev": {
-            "allowed_fm_locations": ["cmsrc-lumidev.cms:46000"]
+            "rcms_location": "cmsrc-lumidev.cms:46000"
         },
         "lumipro": {
-            "allowed_fm_locations": ["cmsrc-lumi.cms:26000"]
+            "rcms_location": "cmsrc-lumi.cms:26000"
         }
     }
 }

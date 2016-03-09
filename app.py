@@ -93,32 +93,62 @@ def get_running(owner=None):
 @default_configurator_error_response
 def get_states():
     if flask.request.method == 'GET':
-        return flask.Response('Use POST method. Request body: json array '
-                              'of configuration URIs (string)', status=405)
+        return flask.Response(
+            'Use POST method (or GET /state/<path>). Request body: json array '
+            'of configuration URIs (string)', status=405)
     data = flask.request.json
     r = rcmsws.get_states(data)
     return flask.Response(json.dumps(r), mimetype='application/json')
 
 
-@app.route('/send/<string:command>', methods=['POST'])
+@app.route('/state/<path:path>')
 @default_configurator_error_response
-def send_command(command):
-    data = flask.request.json
-    return ('', 200) if rcmsws.send_command(command, data) else flask.abort(400)
+def get_state(path):
+    uri = utils.path2uri('/' + path)
+    r = rcmsws.get_state(uri)
+    return flask.Response(json.dumps(r), mimetype='application/json')
 
 
-@app.route('/create', methods=['POST'])
+@app.route('/send/<string:command>/<path:path>', methods=['GET', 'POST'])
+@app.route('/send/<string:command>', methods=['GET', 'POST'])
 @default_configurator_error_response
-def create_fm():
-    data = flask.request.json
-    return ('', 200) if rcmsws.create(data) else flask.abort(400)
+def send_command(command, path=None):
+    if flask.request.method == 'GET':
+        uri = utils.path2uri('/' + path)
+    else:
+        uri = flask.request.json
+    if rcmsws.send_command(command, uri):
+        return ('OK', 200)
+    else:
+        return flask.Response('Send command failed', status=400)
 
 
-@app.route('/destroy', methods=['POST'])
+@app.route('/create/<path:path>', methods=['GET', 'POST'])
+@app.route('/create', methods=['GET', 'POST'])
 @default_configurator_error_response
-def destroy_fm():
-    data = flask.request.json
-    return ('', 200) if rcmsws.destroy(data) else flask.abort(400)
+def create_fm(path=None):
+    if flask.request.method == 'GET':
+        uri = utils.path2uri('/' + path)
+    else:
+        uri = flask.request.json
+    if rcmsws.create(uri):
+        return ('OK', 200)
+    else:
+        return flask.Response('Failed to create', status=400)
+
+
+@app.route('/destroy/<path:path>', methods=['GET', 'POST'])
+@app.route('/destroy', methods=['GET', 'POST'])
+@default_configurator_error_response
+def destroy_fm(path=None):
+    if flask.request.method == 'GET':
+        uri = utils.path2uri('/' + path)
+    else:
+        uri = flask.request.json
+    if rcmsws.destroy(uri):
+        return ('OK', 200)
+    else:
+        return flask.Response('Failed to destroy', status=400)
 
 
 @app.route('/history/<path:path>')
@@ -180,9 +210,9 @@ def make_easy_xml():
 def submit_fields():
     data = flask.request.json
     comment = data['comment']
+    v = data['version'] if ('version' in data) else None
     final = utils.build_final_from_fields(
-        dbcon, path=data['path'], fields=data['fields'],
-        version=data['version'])
+        dbcon, path=data['path'], fields=data['fields'], version=v)
     if final:
         r = utils.populate_RSDB_with_DUCK(final, comment)
         if r[0]:
@@ -198,9 +228,10 @@ def submit_fields():
 def submit_xml():
     data = flask.request.json
     comment = data['comment']
+    v = data['version'] if ('version' in data) else None
     final = utils.build_final_from_xml(
         dbcon, path=data['path'], xml=data['xml'],
-        executive=data['executive'], version=data['version'])
+        executive=data['executive'], version=v)
     if final:
         r = utils.populate_RSDB_with_DUCK(final, comment)
         if r[0]:
@@ -209,6 +240,33 @@ def submit_xml():
             return flask.Response(r[1], status=500)
     else:
         return flask.Response('Failed to build final xml', status=500)
+
+
+@app.route('/submitfull', methods=['POST'])
+@default_configurator_error_response
+def submit_full():
+    data = flask.request.json
+    try:
+        comment = data['comment']
+        final = data['xml']
+    except ValueError as e:
+        raise err.ConfiguratorUserError(
+            '/submitfull request data must be {comment:..., xml:...}',
+            details=data)
+    r = utils.populate_RSDB_with_DUCK(final, comment)
+    if r[0]:
+        return flask.Response('Successfully submitted', status=200)
+    else :
+        return flask.Response(r[1], status=500)
+
+
+@app.route('/fullxml/<path:path>')
+@app.route('/fullxml/<path:path>/v=<int:version>')
+@default_configurator_error_response
+def get_full_xml(path, version=None):
+    path = '/' + path
+    final = utils.get_final_xml(dbcon, path=path, version=version)
+    return flask.Response(final, mimetype='text/xml')
 
 
 if __name__ == '__main__':

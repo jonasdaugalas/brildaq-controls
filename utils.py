@@ -57,6 +57,16 @@ def dbconnect(servicemap):
     return engine.connect()
 
 
+def path2uri(path):
+    owner = path.split('/')[1]
+    if owner not in CONFIG.owners:
+        raise err.ConfiguratorUserError('Unknown owner for path.', details=path)
+    uri = ('http://' + CONFIG.owners[owner]['rcms_location'] +
+           '/urn:rcms-fm:fullpath=' + path +
+           ',group=BrilDAQFunctionManager,owner=' + owner)
+    return uri
+
+
 def get_owners(dbcon):
     select = (
         'select user_name '
@@ -109,7 +119,7 @@ def get_configurations(dbcon, owner=None):
 def _set_owner_host_port_flags(obj, owner, fmhostport):
     if owner not in CONFIG.owners:
         _set_flag(obj, 'danger', "Unconfigured owner: '{}\'".format(owner))
-    elif fmhostport not in CONFIG.owners[owner]['allowed_fm_locations']:
+    elif fmhostport != CONFIG.owners[owner]['rcms_location']:
         _set_flag(obj, 'danger',
                   "Owner '{}' is not allowed on {}"
                   .format(owner, fmhostport))
@@ -135,13 +145,13 @@ def get_running_configurations(dbcon, owner=None):
     """
     cfgs = rcmsws.get_running(owner)
     if not cfgs:
-        return None
+        return {}
     resgids = [x['resGID'] for x in cfgs.values()]
     # (Jonas) Unable to pass list as parameter to oracle
     # Could potentially be security problem: non-parameterized query!
     resgids = [str(int(x)) for x in resgids]
     if not resgids:
-        return None
+        return {}
     select = (
         'select res.configresourceid, cfg.version '
         'from CMS_LUMI_RS.CONFIGRESOURCES res,'
@@ -288,6 +298,13 @@ def _check_hosts_and_ports(executive, xml):
                 executive['port'], contextport, contextport,  endpointport))
 
 
+def get_final_xml(dbcon, path, version=None):
+    group = _get_parsed_groupblob(dbcon, path, version)
+    xml = _get_config_xml_from_groupblob(group)
+    final = configbuilder.build_final(path, xml, group)
+    return final
+
+
 def build_final_from_xml(dbcon, path, xml, executive=None, version=None):
     _check_hosts_and_ports(executive, xml)
     group = _get_parsed_groupblob(dbcon, path, version)
@@ -345,8 +362,13 @@ def _modify_xml_by_fields(xml, fields, easyconfig):
     _register_xml_nsprefixes(xml)
     root = ET.fromstring(xml)
     for field in fields:
-        field['xpath'] = [f['xpath'] for f in easyconfig['fields']
-                          if f['name'] == field['name']][0]
+        log.debug(field)
+        try:
+            field['xpath'] = [f['xpath'] for f in easyconfig['fields']
+                              if f['name'] == field['name']][0]
+        except IndexError as e:
+            raise err.ConfiguratorUserError(
+                'Could not find predefined field with this name', details=field)
         _modify_xml_value(root, field['xpath'], field['type'],
                          field['value'], easyconfig['namespaces'])
     return ET.tostring(root, encoding='UTF-8')

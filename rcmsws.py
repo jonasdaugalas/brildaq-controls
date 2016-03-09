@@ -81,27 +81,27 @@ def get_running(owner=None):
     for key in CONFIG.owners:
         if owner is not None and key != owner:
             continue
-        for service in CONFIG.owners[owner]['allowed_fm_locations']:
-            url = 'http://' + service + FMLIFECYCLE_URL
-            try:
-                # ConnectionError
-                resp = post_soap_body(url, TPL_GET_RUNNING)
-                if not is_ok(resp):
-                    raise requests.exceptions.RequestException(resp.text)
-                matches = RE_GET_RUNNING_PARSE.findall(resp.text)
-                if matches:
-                    matches = {
-                        x[1]: {
-                            'URI': x[0],
-                            'resGID': int(x[2])}
-                        for x in matches}
-                    result.update(matches)
-            except (requests.exceptions.ConnectionError,
-                    requests.exceptions.RequestException) as e:
-                log.exception(e)
-                raise err.ConfiguratorInternalError(
-                    'Failed to get running configurations',
-                    details=(str(url) + '\n' + str(e.message)))
+        service = CONFIG.owners[key]['rcms_location']
+        url = 'http://' + service + FMLIFECYCLE_URL
+        try:
+            # ConnectionError
+            resp = post_soap_body(url, TPL_GET_RUNNING)
+            if not is_ok(resp):
+                raise requests.exceptions.RequestException(resp.text)
+            matches = RE_GET_RUNNING_PARSE.findall(resp.text)
+            if matches:
+                matches = {
+                    x[1]: {
+                        'URI': x[0],
+                        'resGID': int(x[2])}
+                    for x in matches}
+                result.update(matches)
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.RequestException) as e:
+            log.exception(e)
+            raise err.ConfiguratorInternalError(
+                'Failed to get running configurations',
+                details=(str(url) + '\n' + str(e.message)))
     return result
 
 
@@ -112,38 +112,56 @@ def get_states(uris):
     result = {}
     some_good = False
     for uri in uris:
-        body = TPL_GET_STATE.format(uri=uri)
-        service = get_service_from_uri(uri)
-        url = 'http://' + service + COMMANDSERVICE_URL
-        try:
-            resp = post_soap_body(url, body)
-            if is_ok(resp):
-                found = RE_GET_STATE_PARSE.search(resp.text)
-                result[uri] = found.group(1) if found else None
-                if found:
-                    some_good = True
-            else:
-                raise requests.exceptions.RequestException(resp.text)
-        except (requests.exceptions.ConnectionError,
-                requests.exceptions.RequestException) as e:
-            result[uri] =  None
+        state = _get_state(uri)
+        if state:
+            some_good = True
+        result[uri] = state
     if not some_good:
-        log.error("Failed to get states for all uris: %s", uris)
+        log.info("Failed to get states for all uris: %s", uris)
         raise err.ConfiguratorInternalError(
             'Failed to get states for all uris', details=uris)
     return result
 
 
+def get_state(uri):
+    state = _get_state(uri)
+    if state is None:
+        log.info("Failed to get state for uri: %s", uri)
+        raise err.ConfiguratorInternalError(
+            'Failed to get state for uri.', details=uri)
+    else:
+        return state
+
+
+def _get_state(uri):
+    body = TPL_GET_STATE.format(uri=uri)
+    service = get_service_from_uri(uri)
+    url = 'http://' + service + COMMANDSERVICE_URL
+    try:
+        resp = post_soap_body(url, body)
+        if is_ok(resp):
+            found = RE_GET_STATE_PARSE.search(resp.text)
+            state = found.group(1) if found else None
+            return state
+        else:
+            raise requests.exceptions.RequestException(resp.text)
+    except (requests.exceptions.ConnectionError,
+            requests.exceptions.RequestException) as e:
+        return None
+
+
 def send_command(command, uri):
     log.info('SEND "%s" %s', command, uri)
     body = TPL_COMMAND.format(uri=uri, cmd=command)
-    service = SERVICE_OWNERS[get_ownwer(uri)]
-    resp = post_soap_body(service + COMMANDSERVICE_URL, body)
+    service = get_service_from_uri(uri)
+    url = 'http://' + service + COMMANDSERVICE_URL
+    resp = post_soap_body(url, body)
     if is_ok(resp):
         log.info('SUCCESS "%s" %s', command, uri)
         return True
     else:
         log.info('FAIL "%s" %s', command, uri)
+        return False
 
 
 def turn_on(uri):
@@ -161,22 +179,26 @@ def reset(uri):
 def create(uri):
     log.info('CREATE %s', uri)
     body = TPL_CREATE.format(uri=uri)
-    service = SERVICE_OWNERS[get_ownwer(uri)]
-    resp = post_soap_body(service + FMLIFECYCLE_URL, body)
+    service = get_service_from_uri(uri)
+    url = 'http://' + service + FMLIFECYCLE_URL
+    resp = post_soap_body(url, body)
     if is_ok(resp):
         log.info('CREATED %s', uri)
         return True
     else:
         log.info('FAILED to CREATE %s', uri)
+        return False
 
 
 def destroy(uri):
     log.info('DESTROY %s', uri)
     body = TPL_DESTROY.format(uri=uri)
-    service = SERVICE_OWNERS[get_ownwer(uri)]
-    resp = post_soap_body(service + FMLIFECYCLE_URL, body)
+    service = get_service_from_uri(uri)
+    url = 'http://' + service + FMLIFECYCLE_URL
+    resp = post_soap_body(url, body)
     if is_ok(resp):
         log.info('DESTROYED %s', uri)
         return True
     else:
         log.info('FAILED to DESTROY %s', uri)
+        return False
