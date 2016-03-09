@@ -131,9 +131,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
                     submitChanges(comment), true); // resolve on success
             }
             infoModal.result.then(function(response) {
-                console.log(response);
                 me.getConfigVersions().then(function() {
-                    console.log(me.versions);
                     if (me.versions.length > 0) {
                         me.selectVersion(me.versions[0][0]);
                     }

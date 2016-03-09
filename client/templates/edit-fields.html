@@ -1,3 +1,7 @@
+<div ng-if="!ctrl.fields">
+    <h3 class="text-center"><mark>No preconfigured fields for this configuration</mark></h3>
+</div>
+
 <div ng-repeat="field in ctrl.fields" ng-switch="field.type" class="form-group">
     <label>{{field.name}}:</label>
 
