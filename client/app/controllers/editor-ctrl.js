@@ -146,10 +146,10 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
             var infoModal;
             if (me.expertMode) {
                 infoModal = Modals.responseModal(
-                    submitExpertXML(comment), true); // resolve on success
+                    submitExpertXML(comment));
             } else {
                 infoModal = Modals.responseModal(
-                    submitChanges(comment), true); // resolve on success
+                    submitChanges(comment));
             }
             infoModal.result.then(function(response) {
                 me.getConfigVersions().then(function() {
