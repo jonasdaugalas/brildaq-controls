@@ -432,4 +432,4 @@ def populate_RSDB_with_DUCK(xml, comment=None):
                 return False, ""
             out = out[(skip+15):]
             return False, 'duck.jar failed:' + out
-        return True, "OK"
+        return True, 'OK'

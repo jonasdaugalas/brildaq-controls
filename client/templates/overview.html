@@ -153,23 +153,29 @@
 
 <script type="text/ng-template" id="action-popover.html">
     <div style="min-width:160px">
-        <button class="list-group-item btn" ui-sref="editor({path:path})">Edit</button>
+        <button class="list-group-item btn" ui-sref="editor({path:path})">
+            <b>Edit</b> <small>configuration</small></button>
         <fieldset ng-if="!ctrl.getDangerFlags(path)">
             <button class="list-group-item btn"
                     ng-disabled="ctrl.states[path] !== 'OFF'"
-                    ng-click="ctrl.sendCommand('TurnON', path)">TurnON</button>
+                    ng-click="ctrl.sendCommand('TurnON', path)">
+                <b>TurnON</b> <small>executive</small></button>
             <button class="list-group-item btn"
                     ng-disabled="ctrl.states[path] !=='ON'"
-                    ng-click="ctrl.sendCommand('TurnOFF', path)">TurnOFF</button>
+                    ng-click="ctrl.sendCommand('TurnOFF', path)">
+                <b>TurnOFF</b> <small>executive</small></button>
             <button class="list-group-item btn"
                     ng-disabled="!ctrl.states[path]"
-                    ng-click="ctrl.sendCommand('Reset', path)">Reset</button>
+                    ng-click="ctrl.sendCommand('Reset', path)">
+                <b>Reset</b> <small>executive</small></button>
             <button class="list-group-item btn"
                     ng-disabled="ctrl.runningDetails[path]"
-                    ng-click="ctrl.create(path)">Create</button>
+                    ng-click="ctrl.create(path)">
+                <b>Create</b> <small>function manager</small></button>
             <button class="list-group-item btn"
                     ng-disabled="!ctrl.runningDetails[path]"
-                    ng-click="ctrl.destroy(path)">Destroy</button>
+                    ng-click="ctrl.destroy(path)">
+                <b>Destroy</b> <small>function manager</small></button>
         </fieldset>
         <div ng-if="ctrl.getDangerFlags(path)" class="panel-body bg-danger">
             DANGER flags: {{ctrl.getDangerFlags(path)}}

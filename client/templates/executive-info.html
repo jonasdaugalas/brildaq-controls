@@ -32,9 +32,15 @@
     </div>
     <div class="form-group col-sm-4" style="margin-bottom:0px">
         <label>Log level:</label>
-        <input type="text" class="form-control input-sm"
-               ng-disabled="!ctrl.editable"
-               ng-model="ctrl.executive.logLevel"></input>
+        <select class="form-control input-sm"
+                ng-disabled="!ctrl.editable"
+                ng-options="opt for opt in ['ERROR', 'WARN', 'INFO', 'DEBUG']"
+                ng-model="ctrl.executive.logLevel">
+        </select>
+
+        <!-- <input type="text" class="form-control input-sm"
+             ng-disabled="!ctrl.editable"
+             ng-model="ctrl.executive.logLevel"></input> -->
     </div>
     <div class="form-group col-sm-4" style="margin-bottom:0px">
         <label>Path to executive:</label>
