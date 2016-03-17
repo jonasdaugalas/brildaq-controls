@@ -166,16 +166,27 @@ def get_running_configurations(dbcon, owner=None):
     return cfgs
 
 
-def get_versions(dbcon, path):
+def get_versions(dbcon, path, limit, bellow):
     select = (
         'select cfg.VERSION, cfg.MODIFICATIONDATE, cfg.VERSIONCOMMENT '
         'from CMS_LUMI_RS.CONFIGRESOURCES res, CMS_LUMI_RS.CONFIGURATIONS cfg '
         'where res.NAME=:resname '
         'and res.URN LIKE :path and '
-        'res.CONFIGURATIONID=cfg.CONFIGURATIONID ')
+        'res.CONFIGURATIONID=cfg.CONFIGURATIONID {bellow} '
+        'order by cfg.version desc')
     variables = {
         'resname': 'BrilDAQFunctionManager',
         'path': '%' + path + ',%'}
+    log.debug(bellow)
+    if bellow:
+        select = select.format(bellow=' and version < :BELLOW')
+        variables['BELLOW'] = (bellow or 0)
+    else:
+        select = select.format(bellow='')
+    if limit:
+        select = 'select * from (' + select + ') where ROWNUM <= :LIMIT'
+        variables['LIMIT'] = (limit or 0)
+    log.debug(select)
     r = dbcon.execute(select, variables).fetchall()
     if not r:
         return None

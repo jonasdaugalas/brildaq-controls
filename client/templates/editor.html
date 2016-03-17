@@ -17,7 +17,7 @@
     </span>
 </h2>
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-7">
         <h3 ng-class="ctrl.expertMode ? 'text-danger' : ''">
             Editor {{ctrl.expertMode ? '(expert mode)' : ''}}
 
@@ -52,7 +52,7 @@
                 </button>
                 <button class="btn btn-primary pull-right"
                         ng-click="ctrl.submit()">
-                    Submit modifications as new version
+                    Submit as new version
                 </button>
             </form>
         </div>
@@ -81,12 +81,12 @@
                 </button>
                 <button class="btn btn-primary pull-right"
                         ng-click="ctrl.submit()">
-                    Submit modifications as new version
+                    Submit as new version
                 </button>
             </form>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-5">
         <h3>History table</h3>
         <table class="table table-condensed table-bordered">
             <tr>
@@ -108,5 +108,13 @@
                 <td>{{v[2]}}</td>
             </tr>
         </table>
+        <div class="text-center">
+            <!-- ctrl.getConfigVersions(true) -- true for append older-->
+            <button class="btn"
+                    ng-click="ctrl.getConfigVersions(true)"
+                    ng-disabled="ctrl.oldestVersion <= 1">
+                Show older versions
+            </button>
+        </div>
     </div>
 </div>

@@ -152,9 +152,11 @@ def destroy_fm(path=None):
 
 
 @app.route('/history/<path:path>')
+@app.route('/history/<path:path>/limit=<int:limit>')
+@app.route('/history/<path:path>/limit=<int:limit>/bellow=<int:bellow>')
 @default_configurator_error_response
-def get_versions(path):
-    r = utils.get_versions(dbcon, '/' + path)
+def get_versions(path, limit=None, bellow=None):
+    r = utils.get_versions(dbcon, '/' + path, limit, bellow)
     if r is None:
         flask.abort(404)
     return flask.Response(json.dumps(r), mimetype='application/json')

@@ -5,6 +5,8 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     this.configPath = $stateParams.path;
     this.versions = [];
     this.selectedVersion = null;
+    // oldest loaded version number
+    this.oldestVersion = null;
     this.config = {xml: ""};
     this.configExecutiveCopy = {};
     this.expertMode = false;
@@ -29,9 +31,28 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
         }
     };
 
-    this.getConfigVersions = function() {
-        return $http.get(srvendp + "/history" + me.configPath).then(function(response) {
-            me.versions = response.data;
+    this.getConfigVersions = function(older) {
+        var requestURL = srvendp + "/history" + me.configPath;
+        if (older) {
+            if (me.oldestVersion > 1) {
+                requestURL += '/limit=20/bellow=' + me.oldestVersion;
+            } else {
+                return Promise.reject(
+                    "Not querying history, oldest version <= 1");
+            }
+        } else {
+            requestURL += '/limit=20';
+        }
+        return $http.get(requestURL).then(function(response) {
+            var d = response.data;
+            if (older) {
+                me.versions = me.versions.concat(d);
+                console.log(me.versions);
+                console.log(d);
+            } else {
+                me.versions = d;
+            }
+            me.oldestVersion = d[d.length - 1][0];
         }, function(response) {
             console.log("Failed to get versions for" + me.configPath);
         });
