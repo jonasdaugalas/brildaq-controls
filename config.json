@@ -2,6 +2,7 @@
     "logfile": "/nfshome0/jdaugala/webapp/configurator/flask_configurator_test.log",
     "loglevel": "DEBUG",
     "authfile": "/brildata/db/db.ini",
+    "duckauthfile": "/brilpro/duck/DUCK.properties",
     "easyconfigmap": "easyconfigmap.json",
     "easyconfigdir": "easyconfig",
     "xdaqxmlnamespace": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",

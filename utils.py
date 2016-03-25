@@ -23,6 +23,8 @@ from easyconfig import easyconfigmap
 
 log = custom_logging.get_logger(__name__)
 
+# authentication commandline args for duck.jar
+duckautlist = None
 
 RE_GET_CONFIGS_PARSE = re.compile('.*?fullpath=(.*?),')
 
@@ -388,7 +390,6 @@ def _modify_xml_by_fields(xml, fields, easyconfig):
 def _register_xml_nsprefixes(xml):
     source = StringIO.StringIO(xml)
     events = ("end", "start-ns", "end-ns")
-    counter = 0
     namespaces = []
     for event, elem in ET.iterparse(source, events=events):
         if event == "start-ns":
@@ -413,18 +414,21 @@ def _modify_xml_value(root, xpath, dtype, val, ns):
 
 
 def populate_RSDB_with_DUCK(xml, comment=None):
+    global duckautlist
+    if duckautlist is None:
+        duckautlist = parse_duck_auth_to_cmd_arg_list()
+
     with tempfile.NamedTemporaryFile(mode='w') as f:
         f.write(xml)
         f.flush()
         cmd = ['java', '-jar', 'duck.jar', f.name]
+        cmd += duckautlist
         if comment:
             cmd += ['-c', str(comment)]
-        log.debug("Subprocess: {}".format(' '.join(cmd)))
         fdir = os.path.dirname(os.path.realpath(__file__))
         cwd = os.path.join(fdir, 'tools')
-        log.debug('subprocess cwd: {}'.format(cwd))
+        log.debug('subprocess (duck.jar) cwd: {}'.format(cwd))
         out = subprocess.check_output(cmd, cwd=cwd)
-        log.debug('cwd: {}'.format(os.getcwd()))
         if 'ERROR' in out:
             log.debug('duck.jar output: {}'.format(out))
             skip = out.find('Continueing...')
@@ -433,3 +437,36 @@ def populate_RSDB_with_DUCK(xml, comment=None):
             out = out[(skip+15):]
             return False, 'duck.jar failed:' + out
         return True, 'OK'
+
+
+def parse_duck_auth_to_cmd_arg_list():
+    content = StringIO.StringIO()
+    sec = 'dummysection'
+    content.write('[' + sec + ']\n')
+    try:
+        f = open(CONFIG.duckauthfile, 'r')
+        content.write(f.read())
+        f.close()
+    except IOError:
+        log.exception('Cannot read duckauthfile')
+        raise err.ConfiguratorInternalError(
+            'Cannot read RSDB credentials')
+    content.seek(0, os.SEEK_SET)
+
+    parser = ConfigParser.ConfigParser()
+    parser.readfp(content)
+
+    result = []
+    try:
+        result.append(parser.get(sec, 'rs3Db.hostname'))
+        result.append(parser.get(sec, 'rs3Db.port'))
+        result.append(parser.get(sec, 'rs3Db.sid'))
+        result.append(parser.get(sec, 'rs3Db.loginName'))
+        result.append(parser.get(sec, 'rs3Db.password'))
+        result.append(parser.get(sec, 'rs3Db.type'))
+    except ConfigParser.Error:
+        log.exception('Failed parsing duckauthfile')
+        raise err.ConfiguratorInternalError(
+            'Failed to parse RSDB credentials')
+
+    return result
