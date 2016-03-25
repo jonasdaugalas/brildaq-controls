@@ -1,5 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stateParams", "$filter", "$uibModal", "CLIENT_CONSTS", "Modals", function($scope, $http, $stateParams, $filter, $uibModal, CONST, Modals) {
+angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stateParams", "$filter", "$uibModal", "CONSTS", "Modals", function($scope, $http, $stateParams, $filter, $uibModal, CONSTS, Modals) {
 
     var me = this;
     this.configPath = $stateParams.path;
@@ -11,7 +11,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     this.configExecutiveCopy = {};
     this.expertMode = false;
 
-    var srvendp = CONST.server_endpoint;
+    var srvendp = CONSTS.server_endpoint;
     var initPromise = Promise.resolve();
     var editor = null;
 

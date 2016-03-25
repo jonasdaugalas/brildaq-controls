@@ -1,5 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CLIENT_CONSTS", "Timers", "Configurations", function($rootScope, $http, $timeout, CONSTS, Timers, Cfgs) {
+angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CONSTS", "Timers", "Configurations", function($rootScope, $http, $timeout, CONSTS, Timers, Cfgs) {
 
     var me = this;
     // all configurations' paths

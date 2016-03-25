@@ -1,4 +1,4 @@
-angular.module("web-config").service("Configurations", ["$http", "CLIENT_CONSTS", function($http, CONSTS) {
+angular.module("web-config").service("Configurations", ["$http", "CONSTS", function($http, CONSTS) {
     var me = this;
 
     this.configurations = {};
