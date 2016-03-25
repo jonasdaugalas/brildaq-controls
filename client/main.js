@@ -11,7 +11,6 @@ require("./node_modules/angular-ui-ace/src/ui-ace");
 require("./node_modules/angular-pretty-xml/dist/angular-pretty-xml");
 
 require("./app/app");
-require("./app/constants/const");
 require("./app/controllers/main-ctrl");
 require("./app/controllers/overview-ctrl");
 require("./app/controllers/editor-ctrl");

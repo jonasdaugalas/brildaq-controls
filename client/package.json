@@ -5,14 +5,14 @@
     "main": "index.html",
     "scripts": {
         "lint": "jshint app",
-        "oldinstall": "browserify main.js > bundle.js",
-        "install": "browserify main.js -t [babelify --global --presets es2015] | uglifyjs > bundle.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "install": "browserify main.js -t [babelify --global --presets es2015] -p [parcelify -o bundle.css] | uglifyjs > bundle.js; cp -R ./node_modules/bootstrap vendor/; cp -R ./node_modules/font-awesome vendor/",
+        "install2": "browserify main.js > bundle.js; cp -R ./node_modules/bootstrap vendor/; cp -R ./node_modules/font-awesome vendor/",
+        "install3": "browserify main.js > bundle.js",
+        "test": "echo \"Error: no tests specified\" && exit 1"
     },
     "author": "Jonas Daugalas",
     "license": "UNLICENSED",
     "devDependencies": {
-        "minifyify": "latest",
         "babel-preset-es2015": "latest",
         "babelify": "latest",
         "browserify": "latest",
@@ -22,12 +22,12 @@
     "dependencies": {
         "angular": "latest",
         "bootstrap": "latest",
-        "//": "could not use $stateChangestart event in newest router version. Maybe now fixed or there is an alternative for this event",
         "angular-ui-router": "0.2.15",
         "angular-ui-bootstrap": "latest",
         "ace-builds": "latest",
         "angular-ui-ace": "latest",
         "angular-pretty-xml": "latest",
         "font-awesome": "latest"
-    }
+    },
+    "style": ["./styles/*.css", "./node_modules/bootstrap/dist/css/bootstrap.min.css", "./node_modules/font-awesome/css/font-awesome.min.css", "./node_modules/font-awesome/fonts/*"]
 }
