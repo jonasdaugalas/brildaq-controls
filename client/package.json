@@ -5,7 +5,7 @@
     "main": "index.html",
     "scripts": {
         "lint": "jshint app",
-        "install": "browserify main.js -t [babelify --global --presets es2015] -p [parcelify -o bundle.css] | uglifyjs > bundle.js; cp -R ./node_modules/bootstrap vendor/; cp -R ./node_modules/font-awesome vendor/",
+        "install": "browserify main.js -t [babelify --global --presets es2015] | uglifyjs > bundle.js; cp -R ./node_modules/bootstrap vendor/; cp -R ./node_modules/font-awesome vendor/",
         "install2": "browserify main.js > bundle.js; cp -R ./node_modules/bootstrap vendor/; cp -R ./node_modules/font-awesome vendor/",
         "install3": "browserify main.js > bundle.js",
         "test": "echo \"Error: no tests specified\" && exit 1"
