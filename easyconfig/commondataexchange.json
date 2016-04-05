@@ -31,7 +31,7 @@
             "hideInOverview": true,
             "type": "commaSeparatedString",
             "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:dipSubs",
-            "help": "testing help",
+            "help": "DIP subcriptions",
             "typeahead": [
                 "dip/acc/LHC/Beam/AutomaticScan",
                 "dip/acc/LHC/Beam/BPM/LSS5L/B1_DOROS",

@@ -95,6 +95,7 @@
     </div>
 </div>
 
+
 <script type="text/ng-template" id="tree-item.html">
     <div style="white-space: nowrap">
         <div ng-if="node._isLeaf" ng-init="path=node._path">
@@ -157,6 +158,9 @@
     </div>
 </script>
 
+<style type="text/css">
+   .popover-content {padding: 0px;}
+</style>
 <script type="text/ng-template" id="action-popover.html">
     <div style="min-width:160px">
         <button class="list-group-item btn" ui-sref="editor({path:path})">

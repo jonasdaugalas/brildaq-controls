@@ -12,12 +12,16 @@
        ng-switch="field.type">
     <label>
       {{field.name}}:
-      <span class="fa fa-question-circle text-info"
-            ng-if="field.help"
-            style="height: 1.5em"
-            uib-popover-template="'info.html'"
-            popover-trigger="mouseenter"
-            popover-placement="right-top"></span>
+      <button class="btn btn-xs"
+              ng-if="field.help"
+              uib-popover-template="'info.html'"
+              popover-trigger="outsideClick"
+              popover-title="Help"
+              popover-placement="right-top">
+        <span class="fa fa-question-circle text-info"
+              style="height: 1.5em">
+        </span>
+      </button>
     </label>
 
     <span ng-switch-when="unsignedInt">
@@ -46,13 +50,19 @@
   </div>
 </div>
 
+
+<style type="text/css">
+  .popover{max-width:700px;background-color: #d9edf7;}
+</style>
 <script type="text/ng-template" id="info.html">
   <div>{{field.help}}</div><br/>
   <div ng-if="field.typeahead">
     <b class="text-info">typeahead:</b><br/>
-    <span ng-repeat="t in field.typeahead track by $index">
-      <span style="white-space: nowrap">{{t}}</span>,
-    </span>
+    <ul>
+      <li class="text-nowrap small" ng-repeat="t in field.typeahead track by $index">
+        {{t}}
+      </li>
+    </ul>
   </div>
 </script>
 

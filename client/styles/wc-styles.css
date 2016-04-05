@@ -23,10 +23,11 @@
   border-radius: 1em;
 }
 
-.popover-content {
-  padding: 0px;
-}
-
 .panel-heading {
   word-wrap: break-word;
+}
+
+.panel {
+    word-wrap:break-word;
+    overflow-x:hidden;
 }
