@@ -28,7 +28,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
 
     this.init = function() {
         me.refreshConfigurations().then(function() {
-            refreshTimer = Timers.create(50000);
+            refreshTimer = Timers.create(90000);
             refreshTimer.addAction({callable: refresher});
         });
     };

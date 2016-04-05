@@ -8,7 +8,7 @@ angular.module("web-config").controller("MainCtrl", ["$rootScope", "$http", "CON
     };
 
     // load configuration constants
-    $http.get("const.json").then(function(response) {
+    $http.get("const.json?" + APP_TIME).then(function(response) {
         console.log(response);
         angular.copy(response.data, CONSTS);
         console.log(CONSTS);
