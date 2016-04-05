@@ -5,7 +5,6 @@ import os
 import ConfigParser
 import sqlalchemy as sql
 import xml.etree.ElementTree as ET
-import requests
 import re
 import gzip
 import datetime
@@ -19,7 +18,7 @@ import configbuilder
 import rcmsws
 import configurator_errors as err
 import config as CONFIG
-from easyconfig import easyconfigmap
+import easyconfig
 
 log = custom_logging.get_logger(__name__)
 
@@ -62,7 +61,8 @@ def dbconnect(servicemap):
 def path2uri(path):
     owner = path.split('/')[1]
     if owner not in CONFIG.owners:
-        raise err.ConfiguratorUserError('Unknown owner for path.', details=path)
+        raise err.ConfiguratorUserError('Unknown owner for path.',
+                                        details=path)
     uri = ('http://' + CONFIG.owners[owner]['rcms_location'] +
            '/urn:rcms-fm:fullpath=' + path +
            ',group=BrilDAQFunctionManager,owner=' + owner)
@@ -158,7 +158,7 @@ def get_running_configurations(dbcon, owner=None):
         'select res.configresourceid, cfg.version '
         'from CMS_LUMI_RS.CONFIGRESOURCES res,'
         ' CMS_LUMI_RS.CONFIGURATIONS cfg '
-        'where res.configresourceid in (' + ','.join(resgids) +') and '
+        'where res.configresourceid in (' + ','.join(resgids) + ') and '
         'res.configurationid=cfg.configurationid')
     res = dbcon.execute(select).fetchall()
     for r in res:
@@ -196,7 +196,7 @@ def get_versions(dbcon, path, limit, bellow):
           (x[1] - datetime.datetime(1970, 1, 1)).total_seconds()*1000,
           x[2])
          for x in r]
-    r.sort(key=lambda x:x[1], reverse=True)
+    r.sort(key=lambda x: x[1], reverse=True)
     return r
 
 
@@ -236,9 +236,6 @@ def _get_config_xml_from_groupblob(group):
 
 
 def get_config(dbcon, path, version):
-    easyconfig = None
-    if path in easyconfigmap:
-        easyconfig = easyconfigmap[path]
     group = _get_parsed_groupblob(dbcon, path, version)
     xml = group[0]['childrenResources']['data'][0]['configFile']
     if not xml:
@@ -247,25 +244,13 @@ def get_config(dbcon, path, version):
     owner = path.split('/')[1]
     fmhostport = group[0]['thisResource']['uri']['string'][7:].split('/')[0]
     _set_owner_host_port_flags(result, owner, fmhostport)
-    result['fields'] = _parse_fields(easyconfig, xml) if easyconfig else None
+    try:
+        result['fields'] = easyconfig.parse_fields(path, xml)
+    except Exception as e:
+        log.exception(e)
+        result['fields'] = 'ERROR'
     result['executive'] = configbuilder.get_executive(group)
     return result
-
-
-def _parse_fields(easyconfig, xml):
-    ns = easyconfig['namespaces']
-    root = ET.fromstring(xml)
-    for field in easyconfig['fields']:
-        node = root.find(field['xpath'], ns)
-        if field['type'] in ('Integer', 'unsignedInt'):
-            field['value'] = int(node.text)
-        elif field['type'] == 'commaSeparatedString':
-            field['value'] = node.text.split(',')
-        else:
-            field['value'] = node.text
-    fields = [{'name': f['name'], 'type': f['type'], 'value': f['value']}
-              for f in easyconfig['fields']]
-    return fields
 
 
 def _check_hosts_and_ports(executive, xml):
@@ -287,7 +272,7 @@ def _check_hosts_and_ports(executive, xml):
     root = ET.fromstring(xml)
     context = root.find('.//{' + CONFIG.xdaqxmlnamespace + '}Context')
     contexturl = context.attrib['url'].split(':')
-    contexthost = contexturl[-2][2:] # drop two slashes after 'http:'
+    contexthost = contexturl[-2][2:]  # drop two slashes after 'http:'
     contextport = int(contexturl[-1])
     endpoint = context.find('.//{' + CONFIG.xdaqxmlnamespace + '}Endpoint')
     endpointhost = endpoint.attrib['hostname']
@@ -321,17 +306,17 @@ def get_final_xml(dbcon, path, version=None):
 def build_final_from_xml(dbcon, path, xml, executive=None, version=None):
     _check_hosts_and_ports(executive, xml)
     group = _get_parsed_groupblob(dbcon, path, version)
-    _check_danger_flags(path, group) # raises configurator user error
+    _check_danger_flags(path, group)  # raises configurator user error
     final = configbuilder.build_final(path, xml, group, executive)
     return final
 
 
 def build_final_from_fields(dbcon, path, fields, version=None):
+    easyconfig.get_easyconfig(path)
     group = _get_parsed_groupblob(dbcon, path, version)
-    _check_danger_flags(path, group) # raises configurator user error
-    easyconfig = _get_easyconfig(path)
+    _check_danger_flags(path, group)  # raises configurator user error
     xml = _get_config_xml_from_groupblob(group)
-    xml = _modify_xml_by_fields(xml, fields, easyconfig)
+    xml = easyconfig.update_xml_fields(path, xml, fields)
     final = configbuilder.build_final(path, xml, group)
     return final
 
@@ -356,61 +341,9 @@ def build_from_fields(dbcon, path, fields, version=None):
     :returns: constructed xml
     :rtype: str
     """
-    easyconfig = _get_easyconfig(path)
+    easyconfig.get_easyconfig(path)
     xml = get_config_xml(dbcon, path, version)
-    return _modify_xml_by_fields(xml, fields, easyconfig)
-
-
-def _get_easyconfig(path):
-    if path in easyconfigmap:
-        return easyconfigmap[path]
-    else:
-        raise err.ConfiguratorUserError(
-            'Could not find easyconfig for given configuration path',
-            details='given path: {},\neasyconfigs exist for:{}'
-            .format(path, str(easyconfigmap.keys())))
-
-
-def _modify_xml_by_fields(xml, fields, easyconfig):
-    _register_xml_nsprefixes(xml)
-    root = ET.fromstring(xml)
-    for field in fields:
-        log.debug(field)
-        try:
-            field['xpath'] = [f['xpath'] for f in easyconfig['fields']
-                              if f['name'] == field['name']][0]
-        except IndexError as e:
-            raise err.ConfiguratorUserError(
-                'Could not find predefined field with this name', details=field)
-        _modify_xml_value(root, field['xpath'], field['type'],
-                         field['value'], easyconfig['namespaces'])
-    return ET.tostring(root, encoding='UTF-8')
-
-
-def _register_xml_nsprefixes(xml):
-    source = StringIO.StringIO(xml)
-    events = ("end", "start-ns", "end-ns")
-    namespaces = []
-    for event, elem in ET.iterparse(source, events=events):
-        if event == "start-ns":
-            if re.match('^ns[0-9]+$', elem[0]):
-                namespaces.append(('', elem[1]))
-            else:
-                namespaces.append(elem)
-    for ns in namespaces:
-        if len(ns[0]) > 0:
-            ET.register_namespace(ns[0], ns[1])
-    return namespaces
-
-
-def _modify_xml_value(root, xpath, dtype, val, ns):
-    node = root.find(xpath, ns)
-    if dtype in ('Integer', 'unsignedInt'):
-        node.text = str(int(val))
-    elif dtype == 'commaSeparatedString':
-        node.text = ','.join(val)
-    else:
-        node.text = str(val)
+    return easyconfig.update_xml_fields(path, xml, fields)
 
 
 def populate_RSDB_with_DUCK(xml, comment=None):
