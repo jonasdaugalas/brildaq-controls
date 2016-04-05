@@ -1,24 +1,40 @@
 <!DOCTYPE html>
+
+<script>
+  var APP_TIME = 14002;
+</Script>
+
 <html>
-    <head>
-        <!-- base href: static_base -->
-        <base href="/webbrildaq/" />
-        <meta charset="UTF-8"/>
-        <title>BRILDAQ web configurator</title>
-        <link href="vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
-        <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
-        <link href="styles/wc-styles.css" rel="stylesheet"/>
-    </head>
+  <head>
+    <meta charset="UTF-8"/>
+    <base href="/webbrildaq/" />
+    <!-- ask not to cache this index.html (other stuff can be cached) -->
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <!--  -->
+    <title>BRILDAQ web configurator</title>
 
-    <body class="container-fluid"
-          ng-app="web-config"
-          ng-controller="MainCtrl as main">
-        <!-- view -->
-        <ui-view/>
-        <!-- end view -->
+    <link href="vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+    <script>
+      document.write('<link href=\"styles/wc-styles.css?' + APP_TIME + '\" rel=\"stylesheet\"/\>');
+    </script>
+  </head>
 
-        <script src="bundle.js?$Rev:$"></script>
+  <body class="container-fluid"
+        ng-app="web-config"
+        ng-controller="MainCtrl as main">
+    <!-- view -->
+    <ui-view/>
+    <!-- end view -->
 
-    </body>
+
+    <script>
+      document.write('<script src=\"bundle.js?' + APP_TIME + '\"\></script\>');
+    </script>
+
+  </body>
 
 </html>

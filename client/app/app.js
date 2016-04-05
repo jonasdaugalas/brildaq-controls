@@ -19,12 +19,12 @@ angular.module("web-config").config(["$locationProvider", "$stateProvider", "$ur
     $stateProvider
         .state("overview", {
             url: gui_prefix + "/",
-            templateUrl: "templates/overview.html",
+            templateUrl: "templates/overview.html?" + APP_TIME,
             controller: "OverviewCtrl as ctrl"
         })
         .state("editor", {
             url: gui_prefix + "/editor{path:raw}",
-            templateUrl: "templates/editor.html",
+            templateUrl: "templates/editor.html?" + APP_TIME,
             controller: "EditorCtrl as ctrl"
         });
 

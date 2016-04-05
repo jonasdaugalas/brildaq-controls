@@ -7,7 +7,7 @@ angular.module("web-config").service("Modals", ["$rootScope", "$uibModal", funct
         var infoModal;
         var isolatedScope = $rootScope.$new(true); // true for isolated
         var modalOptions = {
-            templateUrl: "templates/modals/info.html",
+            templateUrl: "templates/modals/info.html?" + APP_TIME,
             controller: "ResponseInfoModalCtrl as ctrl",
             scope: isolatedScope
         };
@@ -20,7 +20,7 @@ angular.module("web-config").service("Modals", ["$rootScope", "$uibModal", funct
 
     this.showXML = function(title, xml) {
         var modal = $uibModal.open({
-            templateUrl: "templates/modals/view-xml.html",
+            templateUrl: "templates/modals/view-xml.html?" + APP_TIME,
             controller: "ViewXmlModalCtrl as ctrl",
             size: "lg",
             resolve: {
