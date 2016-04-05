@@ -186,7 +186,7 @@ def _modify_xml_value(root, xpath, dtype, val, ns):
     if dtype in ('Integer', 'unsignedInt'):
         node.text = str(int(val))
     elif dtype == 'commaSeparatedString':
-        node.text = ','.join(map(str, val))
+        node.text = ','.join(map((lambda x: x if x is not None else ''), val))
     elif dtype == 'stringArray':
         _set_string_array(node, val)
     elif dtype == 'stringMap':
