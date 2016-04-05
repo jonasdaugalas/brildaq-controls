@@ -1,7 +1,15 @@
 {
-    "/lumipro/central/global/bestLumiProcessor": "bestlumitest.json",
-    "/lumidev/central/local/bestLumiProcessorTest": "bestlumitest.json",
-    "/lumidev/central/global/bestLumiProcessor": "bestlumitest.json",
-    "/lumidev/central/global/bestLumiProcessor_lowEpp": "bestlumitest.json",
-    "/lumidev/central/global/bestLumiProcessor_pbpb": "bestlumitest.json"
+    "/lumipro/central/global/bestLumiProcessor":        "bestlumi.json",
+    "/lumidev/central/local/bestLumiProcessorTest":     "bestlumi.json",
+    "/lumidev/central/global/bestLumiProcessor":        "bestlumi.json",
+    "/lumidev/central/global/bestLumiProcessor_lowEpp": "bestlumi.json",
+    "/lumidev/central/global/bestLumiProcessor_pbpb":   "bestlumi.json",
+    "/lumidev/bhm/global/bhmprocessor":                 "bhmprocessor.json",
+    "/lumidev/bhm/global/bhmprocessor_nostore":         "bhmprocessor.json",
+    "/lumipro/bhm/global/bhmprocessor":                 "bhmprocessor.json",
+    "/lumipro/bhm/global/bhmprocessor_nostore":         "bhmprocessor.json",
+    "/lumipro/dip/global/commondataexchange":           "commondataexchange.json",
+    "/lumidev/central/global/commondataexchange":       "commondataexchange.json",
+    "/lumipro/central/global/lumistore":                "lumistore.json",
+    "/lumidev/central/global/lumistore":                "lumistore.json"
 }

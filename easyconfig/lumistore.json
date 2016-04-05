@@ -1,0 +1,29 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "lst": "urn:xdaq-application:bril::lumistore::Application"
+    },
+    "fields": [
+        {
+            "name": "topics",
+            "hideInOverview": true,
+            "type": "commaSeparatedString",
+            "xpath": ".//xc:Application[@class='bril::lumistore::Application']/lst:properties/lst:datasources/lst:item[0]/lst:properties/lst:topics",
+            "typeahead": [
+                "tcds", "beam", "bestlumi", "bcm1fagghist", "bcm1flumi", "bcm1fbkg",
+                "pltaggzero", "pltlumizero", "hflumi", "vdmscan", "atlasbeam",
+                "bxconfig", "bunchmask", "bestbxconfig"],
+            "help": "Lumistore datasources."
+        },
+        {
+            "name": "bus",
+            "type": "string",
+            "xpath": ".//xc:Application[@class='bril::lumistore::Application']/lst:properties/lst:datasources/lst:item[0]/lst:properties/lst:bus"
+        },
+        {
+            "name": "filepath",
+            "type": "string",
+            "xpath": ".//xc:Application[@class='bril::lumistore::Application']/lst:properties/lst:filepath"
+        }
+    ]
+}

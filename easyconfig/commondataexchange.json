@@ -1,0 +1,64 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "cde": "urn:xdaq-application:bril::dip::CommonDataExchange"
+    },
+    "fields": [
+        {
+            "name": "amodetag",
+            "type": "string",
+            "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:amodetag"
+        },
+        {
+            "name": "targetegev",
+            "type": "integer",
+            "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:targetegev"
+        },
+        {
+            "name": "inTopics",
+            "hideInOverview": true,
+            "type": "commaSeparatedString",
+            "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:inTopics"
+        },
+        {
+            "name": "outTopics",
+            "hideInOverview": true,
+            "type": "commaSeparatedString",
+            "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:outTopics"
+        },
+        {
+            "name": "dipSubs",
+            "hideInOverview": true,
+            "type": "commaSeparatedString",
+            "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:dipSubs",
+            "help": "testing help",
+            "typeahead": [
+                "dip/acc/LHC/Beam/AutomaticScan",
+                "dip/acc/LHC/Beam/BPM/LSS5L/B1_DOROS",
+                "dip/acc/LHC/Beam/BPM/LSS5L/B2_DOROS",
+                "dip/acc/LHC/Beam/BPM/LSS5R/B1_DOROS",
+                "dip/acc/LHC/Beam/BPM/LSS5R/B2_DOROS",
+                "dip/TNproxy/ATLAS/LHC/Luminosity",
+                "dip/TNproxy/ATLAS/LHC/BPTX1/IntensitiesPerBunch",
+                "dip/TNproxy/ATLAS/LHC/BPTX2/IntensitiesPerBunch",
+                "dip/acc/LHC/Beam/BunchLengths/Beam1",
+                "dip/acc/LHC/Beam/BunchLengths/Beam2",
+                "dip/acc/LHC/Beam/IntensityPerBunch/Beam1",
+                "dip/acc/LHC/Beam/IntensityPerBunch/Beam2",
+                "dip/acc/LHC/Beam/Energy",
+                "dip/acc/LHC/RunControl/BeamMode",
+                "dip/acc/LHC/RunControl/RunConfiguration",
+                "dip/acc/LHC/RunControl/MachineMode",
+                "dip/CMS/BRIL/BPTX/Scope-Bunches",
+                "dip/CMS/BRIL/BPTX/scaler_rates",
+                "dip/CMS/LHC/Timing/BPTX",
+                "dip/CMS/LHC/Timing/BPTX1"]
+        },
+        {
+            "name": "dipPubs",
+            "hideInOverview": true,
+            "type": "commaSeparatedString",
+            "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:dipPubs"
+        }
+    ]
+}

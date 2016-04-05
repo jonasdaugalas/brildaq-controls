@@ -1,0 +1,23 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "bhm": "urn:xdaq-application:bril::bhmprocessor::Application"
+    },
+    "fields": [
+        {
+            "name": "aggregatealgo",
+            "type": "stringMap",
+            "xpath": ".//xc:Application[@class='bril::bhmprocessor::Application']/bhm:properties/bhm:aggregatealgo/bhm:properties"
+        },
+        {
+            "name": "backgroundalgo",
+            "type": "stringMap",
+            "xpath": ".//xc:Application[@class='bril::bhmprocessor::Application']/bhm:properties/bhm:backgroundalgo/bhm:properties"
+        },
+        {
+            "name": "amplitudealgo",
+            "type": "stringMap",
+            "xpath": ".//xc:Application[@class='bril::bhmprocessor::Application']/bhm:properties/bhm:amplitudealgo/bhm:properties"
+        }
+    ]
+}
