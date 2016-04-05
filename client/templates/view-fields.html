@@ -1,18 +1,43 @@
-<div ng-repeat="field in fields" ng-switch="field.type">
-    <label>{{field.name}}:</label>
-    <span ng-switch-when="unsignedInt"><span ng-include="'unsigned-int.html'"></span></span>
-    <span ng-switch-when="string"><span ng-include="'string.html'"></span></span>
-    <span ng-switch-when="commaSeparatedString"><span ng-include="'comma-separated-string.html'"></span></span>
+<div ng-repeat="field in fields"
+     ng-if="!field.hideInOverview"
+     ng-switch="field.type"
+  <label><b>{{field.name}}:</b></label>
+  <span ng-switch-when="unsignedInt"><span ng-include="'int.html'"></span></span>
+  <span ng-switch-when="integer"><span ng-include="'int.html'"></span></span>
+  <span ng-switch-when="string"><span ng-include="'string.html'"></span></span>
+  <span ng-switch-when="commaSeparatedString"><span ng-include="'comma-separated-string.html'"></span></span>
+  <span ng-switch-when="stringArray"><span ng-include="'string-array.html'"></span></span>
+  <span ng-switch-when="stringMap"><span ng-include="'string-map.html'"></span></span>
 </div>
 
-<script type="text/ng-template" id="unsigned-int.html">
-    <code>{{field.value}}</code>
+<script type="text/ng-template" id="int.html">
+  <code>{{field.value}}</code>
 </script>
 
 <script type="text/ng-template" id="string.html">
-    {{field.value}}
+  <span class="text-info">{{field.value}}</span>
 </script>
 
 <script type="text/ng-template" id="comma-separated-string.html">
-    <span class="text-info">{{field.value.join()}}</span>
+  <span class="text-info">{{field.value.join()}}</span>
+</script>
+
+<script type="text/ng-template" id="string-array.html">
+  <small>
+    <span ng-repeat="i in field.value track by $index">
+      <br />
+      <span style="padding-left: 6px;">{{$index}}.<b>:</b></span>
+      <span class="text-info"> {{i[1]}}</span>
+    </span>
+  </small>
+</script>
+
+<script type="text/ng-template" id="string-map.html">
+  <small>
+    <span ng-repeat="(k,v) in field.value">
+      <br />
+      <span style="padding-left: 6px;">{{k}}<b>:</b></span>
+      <span class="text-info"> {{v}}</span>
+    </span>
+  </small>
 </script>

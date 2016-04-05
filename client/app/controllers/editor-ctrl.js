@@ -175,6 +175,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     }
 
     function submitChanges(comment) {
+        console.log(me.config.fields);
         return $http.post(
             srvendp + "/submitfields", {
                 path: me.configPath,
