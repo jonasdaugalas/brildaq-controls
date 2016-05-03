@@ -194,6 +194,7 @@ def deploy_client():
 
     copyfiles(r'client/bundle.js', clpath)
     copyfiles(r'client/index.html', clpath)
+    copyfiles(r'client/viewlog.html', clpath)
     copyfiles(r'client/const.json', clpath)
     copydir('client/styles', os.path.join(clpath, 'styles'))
     copydir('client/vendor', os.path.join(clpath, 'vendor'))

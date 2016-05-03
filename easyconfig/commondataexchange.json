@@ -24,7 +24,8 @@
             "name": "outTopics",
             "hideInOverview": true,
             "type": "commaSeparatedString",
-            "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:outTopics"
+            "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:outTopics",
+            "typeahead": ["beam", "bxconfig", "atlasbeam", "bunchlength", "vdmscan"]
         },
         {
             "name": "dipSubs",
@@ -52,13 +53,27 @@
                 "dip/CMS/BRIL/BPTX/Scope-Bunches",
                 "dip/CMS/BRIL/BPTX/scaler_rates",
                 "dip/CMS/LHC/Timing/BPTX",
-                "dip/CMS/LHC/Timing/BPTX1"]
+                "dip/CMS/LHC/Timing/BPTX1",
+                "dip/CMS/BRIL/VacSummary",
+                "dip/CMS/BRIL/BCMAnalysis/Background3",
+                "dip/CMS/LHC/BKGD",
+                "dip/acc/LHC/Beam/BunchLengths/Beam1",
+                "dip/acc/LHC/Beam/BunchLengths/Beam2",
+                "dip/CMS/BRIL/BLMSummary/Histo"
+            ]
         },
         {
             "name": "dipPubs",
             "hideInOverview": true,
             "type": "commaSeparatedString",
             "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:dipPubs"
+        },
+        {
+            "name": "flashlists",
+            "type": "commaSeparatedString",
+            "xpath": ".//xc:Application[@class='bril::dip::CommonDataExchange']/cde:properties/cde:flashlists",
+            "help": "Monitoring flashlists",
+            "typeahead": ["brilsummary", "beam", "blmhisto", "vachisto"]
         }
     ]
 }

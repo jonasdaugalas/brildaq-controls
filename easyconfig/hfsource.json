@@ -1,0 +1,50 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "hfs": "urn:xdaq-application:bril::hfsource::Application"
+    },
+    "fields": [
+        {
+            "name": "topics",
+            "hideInOverview": true,
+            "type": "commaSeparatedString",
+            "multiple": true,
+            "xpath": ".//xc:Application[@class='bril::hfsource::Application']/hfs:properties/hfs:topics"
+        },
+        {
+            "name": "histsToRead",
+            "hideInOverview": true,
+            "type": "commaSeparatedString",
+            "multiple": true,
+            "xpath": ".//xc:Application[@class='bril::hfsource::Application']/hfs:properties/hfs:histsToRead"
+        },
+        {
+            "name": "integration_period_nb",
+            "hideInOverview": true,
+            "type": "integer",
+            "multiple": true,
+            "xpath": ".//xc:Application[@class='bril::hfsource::Application']/hfs:properties/hfs:integration_period_nb"
+        },
+        {
+            "name": "cms1_threshold",
+            "hideInOverview": true,
+            "type": "integer",
+            "multiple": true,
+            "xpath": ".//xc:Application[@class='bril::hfsource::Application']/hfs:properties/hfs:cms1_threshold"
+        },
+        {
+            "name": "cms2_threshold",
+            "hideInOverview": true,
+            "type": "integer",
+            "multiple": true,
+            "xpath": ".//xc:Application[@class='bril::hfsource::Application']/hfs:properties/hfs:cms2_threshold"
+        },
+        {
+            "name": "orbit_phase",
+            "hideInOverview": true,
+            "type": "integer",
+            "multiple": true,
+            "xpath": ".//xc:Application[@class='bril::hfsource::Application']/hfs:properties/hfs:orbit_phase"
+        }
+    ]
+}

@@ -1,0 +1,42 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "bhm": "urn:xdaq-application:bril::bhmsource::Application"
+    },
+    "fields": [
+        {
+            "name": "Z plus orbitphase",
+            "type": "integer",
+            "xpath": ".//xc:Application[@class='bril::bhmsource::Application'][@id='121']/bhm:properties/bhm:orbitphase"
+        },
+        {
+            "name": "Z minus orbitphase",
+            "type": "integer",
+            "xpath": ".//xc:Application[@class='bril::bhmsource::Application'][@id='122']/bhm:properties/bhm:orbitphase"
+        },
+        {
+            "name": "Z plus tdcmap",
+            "type": "string",
+            "hideInOverview": true,
+            "xpath": ".//xc:Application[@class='bril::bhmsource::Application'][@id='121']/bhm:properties/bhm:tdcmap"
+        },
+        {
+            "name": "Z minus tdcmap",
+            "type": "string",
+            "hideInOverview": true,
+            "xpath": ".//xc:Application[@class='bril::bhmsource::Application'][@id='122']/bhm:properties/bhm:tdcmap"
+        },
+        {
+            "name": "amplitude",
+            "type": "bool",
+            "multiple": true,
+            "xpath": ".//xc:Application[@class='bril::bhmsource::Application']/bhm:properties/bhm:amplitude"
+        },
+        {
+            "name": "calenable",
+            "type": "bool",
+            "multiple": true,
+            "xpath": ".//xc:Application[@class='bril::bhmsource::Application']/bhm:properties/bhm:calenable"
+        }
+    ]
+}

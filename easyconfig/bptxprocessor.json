@@ -1,0 +1,18 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "bsp": "urn:xdaq-application:bril::bptxprocessor::ScopeProcessor"
+    },
+    "fields": [
+        {
+            "name": "AtoIfactor_B1",
+            "type": "integer",
+            "xpath": ".//xc:Application[@class='bril::bptxprocessor::ScopeProcessor']/bsp:properties/bsp:AtoIfactor_B1"
+        },
+        {
+            "name": "AtoIfactor_B2",
+            "type": "integer",
+            "xpath": ".//xc:Application[@class='bril::bptxprocessor::ScopeProcessor']/bsp:properties/bsp:AtoIfactor_B2"
+        }
+    ]
+}

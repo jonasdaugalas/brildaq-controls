@@ -46,6 +46,16 @@ def parse_fields(configpath, xml):
     fields = []
     for field in easy['fields']:
         node = root.find(field['xpath'], ns)
+
+        # check if multiple values are the same
+        if 'multiple' in field and field['multiple']:
+            nodes = root.findall(field['xpath'], ns)
+            for node2 in nodes:
+                if node2.text != node.text:
+                    raise ValueError('Field {} has flag "multiple" and values'
+                                     'are different e.g. {}; {}'.format(
+                                         field['name'], node.text, node2.text))
+
         f = {'name': field['name'], 'type': field['type']}
         if f['type'] in ('integer', 'Integer', 'unsignedInt'):
             f['value'] = int(node.text)
@@ -59,6 +69,8 @@ def parse_fields(configpath, xml):
         else:
             f['value'] = node.text
 
+        if 'multiple' in field:
+            f['multiple'] = field['multiple']
         if 'hideInOverview' in field:
             f['hideInOverview'] = field['hideInOverview']
         if 'typeahead' in field:
@@ -67,9 +79,6 @@ def parse_fields(configpath, xml):
             f['help'] = field['help']
 
         fields.append(f)
-
-    # fields = [{'name': f['name'], 'type': f['type'], 'value': f['value']}
-    #           for f in easy['fields']]
     return fields
 
 
@@ -78,6 +87,7 @@ def update_xml_fields(path, xml, fields):
     _register_xml_nsprefixes(xml)
     root = ET.fromstring(xml)
     for field in fields:
+        multi = field['multiple'] if 'multiple' in field else False
         log.debug(field)
         try:
             field['xpath'] = [f['xpath'] for f in easy['fields']
@@ -86,9 +96,10 @@ def update_xml_fields(path, xml, fields):
             raise err.ConfiguratorUserError(
                 'Could not find predefined field with this name',
                 details=field)
-        _modify_xml_value(root, field['xpath'], field['type'],
-                          field['value'], easy['namespaces'])
-    log.debug(ET.tostring(root, encoding='UTF-8'))
+        _modify_xml_value(
+            root, field['xpath'], field['type'], field['value'],
+            easy['namespaces'], multi)
+    # log.debug(ET.tostring(root, encoding='UTF-8'))
     return ET.tostring(root, encoding='UTF-8')
 
 
@@ -112,7 +123,7 @@ def _set_string_array(node, val):
     pos = 0
     for v in val:
         newe = ET.SubElement(node, ns + str(v[0]))
-        newe.text = str(v[1])
+        newe.text = str(v[1]) if v[1] is not None else ''
         newe.set(_encurl(NS_XSI) + 'type', 'xsd:string')
         newe.set(_encurl(NS_SOAPENC) + 'position', '[{}]'.format(str(pos)))
         pos += 1
@@ -144,7 +155,7 @@ def _set_string_map(node, newmap):
     node.clear()
     for (k, v) in newmap.items():
         newe = ET.SubElement(node, ns + k)
-        newe.text = str(v)
+        newe.text = str(v) if v is not None else ''
         newe.set(_encurl(NS_XSI) + 'type', 'xsd:string')
 
     node.set(_encurl(NS_XSI) + 'type', 'soapenc:struct')
@@ -181,15 +192,21 @@ def _register_xml_nsprefixes(xml):
     return namespaces
 
 
-def _modify_xml_value(root, xpath, dtype, val, ns):
-    node = root.find(xpath, ns)
-    if dtype in ('Integer', 'unsignedInt'):
-        node.text = str(int(val))
-    elif dtype == 'commaSeparatedString':
-        node.text = ','.join(map((lambda x: x if x is not None else ''), val))
-    elif dtype == 'stringArray':
-        _set_string_array(node, val)
-    elif dtype == 'stringMap':
-        _set_string_map(node, val)
+def _modify_xml_value(root, xpath, dtype, val, ns, multi):
+    if multi:
+        nodes = root.findall(xpath, ns)
     else:
-        node.text = str(val)
+        nodes = [root.find(xpath, ns)]
+    for node in nodes:
+        log.debug(node.attrib)
+        if dtype in ('Integer', 'unsignedInt'):
+            node.text = str(int(val))
+        elif dtype == 'commaSeparatedString':
+            node.text = ','.join(
+                map((lambda x: x if x is not None else ''), val))
+        elif dtype == 'stringArray':
+            _set_string_array(node, val)
+        elif dtype == 'stringMap':
+            _set_string_map(node, val)
+        else:
+            node.text = str(val)
