@@ -1,13 +1,16 @@
-<div ng-repeat="field in fields"
-     ng-if="!field.hideInOverview"
-     ng-switch="field.type"
-  <label><b>{{field.name}}:</b></label>
-  <span ng-switch-when="unsignedInt"><span ng-include="'int.html'"></span></span>
-  <span ng-switch-when="integer"><span ng-include="'int.html'"></span></span>
-  <span ng-switch-when="string"><span ng-include="'string.html'"></span></span>
-  <span ng-switch-when="commaSeparatedString"><span ng-include="'comma-separated-string.html'"></span></span>
-  <span ng-switch-when="stringArray"><span ng-include="'string-array.html'"></span></span>
-  <span ng-switch-when="stringMap"><span ng-include="'string-map.html'"></span></span>
+<div ng-if="fields!=='ERROR'">
+  <div ng-repeat="field in fields"
+       ng-if="!field.hideInOverview"
+       ng-switch="field.type">
+    <label><b>{{field.name}}:</b></label>
+    <span ng-switch-when="unsignedInt"><span ng-include="'int.html'"></span></span>
+    <span ng-switch-when="integer"><span ng-include="'int.html'"></span></span>
+    <span ng-switch-when="string"><span ng-include="'string.html'"></span></span>
+    <span ng-switch-when="commaSeparatedString"><span ng-include="'comma-separated-string.html'"></span></span>
+    <span ng-switch-when="stringArray"><span ng-include="'string-array.html'"></span></span>
+    <span ng-switch-when="stringMap"><span ng-include="'string-map.html'"></span></span>
+    <span ng-switch-when="bool"><span ng-include="'bool.html'"></span></span>
+  </div>
 </div>
 
 <script type="text/ng-template" id="int.html">
@@ -40,4 +43,12 @@
       <span class="text-info"> {{v}}</span>
     </span>
   </small>
+</script>
+
+<script type="text/ng-template" id="bool.html">
+  <span class="fa"
+        ng-class="field.value === 1 || field.value === 'true' ?
+                  'fa-toggle-on text-success' :
+                  'fa-toggle-off'"></span>
+  <span class="text-info">{{field.value}}</span>
 </script>

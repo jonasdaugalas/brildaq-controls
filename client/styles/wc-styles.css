@@ -14,7 +14,7 @@
 .wc-config-panel-group {
   border-bottom: dashed 1px grey;
   border-left: dashed 1px grey;
-  padding-bottom: 6px;
+  padding: 6px;
   /* box-shadow: inset 0px 0px 6px 0px rgba(0,0,0,0.1); */
   /* background-color: #FCF7E9; */
 }

@@ -13,7 +13,7 @@
     <label>
       {{field.name}}:
       <button class="btn btn-xs"
-              ng-if="field.help"
+              ng-if="field.help || field.typeahead"
               uib-popover-template="'info.html'"
               popover-trigger="outsideClick"
               popover-title="Help"
@@ -22,6 +22,9 @@
               style="height: 1.5em">
         </span>
       </button>
+      <span class="fa fa-clone text-warning" ng-if="field.multiple"
+            uib-tooltip="This field modifies multiple values in configuration xml"
+            tooltip-placement="right"/>
     </label>
 
     <span ng-switch-when="unsignedInt">
@@ -42,6 +45,10 @@
 
     <span ng-switch-when="stringMap">
       <span ng-include="'string-map.html'"></span>
+    </span>
+
+    <span ng-switch-when="bool">
+      <span ng-include="'bool.html'"></span>
     </span>
 
     <span ng-switch-default>
@@ -77,6 +84,17 @@
 <script type="text/ng-template" id="string.html">
   <input type="text" class="form-control" ng-model="field.value"
          uib-typeahead="t for t in field.typeahead | filter:$viewValue"></script>
+</script>
+
+<script type="text/ng-template" id="bool.html">
+  <button ng-click="ctrl.togleBool(field)"
+          style="border-style:none; background: none; font-size: 2em;">
+      <span class="fa"
+            ng-class="field.value === 1 || field.value === 'true' ?
+                      'fa-toggle-on text-success' :
+                      'fa-toggle-off'"></span>
+  </button>
+  {{field.value}}
 </script>
 
 <script type="text/ng-template" id="comma-separated-string.html">

@@ -2,6 +2,15 @@
 angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CONSTS", "Timers", "Configurations", function($rootScope, $http, $timeout, CONSTS, Timers, Cfgs) {
 
     var me = this;
+    var scheduledRefresh = false;
+    var alarm = new Audio('vendor/alarm.wav');
+    alarm.onended = function() {
+        $rootScope.$apply(function() {
+            me.alarmIsPlaying = false;
+        });
+    };
+    this.alarmIsPlaying = false;
+    this.alarmIsMute = false;
     // all configurations' paths
     this.paths = [];
     // map path to newest configuration version
@@ -24,12 +33,12 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
     me.hasChangingStates = false;
 
     var srvendp = CONSTS.server_endpoint;
-    var refreshTimer = null;
+    this.refreshTimer = null;
 
     this.init = function() {
         me.refreshConfigurations().then(function() {
-            refreshTimer = Timers.create(90000);
-            refreshTimer.addAction({callable: refresher});
+            me.refreshTimer = Timers.create(56000);
+            me.refreshTimer.addAction({callable: refresher});
         });
     };
 
@@ -68,10 +77,14 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
             me.owners = Object.keys(me.tree);
             console.log(me.tree);
             return me.refreshStatuses();
+        }, function() {
+            me.isSuccessGetRunning = false;
+            me.active = [];
         });
     };
 
     this.refreshStatuses = function() {
+        scheduledRefresh = false;
         return getRunning().then(function() {
             return getStates(me.running);
         }).then(function() {
@@ -86,10 +99,67 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
                 }
             };
             itterateConfigTree(me.tree, putRunningFlag);
-            if (me.hasChangingStates) {
+            if (me.hasChangingStates && !scheduledRefresh) {
+                scheduledRefresh = true;
                 $timeout(me.refreshStatuses, 4000);
             }
         });
+    };
+
+    this.playAlarm = function(){
+        if (!me.alarmIsMute) {
+            this.alarmIsPlaying = true;
+            alarm.play();
+        }
+    };
+
+    this.toggleAlarmMute = function(){
+        me.alarmIsMute = !me.alarmIsMute;
+        alarm.muted = me.alarmIsMute;
+    };
+
+    this.sendCommand = function(cmd, path) {
+        return $http.post(srvendp + "/send/" + cmd,
+                          JSON.stringify(Cfgs.path2URI(path)))
+            .then(dummyHttpHandler)
+            .catch(dummyHttpHandler);
+    };
+
+    this.create = function(path) {
+        return $http.post(srvendp + "/create", JSON.stringify(Cfgs.path2URI(path)))
+            .then(dummyHttpHandler)
+            .catch(dummyHttpHandler);
+    };
+
+
+    this.destroy = function(path) {
+        return $http.post(srvendp + "/destroy", JSON.stringify(Cfgs.path2URI(path)))
+            .then(dummyHttpHandler)
+            .catch(dummyHttpHandler);
+    };
+
+    this.getDangerFlags = function(path) {
+        var flags = Cfgs.get(path).flags;
+        if (!flags) {
+            return undefined;
+        }
+        return flags.DANGER;
+    };
+
+    this.getActiveConfigData = function() {
+        var path;
+        function getConfigClosure (p) {
+            $http.get(srvendp + "/config" + p + "/v=" + me.runningDetails[p].version)
+                .then(function(response) {
+                    me.configData[p] = response.data;
+                }).catch(function(response) {
+                    console.log(response);
+                    me.configData[p] = null;
+                });
+        }
+        for (path of me.active) {
+            getConfigClosure(path);
+        }
     };
 
     function getRunning() {
@@ -114,6 +184,8 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
 
     function getStates(paths) {
         var running, uris =[];
+        var prevStates = angular.copy(me.states);
+        var needAlarm = false;
         me.states = {};
         me.active = [];
         if (paths.length < 1) {
@@ -138,40 +210,22 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
                         response.data[uri] === "Resetting") {
                         me.hasChangingStates = true;;
                     }
+                    if (prevStates[path] &&
+                        prevStates[path] === "ON"
+                        && me.states[path] === "Error") {
+                        needAlarm = true;
+                    }
                 }
             }
             me.isSuccessGetStates = true;
+            if (needAlarm) {
+                me.playAlarm();
+            }
         }).catch(function(response) {
             me.isSuccessGetStates = false;
             console.log("Failed getting states", response);
         });
     }
-
-
-    this.getActiveConfigData = function() {
-        var path;
-        function getConfigClosure (p) {
-            $http.get(srvendp + "/config" + p + "/v=" + me.runningDetails[p].version)
-                .then(function(response) {
-                    me.configData[p] = response.data;
-                }).catch(function(response) {
-                    console.log(response);
-                    me.configData[p] = null;
-                });
-        }
-        for (path of me.active) {
-            getConfigClosure(path);
-        }
-    };
-
-    // this.getConfigXML = function(path) {
-    //     $http.get("/configxml" + path).then(function(response) {
-    //         return response.data;
-    //     }, function(response) {
-    //         //TODO: ALERT
-    //         console.error("Failed getting configuration xml", path);
-    //     });
-    // };
 
     function itterateConfigTree(node, visit) {
         var stack = [node];
@@ -189,35 +243,6 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
             }
         }
     }
-
-    this.sendCommand = function(cmd, path) {
-        return $http.post(srvendp + "/send/" + cmd,
-                          JSON.stringify(Cfgs.path2URI(path)))
-            .then(dummyHttpHandler)
-            .catch(dummyHttpHandler);
-    };
-
-    this.create = function(path) {
-        return $http.post(srvendp + "/create", JSON.stringify(Cfgs.path2URI(path)))
-            .then(dummyHttpHandler)
-            .catch(dummyHttpHandler);
-    };
-
-
-    this.destroy = function(path) {
-        return $http.post(srvendp + "/destroy", JSON.stringify(Cfgs.path2URI(path)))
-            .then(dummyHttpHandler)
-            .catch(dummyHttpHandler);
-    };
-
-
-    this.getDangerFlags = function(path) {
-        var flags = Cfgs.get(path).flags;
-        if (!flags) {
-            return undefined;
-        }
-        return flags.DANGER;
-    };
 
     function dummyHttpHandler(response) {
         console.log(response);

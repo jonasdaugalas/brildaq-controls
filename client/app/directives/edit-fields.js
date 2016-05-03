@@ -26,6 +26,18 @@ angular.module("web-config").directive("wcEditFields", function() {
                 }
                 obj[key] = val;
             };
+
+            this.togleBool = function(field) {
+                if (field.value === 'true') {
+                    field.value = 'false';
+                } else if (field.value === 1) {
+                    field.value = 0;
+                } else if (field.value === 0) {
+                    field.value = 1;
+                } else {
+                    field.value = 'true';
+                }
+            };
         },
         controllerAs: "ctrl"
     };
