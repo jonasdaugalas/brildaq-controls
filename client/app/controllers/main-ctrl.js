@@ -4,7 +4,8 @@ angular.module("web-config").controller("MainCtrl", ["$rootScope", "$http", "CON
 
     // globals to be used by other controllers for global variables
     $rootScope.globals = {
-        owner: ""
+        owner: "",
+        app_time: APP_TIME
     };
 
     // load configuration constants
