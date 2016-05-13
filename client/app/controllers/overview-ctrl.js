@@ -2,8 +2,14 @@
 angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CONSTS", "Timers", "Configurations", function($rootScope, $http, $timeout, CONSTS, Timers, Cfgs) {
 
     var me = this;
+    var srvendp = CONSTS.server_endpoint;
     var scheduledRefresh = false;
-    var alarm = new Audio('vendor/alarm.wav');
+    // var ssEvents = new EventSource('http://srv-s2d16-22-01:5009/event_stream');
+    // ssEvents.onmessage = function (event) {
+    //     console.log(event);
+    //     alert(event.data);
+    // };
+    var alarm = new Audio('vendor/alarm.ogg');
     alarm.onended = function() {
         $rootScope.$apply(function() {
             me.alarmIsPlaying = false;
@@ -32,7 +38,6 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
     // flag if there is configuration in state 'GoingOn', 'GoingOff', 'Resetting'
     me.hasChangingStates = false;
 
-    var srvendp = CONSTS.server_endpoint;
     this.refreshTimer = null;
 
     this.init = function() {
@@ -149,7 +154,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
     this.getActiveConfigData = function() {
         var path;
         function getConfigClosure (p) {
-            $http.get(srvendp + "/config" + p + "/v=" + me.runningDetails[p].version)
+            $http.get(srvendp + "/config" + p + "/v=" + me.runningDetails[p].version + '/noxml')
                 .then(function(response) {
                     me.configData[p] = response.data;
                 }).catch(function(response) {
