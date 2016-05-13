@@ -1,6 +1,7 @@
 {
-    "logfile": "/nfshome0/jdaugala/webapp/configurator/flask_configurator_test.log",
+    "logfile": "/var/log/brildaq_configurator.log",
     "loglevel": "DEBUG",
+    "action_logfile": "/var/log/brildaq_configurator_action.log",
     "authfile": "/brildata/db/db.ini",
     "duckauthfile": "/brilpro/duck/DUCK.properties",
     "easyconfigmap": "easyconfigmap.json",

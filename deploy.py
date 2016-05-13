@@ -64,6 +64,7 @@ def print_notes(server, client, cpinfo):
     if server:
         nginx_server = (
             '        location {srvmount} {{ \n'
+            '            proxy_set_header X-Forwarded-For $remote_addr;\n'
             '            proxy_pass http://{cphost}:{cpport}/;\n'
             '        }}\n'
         )

@@ -69,6 +69,10 @@ def path2uri(path):
     return uri
 
 
+def uri2path(uri):
+    return RE_GET_CONFIGS_PARSE.search(uri).group(1)
+
+
 def get_owners(dbcon):
     select = (
         'select user_name '
@@ -235,12 +239,14 @@ def _get_config_xml_from_groupblob(group):
     return group[0]['childrenResources']['data'][0]['configFile']
 
 
-def get_config(dbcon, path, version):
+def get_config(dbcon, path, version, includexml=True):
     group = _get_parsed_groupblob(dbcon, path, version)
     xml = group[0]['childrenResources']['data'][0]['configFile']
     if not xml:
         return None
-    result = {'xml': xml}
+    result = {}
+    if includexml:
+        result['xml'] = xml
     owner = path.split('/')[1]
     fmhostport = group[0]['thisResource']['uri']['string'][7:].split('/')[0]
     _set_owner_host_port_flags(result, owner, fmhostport)

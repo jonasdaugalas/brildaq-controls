@@ -12,6 +12,7 @@ import custom_logging
 
 # prepare logging
 log = custom_logging.get_logger(__name__)
+actionlog = custom_logging.get_action_logger()
 
 # module attributes
 dbcon = None
@@ -117,6 +118,9 @@ def send_command(command, path=None):
         uri = utils.path2uri('/' + path)
     else:
         uri = flask.request.json
+        path = utils.uri2path(uri)
+    actionlog.info('{} {}; {}'.format(
+        command.upper(), path, flask.request.environ['HTTP_X_FORWARDED_FOR']))
     if rcmsws.send_command(command, uri):
         return ('OK', 200)
     else:
@@ -131,6 +135,9 @@ def create_fm(path=None):
         uri = utils.path2uri('/' + path)
     else:
         uri = flask.request.json
+        path = utils.uri2path(uri)
+    actionlog.info('CREATE {}; {}'.format(
+        path, flask.request.environ['HTTP_X_FORWARDED_FOR']))
     if rcmsws.create(uri):
         return ('OK', 200)
     else:
@@ -145,6 +152,9 @@ def destroy_fm(path=None):
         uri = utils.path2uri('/' + path)
     else:
         uri = flask.request.json
+        path = utils.uri2path(uri)
+    actionlog.info('DESTROY {}; {}'.format(
+        path, flask.request.environ['HTTP_X_FORWARDED_FOR']))
     if rcmsws.destroy(uri):
         return ('OK', 200)
     else:
@@ -173,10 +183,16 @@ def get_config_xml(path, version=None):
 
 
 @app.route('/config/<path:path>')
+@app.route('/config/<path:path>/noxml')
 @app.route('/config/<path:path>/v=<int:version>')
+@app.route('/config/<path:path>/v=<int:version>/noxml')
 @default_configurator_error_response
 def get_config(path, version=None):
-    r = utils.get_config(dbcon, '/' + path, version)
+    log.debug(flask.request.url)
+    if flask.request.url.endswith('/noxml'):
+        r = utils.get_config(dbcon, '/' + path, version, includexml=False)
+    else:
+        r = utils.get_config(dbcon, '/' + path, version)
     if r is None:
         flask.abort(404)
     return flask.Response(json.dumps(r), mimetype='application/json')
