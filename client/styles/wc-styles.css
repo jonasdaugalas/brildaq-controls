@@ -31,3 +31,18 @@
     word-wrap:break-word;
     overflow-x:hidden;
 }
+
+.error-blink {
+    animation-name: anim-error-blink;
+    animation-timing-function: ease-in-out;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes anim-error-blink {
+    0%   {background-color:#d9534f; }
+    20%   {background-color:#d9534f; }
+    65%  {background-color:white; }
+    80%   {background-color:white; }
+    100% {background-color:#d9534f; }
+}

@@ -181,7 +181,8 @@
       <span class="pull-right"
             ng-include="'old-version-indicator.html'"></span>
     </div>
-    <div class="panel-body">
+    <div class="panel-body"
+         ng-class="ctrl.states[path]==='ON' ? '' : 'error-blink'">
       <b>Host:</b>&nbsp;{{ctrl.configData[path].executive.host}}
       <b>Port:</b>&nbsp;{{ctrl.configData[path].executive.port}}
       <a ng-href="http://{{ctrl.configData[path].executive.host + ':' + ctrl.configData[path].executive.port}}"
