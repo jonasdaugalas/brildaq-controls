@@ -119,8 +119,9 @@ def send_command(command, path=None):
     else:
         uri = flask.request.json
         path = utils.uri2path(uri)
-    actionlog.info('{} {}; {}'.format(
-        command.upper(), path, flask.request.environ['HTTP_X_FORWARDED_FOR']))
+    actionlog.info('{:<8} {}; {}; {}'.format(
+        command.upper(), path, flask.request.user_agent.string,
+        flask.request.environ['HTTP_X_FORWARDED_FOR']))
     if rcmsws.send_command(command, uri):
         return ('OK', 200)
     else:
@@ -136,8 +137,9 @@ def create_fm(path=None):
     else:
         uri = flask.request.json
         path = utils.uri2path(uri)
-    actionlog.info('CREATE {}; {}'.format(
-        path, flask.request.environ['HTTP_X_FORWARDED_FOR']))
+    actionlog.info('CREATE   {}; {}; {}'.format(
+        path, flask.request.user_agent.string,
+        flask.request.environ['HTTP_X_FORWARDED_FOR']))
     if rcmsws.create(uri):
         return ('OK', 200)
     else:
@@ -153,8 +155,9 @@ def destroy_fm(path=None):
     else:
         uri = flask.request.json
         path = utils.uri2path(uri)
-    actionlog.info('DESTROY {}; {}'.format(
-        path, flask.request.environ['HTTP_X_FORWARDED_FOR']))
+    actionlog.info('DESTROY  {}; {}; {}'.format(
+        path, flask.request.user_agent.string,
+        flask.request.environ['HTTP_X_FORWARDED_FOR']))
     if rcmsws.destroy(uri):
         return ('OK', 200)
     else:
