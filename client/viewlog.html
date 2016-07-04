@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script>
+  angular.module("brildaq-logs", []);
+  angular.module("brildaq-logs").controller("MainCtrl", function($rootScope) {
+  var me = this;
+  this.records = [];
+
+  var socket = io.connect('http://kvm-s3562-1-ip151-15.cms:5000');
+
+  socket.on('message', function(data) {
+    console.log(data);
+    $rootScope.$apply(function () {
+      me.records.push(data);
+    });
+  });
+
+  });
+</script>
+
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <base href="/webbrildaqtest/" />
+
+  </head>
+
+  <body ng-app="brildaq-logs"
+        ng-controller="MainCtrl as main">
+
+    <span ng-repeat="r in main.records track by $index">
+      {{r}}
+    </span>
+  </body>
+
+</html>
