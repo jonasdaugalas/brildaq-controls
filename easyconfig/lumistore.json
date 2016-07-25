@@ -12,7 +12,7 @@
             "typeahead": [
                 "tcds", "beam", "bestlumi", "bcm1fagghist", "bcm1flumi", "bcm1fbkg",
                 "pltaggzero", "pltlumizero", "hflumi", "vdmscan", "atlasbeam",
-                "bxconfig", "bunchmask", "bestbxconfig", "hfOcc1Agg"],
+                "bxconfig", "bunchmask", "bestbxconfig", "hfOcc1Agg", "hfetlumi", "hfEtSumAgg"],
             "help": "Lumistore datasources."
         },
         {

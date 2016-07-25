@@ -14,12 +14,14 @@
     "/lumidev/central/global/commondataexchange":       "commondataexchange.json",
     "/lumipro/central/global/lumistore":                "lumistore.json",
     "/lumidev/central/global/lumistore":                "lumistore.json",
-    "/lumipro/hf/global/lumistore":                     "hflumistore.json",
     "/lumidev/hf/global/hfsource":                      "hfsource.json",
+    "/lumipro/hf/global/lumistore":                     "hflumistore.json",
+    "/lumipro/hf/local/lumistore":                      "hflumistore.json",
     "/lumipro/hf/global/hfsource":                      "hfsource.json",
-    "/lumipro/hf/global/hfprocessor":                   "hfprocessor.json",
+    "/lumipro/hf/global/hfocprocessor":                 "hfprocessor.json",
+    "/lumipro/hf/global/hfetprocessor":                 "hfprocessor.json",
+    "/lumipro/hf/local/hfetprocessor":                  "hfprocessor.json",
     "/lumipro/hf/local/hfocprocessor":                  "hfprocessor.json",
-    "/lumipro/hf/local/hfetprocessor":                  "hfetprocessor.json",
-    "/lumipro/hf/local/lumistore":                      "lumistore.json",
-    "/lumipro/bptx/global/bptxScopeProcessor":          "bptxprocessor.json"
+    "/lumipro/bptx/global/bptxScopeProcessor":          "bptxprocessor.json",
+    "/lumipro/bptx/local/bptxScopeProcessor":           "bptxprocessor.json"
 }

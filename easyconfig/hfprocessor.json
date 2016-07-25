@@ -1,13 +1,13 @@
 {
     "namespaces": {
         "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
-        "hfp": "urn:xdaq-application:bril::hfprocessor::Application"
+        "hfp": "urn:xdaq-application:bril::hfprocessor::HFProcessor"
     },
     "fields": [
         {
             "name": "sigmaVis",
             "type": "integer",
-            "xpath": ".//xc:Application[@class='bril::hfprocessor::Application']/hfp:properties/hfp:sigmaVis"
+            "xpath": ".//xc:Application[@id='121']/hfp:properties/hfp:sigmaVis"
         }
     ]
 }
