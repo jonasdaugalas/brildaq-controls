@@ -9,32 +9,32 @@ from cherrypy.process import plugins
 
 class Cherryd:
 
-    def configure(self, configfiles = None, environment = None):
+    def configure(self, configfiles=None, environment=None):
         import wsgi
         for c in configfiles or []:
             cherrypy.config.update(c)
 
         if environment is not None:
             try:
-                cherrypy.config.update({'environment' : environment})
+                cherrypy.config.update({'environment': environment})
             except KeyError:
-                pass # allow environments undefined in
-                     # cherrypy._cpconfig.environments
-
+                # allow environments undefined in
+                # cherrypy._cpconfig.environments
+                pass
 
     def run(self, daemonize=None, pidfile=None, user=None, group=None):
         engine = cherrypy.engine
 
         if daemonize:
             # Don't print anything to stdout/sterr.
-            cherrypy.config.update({'log.screen' : False})
+            cherrypy.config.update({'log.screen': False})
             plugins.Daemonizer(engine).subscribe()
 
         if pidfile:
             plugins.PIDFile(engine, pidfile).subscribe()
 
         if user or group:
-            plugins.DropPrivileges(engine, uid = user, gid = group).subscribe()
+            plugins.DropPrivileges(engine, uid=user, gid=group).subscribe()
 
         if hasattr(engine, "signal_handler"):
             engine.signal_handler.subscribe()
