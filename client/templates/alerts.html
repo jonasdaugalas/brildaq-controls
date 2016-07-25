@@ -1,0 +1,39 @@
+<div>
+  <div ng-repeat="alert in ctrl.alerts"
+       ng-switch="alert.what">
+    <span ng-switch-when="text">
+      <span ng-include="'text-alert.html'"></span>
+    </span>
+    <span ng-switch-when="reload">
+      <span ng-include="'reload-alert.html'"></span>
+    </span>
+    <span ng-switch-when="name">
+      <span ng-include="'name-alert.html'"></span>
+    </span>
+  </div>
+</div>
+
+<script type="text/ng-template" id="text-alert.html">
+  {{alert.text}}
+</script>
+
+<script type="text/ng-template" id="reload-alert.html">
+  <uib-alert type="warning" class="fade-in wc-alert text-center" role="alert" close="ctrl.close(alert)">
+    This page would like to reload itself. Do you mind?
+    <br>Reloading in <strong>{{alert.time}}</strong> seconds
+    <br>
+    <button class="btn" ng-click="ctrl.doFullReload()">Reload now</button>
+    <button class="btn" ng-click="ctrl.close(alert)">Go away</button>
+  </uib-alert>
+</script>
+
+<script type="text/ng-template" id="name-alert.html">
+  <uib-alert type="info" class="fade-in wc-alert text-center" role="alert" close="ctrl.close(alert)" style="width:360px">
+    <p>Server side sometimes logs user activity. It could be useful to know your name.</p>
+    <br>
+    <input placeholder="Name" class="form-control" type="text" ng-model="ctrl.clientname">
+    <br>
+    <button class="btn btn-primary" ng-click="ctrl.setClientNameCookie(true); ctrl.close(alert)">Use this</button>
+    <button class="btn" ng-click="ctrl.setClientNameCookie(false); ctrl.close(alert)">Go away</button>
+  </uib-alert>
+</script>

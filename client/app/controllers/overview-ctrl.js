@@ -1,5 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CONSTS", "Timers", "Configurations", function($rootScope, $http, $timeout, CONSTS, Timers, Cfgs) {
+angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CONSTS", "Timers", "Alerts", "Configurations", function($rootScope, $http, $timeout, CONSTS, Timers, Alerts, Cfgs) {
 
     var me = this;
     var srvendp = CONSTS.server_endpoint;
@@ -45,6 +45,10 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
             me.refreshTimer = Timers.create(56000);
             me.refreshTimer.addAction({callable: refresher});
         });
+        console.log(document.cookie);
+        if (document.cookie.indexOf('clientname') < 0) {
+            Alerts.pushNameAlert();
+        }
     };
 
     this.refreshConfigurations = function() {
@@ -254,15 +258,32 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
         me.refreshStatuses();
     }
 
+    function checkAppVersion() {
+        $http.get(srvendp + '/appv').then(function(response) {
+            console.log(response.data);
+            if (APP_TIME < response.data) {
+                Alerts.pushReloadAlert();
+            }
+        });
+    };
+
     var refresher = (function() {
         var counter = 0;
         return function() {
             counter += 1;
             if (counter > 240) {
                 counter = 0;
-                console.log("Full refresh");
+                console.log("Check for new configurations");
                 me.refreshConfigurations();
+                if (document.cookie.indexOf('clientname') < 0) {
+                    if (Alerts.alertByTypeExists('name')) {
+                        Alerts.pushNameAlert();
+                    }
+                }
             } else {
+                if (counter % 10 == 0) {
+                    checkAppVersion();
+                }
                 console.log("Refreshing states");
                 me.refreshStatuses();
             }

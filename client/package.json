@@ -22,7 +22,7 @@
     "dependencies": {
         "angular": "latest",
         "bootstrap": "latest",
-        "angular-ui-router": "0.2.15",
+        "angular-ui-router": "latest",
         "angular-ui-bootstrap": "latest",
         "ace-builds": "latest",
         "angular-ui-ace": "latest",

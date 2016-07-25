@@ -5,14 +5,28 @@
 <script>
   angular.module("brildaq-logs", []);
   angular.module("brildaq-logs").controller("MainCtrl", function($rootScope) {
+
   var me = this;
   this.records = [];
+  this.appName = "";
 
-  var socket = io.connect('http://kvm-s3562-1-ip151-15.cms:5000');
+  var socket = io.connect('http://srv-s2d16-22-01.cms:5006');
+
+  this.requestLogs = function() {
+    console.log("requsting logs for app: " + me.appName);
+    socket.emit("bringmelogs", {appName: me.appName, otherstuf: null});
+  };
+
+  this.stopLogs = function() {
+    console.log("requsting to stop logs");
+    socket.emit("stopmylogs");
+  };
 
   socket.on('message', function(data) {
-    console.log(data);
     $rootScope.$apply(function () {
+      if (me.records.length > 9) {
+        me.records.splice(0, 1);
+      }
       me.records.push(data);
     });
   });
@@ -30,9 +44,12 @@
   <body ng-app="brildaq-logs"
         ng-controller="MainCtrl as main">
 
-    <span ng-repeat="r in main.records track by $index">
-      {{r}}
-    </span>
+    <div>
+      <input type="text" ng-model="main.appName"></input>
+      <button ng-click="main.requestLogs()">Bring me logs</button>
+      <button ng-click="main.stopLogs()">Stop</button>
+    </div>
+    <p ng-repeat="r in main.records track by $index">{{r}}</p>
   </body>
 
 </html>

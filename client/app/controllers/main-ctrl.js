@@ -1,4 +1,4 @@
-angular.module("web-config").controller("MainCtrl", ["$rootScope", "$http", "CONSTS", "Timers", function($rootScope, $http, CONSTS, Timers) {
+angular.module("web-config").controller("MainCtrl", ["$rootScope", "$http", "CONSTS", "Timers", "Alerts", function($rootScope, $http, CONSTS, Timers, Alerts) {
 
     var me = this;
 
@@ -20,6 +20,7 @@ angular.module("web-config").controller("MainCtrl", ["$rootScope", "$http", "CON
     console.log('owner', $rootScope.globals.owner);
 
     $rootScope.$on('$stateChangeStart', function(){
+        Alerts.clear();
         Timers.clear();
     });
 

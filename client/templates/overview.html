@@ -166,11 +166,11 @@
 </script>
 
 <script type="text/ng-template" id="config-block-container.html">
-  <h3 style="min-width: 60px;"><em>{{dirkey}}</em></h3>
+  <h3 style="min-width: 40px;"><em>{{dirkey}}</em></h3>
   <div ng-repeat="path in ctrl.active
                   | filter: ($root.globals.owner+'/'+dirkey+'/'+dirfilter)"
        class="panel"
-       style="min-width: 280px; max-width: 480px"
+       style="min-width: 320px; max-width: 400px;"
        ng-class="ctrl.states[path]==='ON' ? 'panel-success' : 'panel-danger'">
     <div class="panel-heading" style="cursor:pointer"
          uib-popover-template="'action-popover.html'"

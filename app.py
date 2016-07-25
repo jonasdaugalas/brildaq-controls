@@ -19,6 +19,8 @@ dbcon = None
 # static_folder - hardcoded, for dev only
 app = flask.Flask(__name__, static_folder='client', static_url_path='')
 
+appv = 0  # just some variable to send to client when asked
+
 
 def init():
     app.logger.addHandler(custom_logging.handler)
@@ -43,6 +45,13 @@ def default_configurator_error_response(fun):
             return flask.Response(e.text(), mimetype='text/plain', status=400)
 
     return inner
+
+
+def get_name_from_cookie(request):
+    if 'clientname' in request.cookies:
+        return str(request.cookies['clientname'])[:16]
+    else:
+        return '<no name>'
 
 
 # route: /static_base/app_base
@@ -119,8 +128,9 @@ def send_command(command, path=None):
     else:
         uri = flask.request.json
         path = utils.uri2path(uri)
-    actionlog.info('{:<8} {}; {}; {}'.format(
-        command.upper(), path, flask.request.user_agent.string,
+    client = get_name_from_cookie(flask.request)
+    actionlog.info('{:<8} {}; {}; {}; {}'.format(
+        command.upper(), path, client, flask.request.user_agent.string,
         flask.request.environ['HTTP_X_FORWARDED_FOR']))
     if rcmsws.send_command(command, uri):
         return ('OK', 200)
@@ -137,8 +147,9 @@ def create_fm(path=None):
     else:
         uri = flask.request.json
         path = utils.uri2path(uri)
-    actionlog.info('CREATE   {}; {}; {}'.format(
-        path, flask.request.user_agent.string,
+    client = get_name_from_cookie(flask.request)
+    actionlog.info('CREATE   {}; {}; {}; {}'.format(
+        path, client, flask.request.user_agent.string,
         flask.request.environ['HTTP_X_FORWARDED_FOR']))
     if rcmsws.create(uri):
         return ('OK', 200)
@@ -155,8 +166,9 @@ def destroy_fm(path=None):
     else:
         uri = flask.request.json
         path = utils.uri2path(uri)
-    actionlog.info('DESTROY  {}; {}; {}'.format(
-        path, flask.request.user_agent.string,
+    client = get_name_from_cookie(flask.request)
+    actionlog.info('DESTROY  {}; {}; {}; {}'.format(
+        path, client, flask.request.user_agent.string,
         flask.request.environ['HTTP_X_FORWARDED_FOR']))
     if rcmsws.destroy(uri):
         return ('OK', 200)
@@ -288,6 +300,18 @@ def get_full_xml(path, version=None):
     path = '/' + path
     final = utils.get_final_xml(dbcon, path=path, version=version)
     return flask.Response(final, mimetype='text/xml')
+
+
+@app.route('/appv')
+def get_appv():
+    return flask.Response(str(appv), mimetype='application/json')
+
+
+@app.route('/appv=<int:new_appv>', methods=['GET', 'PUT', 'POST'])
+def set_appv(new_appv):
+    global appv
+    appv = new_appv
+    return ('OK', 200)
 
 
 if __name__ == '__main__':

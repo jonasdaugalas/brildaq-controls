@@ -31,6 +31,10 @@ angular.module("web-config").service("Configurations", ["$http", "CONSTS", funct
 
     this.path2URI = function(path) {
         var cfg = me.configurations[path];
+        if (!cfg) {
+            console.error("new path not in configurations");
+            return "";
+        }
         return "http://" + cfg.host + ":" + cfg.port + cfg.urn;
     };
 
