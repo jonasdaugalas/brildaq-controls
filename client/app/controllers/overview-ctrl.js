@@ -1,6 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CONSTS", "Timers", "Alerts", "Configurations", function($rootScope, $http, $timeout, CONSTS, Timers, Alerts, Cfgs) {
-
+angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CONSTS", "Timers", "Modals", "Alerts", "Configurations", function($rootScope, $http, $timeout, CONSTS, Timers, Modals, Alerts, Cfgs) {
     var me = this;
     var srvendp = CONSTS.server_endpoint;
     var scheduledRefresh = false;
@@ -142,9 +141,17 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
 
 
     this.destroy = function(path) {
-        return $http.post(srvendp + "/destroy", JSON.stringify(Cfgs.path2URI(path)))
-            .then(dummyHttpHandler)
-            .catch(dummyHttpHandler);
+        var modal = Modals.confirmModal(
+            "Annoying confirmation",
+            "Destroying function managers is only needed when changing "
+                + "configurations. 'TurnOFF' and 'Reset' are "
+                + "enough for restarting processes.",
+            "Destroy", "Cancel");
+        return modal.result.then(function() {
+            return $http.post(srvendp + "/destroy", JSON.stringify(Cfgs.path2URI(path)))
+                .then(dummyHttpHandler)
+                .catch(dummyHttpHandler);
+        });
     };
 
     this.getDangerFlags = function(path) {

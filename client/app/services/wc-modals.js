@@ -30,4 +30,27 @@ angular.module("web-config").service("Modals", ["$rootScope", "$uibModal", funct
         });
     };
 
+    this.confirmModal = function(title, message, confirmText, cancelText) {
+        var modal = $uibModal.open({
+            templateUrl: "templates/modals/confirm.html?" + APP_TIME,
+            controller: [
+                "title", "message", "confirmText", "cancelText",
+                function(title, message, confirm, cancel) {
+                    this.title = title || "Please confirm";
+                    this.message = message;
+                    this.confirmText = confirm || "Confirm";
+                    this.cancelText = cancel || "Cancel";
+                }],
+            controllerAs: "ctrl",
+            size: "md",
+            resolve: {
+                title: function() {return title;},
+                message: function() {return message;},
+                confirmText: function() {return confirmText;},
+                cancelText: function() {return cancelText;}
+            }
+        });
+        return modal;
+    };
+
 }]);
