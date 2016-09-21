@@ -1,120 +1,124 @@
-<h2 class="row" ng-class="ctrl.showEditor ? '' : 'text-danger'">
+<div class="container-fluid">
+  <h2 class="row"
+      ng-class="ctrl.showEditor ? '' : 'text-danger'">
     <a ui-sref="main.overview({profileName: $root.globals.profileName})"
        style="float: left; padding-right:0.5em;
               margin-left:0.5em; margin-right:0.5em;
               border-right: grey dotted">
-        <div>
-            <span class="fa fa-arrow-left"></span>
-            <span style="font-size: 0.5em; float: right">
-                Back to<br/>
-                Overview
-            </span>
-        </div>
+      <div>
+        <span class="fa fa-arrow-left"></span>
+        <span style="font-size: 0.5em; float: right">
+          Back to<br/>
+          Overview
+        </span>
+      </div>
     </a>
     {{ctrl.configPath}}
     <span class="label label-info label-as-badge">
-        v{{ctrl.selectedVersion}}
+      v{{ctrl.selectedVersion}}
     </span>
-</h2>
-<div class="row" ng-if="ctrl.showEditor">
-    <div class="col-md-7">
-        <h3 ng-class="ctrl.expertMode ? 'text-danger' : ''">
-            Editor {{ctrl.expertMode ? '(expert mode)' : ''}}
+  </h2>
 
-            <button class="pull-right"
-                    ng-click="ctrl.switchEditingMode()"
-                    style="border-style:none; background: none">
-                <small>
-                    expert mode
-                    <span class="fa fa-2"
-                          ng-class="ctrl.expertMode ?
-                                    'fa-toggle-on text-danger' :
-                                    'fa-toggle-off'"></span>
-                </small>
-            </button>
-        </h3>
-        <div style="margin-bottom: 30px" ng-show="!ctrl.expertMode">
-            <wc-executive-info executive="ctrl.configExecutiveCopy"
-                               editable="false">
-            </wc-executive-info>
-            <div>
-                <wc-edit-fields fields="ctrl.config.fields"></wc-edit-fields>
-            </div>
-            <form class="form-inline" role="form"
-                  style="margin-top: 12px">
-                <button class="btn btn-info"
-                        ng-click="ctrl.showOrigXML()">
-                    Show original XML
-                </button>
-                <button class="btn btn-info"
-                        ng-click="ctrl.previewModifications()">
-                    Preview modifications
-                </button>
-                <button class="btn btn-primary pull-right"
-                        ng-click="ctrl.submit()">
-                    Submit as new version
-                </button>
-            </form>
+  <div class="row" ng-if="ctrl.showEditor">
+    <div class="col-md-7">
+      <h3 ng-class="ctrl.expertMode ? 'text-danger' : ''">
+        Editor {{ctrl.expertMode ? '(expert mode)' : ''}}
+
+        <button class="pull-right"
+                ng-click="ctrl.switchEditingMode()"
+                style="border-style:none; background: none">
+          <small>
+            expert mode
+            <span class="fa fa-2"
+                  ng-class="ctrl.expertMode ?
+                            'fa-toggle-on text-danger' :
+                            'fa-toggle-off'"></span>
+          </small>
+        </button>
+      </h3>
+      <div style="margin-bottom: 30px" ng-show="!ctrl.expertMode">
+        <wc-executive-info executive="ctrl.configExecutiveCopy"
+                           editable="false">
+        </wc-executive-info>
+        <div>
+          <wc-edit-fields fields="ctrl.config.fields"></wc-edit-fields>
         </div>
-        <div style="margin-bottom: 30px" ng-show="ctrl.expertMode">
-            <wc-executive-info executive="ctrl.config.executive"
-                               editable="true">
-            </wc-executive-info>
-            <div ui-ace="{onLoad: ctrl.editorLoaded, mode: 'xml'}"
-                 style="min-height:660px; border: solid 1px grey">
-            </div>
-            <form class="form-inline" role="form"
-                  style="margin-top: 12px">
-                <button class="btn btn-default"
-                        ng-click="ctrl.showEditorBindings()">
-                    <!-- <span class="fa fa-keyboard-o"></span> -->
-                    Bindings
-                    <span class="fa fa-question-circle"></span>
-                </button>
-                <button class="btn btn-default"
-                        ng-click="ctrl.beautify()">
-                    Beautify
-                </button>
-                <button class="btn btn-info"
-                        ng-click="ctrl.previewFinalXML()">
-                    Preview final XML
-                </button>
-                <button class="btn btn-primary pull-right"
-                        ng-click="ctrl.submit()">
-                    Submit as new version
-                </button>
-            </form>
+        <form class="form-inline" role="form"
+              style="margin-top: 12px">
+          <button class="btn btn-info"
+                  ng-click="ctrl.showOrigXML()">
+            Show original XML
+          </button>
+          <button class="btn btn-info"
+                  ng-click="ctrl.previewModifications()">
+            Preview modifications
+          </button>
+          <button class="btn btn-primary pull-right"
+                  ng-click="ctrl.submit()">
+            Submit as new version
+          </button>
+        </form>
+      </div>
+      <div style="margin-bottom: 30px" ng-show="ctrl.expertMode">
+        <wc-executive-info executive="ctrl.config.executive"
+                           editable="true">
+        </wc-executive-info>
+        <div ui-ace="{onLoad: ctrl.editorLoaded, mode: 'xml'}"
+             style="min-height:660px; border: solid 1px grey">
         </div>
+        <form class="form-inline" role="form"
+              style="margin-top: 12px">
+          <button class="btn btn-default"
+                  ng-click="ctrl.showEditorBindings()">
+            <!-- <span class="fa fa-keyboard-o"></span> -->
+            Bindings
+            <span class="fa fa-question-circle"></span>
+          </button>
+          <button class="btn btn-default"
+                  ng-click="ctrl.beautify()">
+            Beautify
+          </button>
+          <button class="btn btn-info"
+                  ng-click="ctrl.previewFinalXML()">
+            Preview final XML
+          </button>
+          <button class="btn btn-primary pull-right"
+                  ng-click="ctrl.submit()">
+            Submit as new version
+          </button>
+        </form>
+      </div>
     </div>
     <div class="col-md-5">
-        <h3>History table</h3>
-        <table class="table table-condensed table-bordered">
-            <tr>
-                <th class="col-md-2">Version</th>
-                <th class="col-md-4">Modified</th>
-                <th>Comment</th>
-            </tr>
-            <tr ng-repeat="v in ctrl.versions"
-                ng-class="v[0]==ctrl.selectedVersion ? (ctrl.config.flags.DANGER ? 'danger' : 'info') : ''"
-                tooltip-trigger="none"
-                tooltip-is-open="v[0]==ctrl.selectedVersion && ctrl.config.flags.DANGER"
-                uib-tooltip="flags: {{ctrl.config.flags}}">
-                <td align="center">
-                    <button class="btn btn-xs"
-                            ng-click="ctrl.selectVersion(v[0])">select</button>
-                    {{v[0]}}
-                </td>
-                <td>{{v[1] | date:'yyyy-MM-dd HH:mm:ss': 'UTC'}} UTC</td>
-                <td>{{v[2]}}</td>
-            </tr>
-        </table>
-        <div class="text-center">
-            <!-- ctrl.getConfigVersions(true) -- true for append older-->
-            <button class="btn"
-                    ng-click="ctrl.getConfigVersions(true)"
-                    ng-disabled="ctrl.oldestVersion <= 1">
-                Show older versions
-            </button>
-        </div>
+      <h3>History table</h3>
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th class="col-md-2">Version</th>
+          <th class="col-md-4">Modified</th>
+          <th>Comment</th>
+        </tr>
+        <tr ng-repeat="v in ctrl.versions"
+            ng-class="v[0]==ctrl.selectedVersion ? (ctrl.config.flags.DANGER ? 'danger' : 'info') : ''"
+            tooltip-trigger="none"
+            tooltip-is-open="v[0]==ctrl.selectedVersion && ctrl.config.flags.DANGER"
+            uib-tooltip="flags: {{ctrl.config.flags}}">
+          <td align="center">
+            <button class="btn btn-xs"
+                    ng-click="ctrl.selectVersion(v[0])">select</button>
+            {{v[0]}}
+          </td>
+          <td>{{v[1] | date:'yyyy-MM-dd HH:mm:ss': 'UTC'}} UTC</td>
+          <td>{{v[2]}}</td>
+        </tr>
+      </table>
+      <div class="text-center">
+        <!-- ctrl.getConfigVersions(true) -- true for append older-->
+        <button class="btn"
+                ng-click="ctrl.getConfigVersions(true)"
+                ng-disabled="ctrl.oldestVersion <= 1">
+          Show older versions
+        </button>
+      </div>
     </div>
+  </div>
 </div>

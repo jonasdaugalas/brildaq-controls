@@ -8,7 +8,16 @@
 
 .wc-tree-view {
     /* max-width: 200px; */
+    width: 16em;
     overflow-x: auto;
+    float: left;
+    padding: 0 1em 1em 1em;
+}
+
+.wc-active-view {
+    position: absolute;
+    margin-left: 16em;
+    padding: 0em 1em 1em 1em;
 }
 
 .wc-config-panel-group {

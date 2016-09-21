@@ -1,9 +1,9 @@
 <span id="version-label" style="position: fixed; color: rgba(0, 0, 0, 0.3); font-size: 0.8em; bottom: 0px; right: 3px;">
   {{::$root.globals.app_time}}
 </span>
-<nav class="row navbar navbar-default navbar-static-top"
+<nav class="navbar navbar-default navbar-static-top"
      style="margin-bottom: 0px">
-  <div class="container-fluid">
+  <div>
     <div class="navbar-header">
       <a class="navbar-brand" ui-sref="overview">
         BRILDAQ controls
@@ -37,8 +37,8 @@
   </div>
 </nav>
 
-<div class="row">
-  <div class="wc-tree-view col-lg-2 col-md-3">
+<div>
+  <div class="wc-tree-view">
     <h2>Configuration tree</h2>
 
     <div ng-repeat="(name,node) in ctrl.tree.childNodes[$root.globals.owner].childNodes track by node._id"
@@ -52,7 +52,7 @@
     </div>
   </div>
 
-  <div class="col-lg-10 col-md-9" ng-init="dirfilter = 'global'">
+  <div class="wc-active-view" ng-init="dirfilter = 'global'">
     <div class="form-inline">
       <h2>Active configurations
         <small>
