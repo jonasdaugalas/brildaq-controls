@@ -1,5 +1,5 @@
-<h2 class="row">
-    <a ui-sref="overview"
+<h2 class="row" ng-class="ctrl.showEditor ? '' : 'text-danger'">
+    <a ui-sref="main.overview({profileName: $root.globals.profileName})"
        style="float: left; padding-right:0.5em;
               margin-left:0.5em; margin-right:0.5em;
               border-right: grey dotted">
@@ -16,7 +16,7 @@
         v{{ctrl.selectedVersion}}
     </span>
 </h2>
-<div class="row">
+<div class="row" ng-if="ctrl.showEditor">
     <div class="col-md-7">
         <h3 ng-class="ctrl.expertMode ? 'text-danger' : ''">
             Editor {{ctrl.expertMode ? '(expert mode)' : ''}}

@@ -1,4 +1,4 @@
-angular.module("web-config").directive("wcAlerts", ["Alerts", "CONSTS", function(Alerts, CONSTS) {
+angular.module("web-config").directive("wcAlerts", ["Alerts", "CONST", function(Alerts, CONST) {
     return {
         restrict: "E",
         templateUrl: "templates/alerts.html?" + APP_TIME,
@@ -22,7 +22,7 @@ angular.module("web-config").directive("wcAlerts", ["Alerts", "CONSTS", function
                 d.setTime(d.getTime() + (300*24*60*60*1000)); // 300 days
                 var expires = "expires="+ d.toUTCString();
                 var cookie = "clientname=";
-                var srvendp = CONSTS.server_endpoint;
+                var srvendp = CONST.server_endpoint;
                 if (provided) {
                     cookie += me.clientname.substring(0, 16);
                 } else {

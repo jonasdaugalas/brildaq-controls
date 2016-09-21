@@ -1,35 +1,47 @@
 .wc-tree-expanded {
-  margin-left: 16px;
+    margin-left: 16px;
 }
 
 .wc-tree-item {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .wc-tree-view {
-  /* max-width: 200px; */
-  overflow-x: auto;
+    /* max-width: 200px; */
+    overflow-x: auto;
 }
 
 .wc-config-panel-group {
-  border-bottom: dashed 1px grey;
-  border-left: dashed 1px grey;
-  padding: 6px;
-  /* box-shadow: inset 0px 0px 6px 0px rgba(0,0,0,0.1); */
-  /* background-color: #FCF7E9; */
+    border-bottom: dashed 1px grey;
+    border-left: dashed 1px grey;
+    padding: 0px 6px 6px 6px;
+    /* box-shadow: inset 0px 0px 6px 0px rgba(0,0,0,0.1); */
+    /* background-color: #FCF7E9; */
 }
 
 .label-as-badge {
-  border-radius: 1em;
-}
-
-.panel-heading {
-  word-wrap: break-word;
+    border-radius: 1em;
 }
 
 .panel {
+    min-width: 240px;
+    max-width: 460px;
     word-wrap:break-word;
     overflow-x:hidden;
+}
+
+.panel-heading {
+    text-decoration: underline;
+    word-wrap: break-word;
+    padding: 0.5em;
+}
+
+.panel-group {
+    margin-bottom: 1em;
+}
+
+.panel-body {
+    padding: 0.6em;
 }
 
 .error-blink {
@@ -54,4 +66,27 @@
 
 .popover {
     z-index: 1039;
+    max-width: 400px;
+}
+
+.popover-content {
+    padding: 0px;
+}
+
+.popover-content dock {
+    display: block;
+    padding: 0em 0.5em 0.5em 0.5em;
+}
+
+.popover-content hr {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.h3, h3, .h2, h2  {
+    margin: 0px 3px 3px 3px;
+}
+
+.label, label {
+    margin-bottom: 0px;
 }

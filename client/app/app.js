@@ -1,7 +1,8 @@
 /* jshint esnext: true */
-angular.module("web-config", ['ui.router', 'ui.bootstrap', 'ui.ace', 'prettyXml']);
+angular.module("web-config", ['sly', 'ui.router', 'ui.bootstrap', 'ui.ace', 'prettyXml']);
 
-angular.module("web-config").value("CONSTS", {});
+// CONST will be filled by main controller
+angular.module("web-config").constant("CONST", {});
 
 angular.module("web-config").config(["$httpProvider", "$locationProvider", "$stateProvider", "$urlRouterProvider", "$urlMatcherFactoryProvider", function($httpProvider, $locationProvider, $stateProvider, $urlRouterProvider, $urlMatcherFactoryProvider) {
 
@@ -17,16 +18,31 @@ angular.module("web-config").config(["$httpProvider", "$locationProvider", "$sta
         is: (val) => true
     });
 
+    $urlMatcherFactoryProvider.strictMode(false);
+
     $stateProvider
-        .state("overview", {
-            url: gui_prefix + "/",
-            templateUrl: "templates/overview.html?" + APP_TIME,
-            controller: "OverviewCtrl as ctrl"
+        .state("main", {
+            url: gui_prefix + "/{profileName:string}",
+            abstract: true,
+            controller: "MainCtrl",
+            resolve: {
+                config: ["$http", function($http) {
+                    return $http.get("const.json?" + APP_TIME);
+                }]
+            },
+            template: '<h1 class="text-danger" ng-if="$root.globals.illegalProfile"> ' +
+                'Unknown profile: {{$root.globals.profileName}}</h1>' +
+                '<ui-view ng-if="!$root.globals.illegalProfile"/>'
         })
-        .state("editor", {
-            url: gui_prefix + "/editor{path:raw}",
+        .state("main.editor", {
+            url: "/editor{path:raw}",
             templateUrl: "templates/editor.html?" + APP_TIME,
             controller: "EditorCtrl as ctrl"
+        })
+        .state("main.overview", {
+            url: "",
+            templateUrl: "templates/overview.html?" + APP_TIME,
+            controller: "OverviewCtrl as ctrl"
         });
 
 }]);

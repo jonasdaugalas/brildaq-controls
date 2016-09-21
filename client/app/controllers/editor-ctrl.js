@@ -1,8 +1,9 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stateParams", "$filter", "$uibModal", "CONSTS", "Modals", function($scope, $http, $stateParams, $filter, $uibModal, CONSTS, Modals) {
+angular.module("web-config").controller("EditorCtrl", ["$http", "$stateParams", "$filter", "$uibModal", "CONST", "Modals", function($http, $stateParams, $filter, $uibModal, CONST, Modals) {
 
     var me = this;
     this.configPath = $stateParams.path;
+    this.showEditor = false;
     this.versions = [];
     this.selectedVersion = null;
     // oldest loaded version number
@@ -11,16 +12,31 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
     this.configExecutiveCopy = {};
     this.expertMode = false;
 
-    var srvendp = CONSTS.server_endpoint;
-    var initPromise = Promise.resolve();
+    var whitelist = CONST.profiles[$stateParams.profileName].whitelist || null;
+    var blacklist = CONST.profiles[$stateParams.profileName].blacklist || null;
+    if (whitelist) {
+        if (whitelist.indexOf(me.configPath) < 0) {
+            console.log('not in whitelist');
+            me.showEditor = false;
+            return;
+        }
+    } else if (blacklist && blacklist.indexOf(me.configPath) >= 0){
+        console.log('in blacklist');
+        me.showEditor = false;
+        return;
+    }
+    var srvendp = CONST.server_endpoint;
     var editor = null;
 
     this.init = function() {
         return me.getConfigVersions().then(function() {
             if (me.versions.length > 0) {
+                me.showEditor = true;
                 return me.selectVersion(me.versions[0][0]);
             }
             return Promise.resolve();
+        }, function() {
+            me.showEditor = false;
         });
     };
 
@@ -55,6 +71,7 @@ angular.module("web-config").controller("EditorCtrl", ["$scope", "$http", "$stat
             me.oldestVersion = d[d.length - 1][0];
         }, function(response) {
             console.log("Failed to get versions for" + me.configPath);
+            return Promise.reject();
         });
     };
 

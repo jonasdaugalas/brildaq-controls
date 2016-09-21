@@ -1,3 +1,14 @@
 {
-    "default_owner": "lumipro"
+    "default_owner": "lumipro",
+    "logs_endpoint": "http://cmsrc-lumi.cms:5009/logs",
+    "profiles": {
+        "bril": {
+            "whitelist": null,
+            "blacklist": null
+        },
+        "cms": {
+            "whitelist": ["/lumipro/central/global/BunchPatternProcessor"],
+            "blacklist": null
+        }
+    }
 }

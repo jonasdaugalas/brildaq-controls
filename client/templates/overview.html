@@ -1,12 +1,12 @@
 <span id="version-label" style="position: fixed; color: rgba(0, 0, 0, 0.3); font-size: 0.8em; bottom: 0px; right: 3px;">
-{{$root.globals.app_time}}
+  {{::$root.globals.app_time}}
 </span>
 <nav class="row navbar navbar-default navbar-static-top"
      style="margin-bottom: 0px">
   <div class="container-fluid">
     <div class="navbar-header">
       <a class="navbar-brand" ui-sref="overview">
-        BRILDAQ configurator
+        BRILDAQ controls
       </a>
     </div>
 
@@ -14,10 +14,10 @@
       <select class="form-control"
               ng-options="own for own in ctrl.owners"
               ng-model="$root.globals.owner"
-              ng-change="ctrl.refreshStatuses()"></select>
+              ng-change="ctrl.updateStates()"></select>
 
       <button class="btn btn-default"
-              ng-click="ctrl.refreshConfigurations()">
+              ng-click="ctrl.updateConfigs()">
         <span class="fa fa-refresh"></span>Refresh
       </button>
     </div>
@@ -33,30 +33,7 @@
       </span>
     </div>
 
-    <div class="navbar-form navbar-right">
-      Links:
-      <a class="navbar-link"
-         target="_blank"
-         href="https://cmsonline.cern.ch/webcenter/portal/cmsonline/pages_common/dcs/dipbrowser?wc.contentSource=">
-        DIP Browser
-      </a>
-      |
-      <a class="navbar-link"
-         target="_blank"
-         href="https://cmsonline.cern.ch/webcenter/portal/cmsonline/pages_common/elog?__adfpwp_action_portlet=623564097&__adfpwp_backurl=https%3A%2F%2Fcmsonline-int.cern.ch&_piref623564097.strutsAction=%2FviewSubcatMessages.do%3FcatId%3D493%26subId%3D851">
-        Elog
-      </a>
-      |
-      <a class="navbar-link"
-         target="_blank"
-         href="http://srv-s2d16-22-01/webmonitor">webmonitor</a>
-      |
-      <a target="_blank"
-         href="https://xdaq.web.cern.ch/xdaq/xmas/11/speedial/speedial.swf?heartbeatsurl=http://pc-c2e11-22-01.cms:8848&zonename=bril" type="application/x-shockwave-flash">
-        <img src="img/XDAQLogoSpeedial.png" style="height:2em">
-      </a>
-      |
-    </div>
+    <div class="navbar-form navbar-right" ng-include="'templates/links.html'"> </div>
   </div>
 </nav>
 
@@ -64,38 +41,26 @@
   <div class="wc-tree-view col-lg-2 col-md-3">
     <h2>Configuration tree</h2>
 
-    <table>
-      <!-- simple workaround to have 'central' on top
-           (cannot easily set order for object keys) -->
-      <tr ng-repeat="owner in ctrl.owners"
-          ng-show="owner===$root.globals.owner"
-          ng-hide="owner!==$root.globals.owner">
-        <td>
-          <div ng-repeat="(name,node) in ctrl.tree[owner]"
-               ng-if="name==='central' || name==='dip'">
-            <div ng-include="'tree-item.html'"></div>
-          </div>
+    <div ng-repeat="(name,node) in ctrl.tree.childNodes[$root.globals.owner].childNodes track by node._id"
+         ng-if="name==='central' || name==='dip'">
+      <div ng-include="'tree-item.html'"></div>
+    </div>
 
-          <div ng-repeat="(name,node) in ctrl.tree[owner]"
-               ng-if="name!=='central' && name!=='dip'">
-            <div ng-include="'tree-item.html'"></div>
-          </div>
-        </td>
-      </tr>
-    </table>
+    <div ng-repeat="(name,node) in ctrl.tree.childNodes[$root.globals.owner].childNodes track by node._id"
+         ng-if="name!=='central' && name!=='dip'">
+      <div ng-include="'tree-item.html'"></div>
+    </div>
   </div>
 
   <div class="col-lg-10 col-md-9" ng-init="dirfilter = 'global'">
-    <div class="row form-inline">
+    <div class="form-inline">
       <h2>Active configurations
         <small>
           | Filter:
+          <!-- ng-change set new reference for sly-evaluate-only-when  -->
           <select class="form-control"
                   id="dirfilter"
-                  ng-options="v as k for (k, v) in
-                              {global: 'global',
-                              local:'local',
-                              'no filter': ''}"
+                  ng-options="v as k for (k, v) in {global: 'global', local:'local', 'no filter': ''}"
                   ng-model="dirfilter"
                   style="margin: auto;"></select>
         </small>
@@ -106,21 +71,21 @@
       <!-- hack again to keep 'central' and 'dip' first -->
       <div class="wc-config-panel-group panel-group"
            style="flex: 1 1 auto;"
-           ng-init="dirkey='central'; dir=ctrl.tree[$root.globals.owner].central"
-           ng-if="ctrl.tree[$root.globals.owner].central"
+           ng-init="dirkey='central'; dir=ctrl.tree.childNodes[$root.globals.owner].childNodes.central"
+           ng-if="ctrl.tree.childNodes[$root.globals.owner].childNodes.central"
            ng-include="'config-block-container.html'">
       </div>
 
       <div class="wc-config-panel-group panel-group"
            style="flex: 1 1 auto;"
-           ng-init="dirkey='dip'; dir=ctrl.tree[$root.globals.owner].dip"
-           ng-if="ctrl.tree[$root.globals.owner].dip"
+           ng-init="dirkey='dip'; dir=ctrl.tree.childNodes[$root.globals.owner].childNodes.dip"
+           ng-if="ctrl.tree.childNodes[$root.globals.owner].childNodes.dip"
            ng-include="'config-block-container.html'">
       </div>
 
       <div class="wc-config-panel-group panel-group"
            style="flex: 1 1 auto;"
-           ng-repeat="(dirkey,dir) in ctrl.tree[$root.globals.owner]"
+           ng-repeat="(dirkey,dir) in ctrl.tree.childNodes[$root.globals.owner].childNodes"
            ng-if="dirkey!=='central' && dirkey!=='dip'"
            ng-include="'config-block-container.html'">
       </div>
@@ -133,20 +98,20 @@
 <script type="text/ng-template" id="tree-item.html">
   <div style="white-space: nowrap">
     <div ng-if="node._isLeaf" ng-init="path=node._path">
+
       <span ng-include="'status-indicator.html'"></span>
 
       <span ng-include="'old-version-indicator.html'"></span>
 
       <a href=""
-         ng-class="node._flags.DANGER ? 'text-danger' : ''"
+         ng-class="ctrl.configFlags[node._path].DANGER ? 'text-danger' : ''"
          uib-popover-template="'action-popover.html'"
          popover-append-to-body="true"
-         popover-placement="right-top"
+         popover-placement="auto right-top"
          popover-title="{{name}}"
          popover-trigger="outsideClick">
         {{name}}
       </a>
-
     </div>
 
     <div ng-if="!node._isLeaf" ng-init="isExpanded=true">
@@ -159,7 +124,7 @@
 
       <div ng-show="isExpanded"
            class="wc-tree-expanded"
-           ng-repeat="(name,node) in node"
+           ng-repeat="(name,node) in node.childNodes track by node._id"
            ng-include="'tree-item.html'"></div>
     </div>
   </div>
@@ -167,11 +132,9 @@
 
 <script type="text/ng-template" id="config-block-container.html">
   <h3 style="min-width: 40px;"><em>{{dirkey}}</em></h3>
-  <div ng-repeat="path in ctrl.active
-                  | filter: ($root.globals.owner+'/'+dirkey+'/'+dirfilter)"
-       class="panel"
-       style="min-width: 320px; max-width: 400px;"
-       ng-class="ctrl.states[path]==='ON' ? 'panel-success' : 'panel-danger'">
+  <div class="panel"
+       ng-repeat="path in ctrl.activePaths | filter: ($root.globals.owner+'/'+dirkey+'/'+dirfilter)"
+       ng-class="ctrl.pathToState[path]==='ON' ? 'panel-success' : 'panel-danger'">
     <div class="panel-heading" style="cursor:pointer"
          uib-popover-template="'action-popover.html'"
          popover-append-to-body="true"
@@ -182,36 +145,32 @@
             ng-include="'old-version-indicator.html'"></span>
     </div>
     <div class="panel-body"
-         ng-class="ctrl.states[path]==='ON' ? '' : 'error-blink'">
-      <b>Host:</b>&nbsp;{{ctrl.configData[path].executive.host}}
-      <b>Port:</b>&nbsp;{{ctrl.configData[path].executive.port}}
-      <a ng-href="http://{{ctrl.configData[path].executive.host + ':' + ctrl.configData[path].executive.port}}"
-         target="_blank">
-        <img src="img/xdaqapplication.png" style="width:2em; height:2em"/>
-      </a>
-      <wc-view-fields fields="ctrl.configData[path].fields"></wc-view-fields>
+         ng-class="ctrl.pathToState[path]==='ON' ? '' : 'error-blink'">
+      <b>Host:</b>&nbsp;{{ctrl.activeConfigDetails[path].executive.host}}
+      <b>Port:</b>&nbsp;{{ctrl.activeConfigDetails[path].executive.port}}
+      <wc-view-fields fields="ctrl.activeConfigDetails[path].fields"></wc-view-fields>
     </div>
   </div>
 </script>
 
-<style type="text/css">
-  .popover-content {padding: 0px;}
-</style>
+<!-- <style type="text/css"> -->
+<!--   .popover-content {padding: 0px;} -->
+<!-- </style> -->
 <script type="text/ng-template" id="action-popover.html">
-  <div style="min-width:160px">
-    <button class="list-group-item btn" ui-sref="editor({path:path})">
+  <div style="width: 200px;">
+    <button class="list-group-item btn" ui-sref="main.editor({profileName: $root.globals.profileName, path:path})">
       <b>Edit</b> <small>configuration</small></button>
-    <fieldset ng-if="!ctrl.getDangerFlags(path)">
+    <fieldset ng-if="!ctrl.confgiFlags[path].DANGER">
       <button class="list-group-item btn"
-              ng-disabled="ctrl.states[path] !== 'OFF'"
+              ng-disabled="ctrl.pathToState[path] !== 'OFF'"
               ng-click="ctrl.sendCommand('TurnON', path)">
         <b>TurnON</b> <small>executive</small></button>
       <button class="list-group-item btn"
-              ng-disabled="ctrl.states[path] !=='ON'"
+              ng-disabled="ctrl.pathToState[path] !=='ON'"
               ng-click="ctrl.sendCommand('TurnOFF', path)">
         <b>TurnOFF</b> <small>executive</small></button>
       <button class="list-group-item btn"
-              ng-disabled="!ctrl.states[path]"
+              ng-disabled="!ctrl.pathToState[path]"
               ng-click="ctrl.sendCommand('Reset', path)">
         <b>Reset</b> <small>executive</small></button>
       <button class="list-group-item btn"
@@ -223,65 +182,80 @@
               ng-click="ctrl.destroy(path)">
         <b>Destroy</b> <small>function manager</small></button>
     </fieldset>
-    <div ng-if="ctrl.getDangerFlags(path)" class="panel-body bg-danger">
-      DANGER flags: {{ctrl.getDangerFlags(path)}}
+    <div ng-if="ctrl.configFlags[path].DANGER" class="panel-body bg-danger">
+      DANGER flags: {{ctrl.configFlags[path].DANGER}}
     </div>
+    <dock ng-if="ctrl.activeConfigDetails[path]">
+      <hr />
+      <a ng-href="http://{{ctrl.activeConfigDetails[path].executive.host + ':' + ctrl.activeConfigDetails[path].executive.port}}"
+         target="_blank">
+        <img src="img/xdaqapplication.png" style="height: 2em"/>
+      </a>
+      <a ng-if="path.split('/')[3] === 'global'"
+         ng-href="{{$root.globals.logs_endpoint +
+                  '?host=' + ctrl.activeConfigDetails[path].executive.host.split('.')[0] +
+                  '&port=' + ctrl.activeConfigDetails[path].executive.port +
+                  '&group=' + $root.globals.owner}}"
+         target="_blank">
+        <img src="img/logs2.png" style="height: 2em"/>
+      </a>
+    </dock>
   </div>
 </script>
 
+
 <script type="text/ng-template" id="status-indicator.html">
-  <span ng-if="ctrl.isSuccessGetRunning">
-    <span ng-if="node._running">
-      <span ng-if="node._state==='ON'"
+  <span ng-if="ctrl.successGetRunning">
+    <span ng-if="ctrl.runningDetails[node._path]">
+      <span ng-if="ctrl.pathToState[node._path] ==='ON'"
             class="fa fa-heartbeat text-success"
-            uib-tooltip="Running. State: ON"
+            uib-tooltip="FM running. State: ON"
             tooltip-placement="top-left"></span>
-      <span ng-if="node._state==='GoingOn'"
+      <span ng-if="ctrl.pathToState[node._path] ==='GoingOn'"
             class="fa fa-spinner text-success fa-spin"
-            uib-tooltip="Running. State: GoingOn"
+            uib-tooltip="FM running. State: GoingOn"
             tooltip-placement="top-left"></span>
-      <span ng-if="node._state==='OFF'"
+      <span ng-if="ctrl.pathToState[node._path] ==='OFF'"
             class="fa fa-cog"
-            uib-tooltip="Running. State: OFF"
+            uib-tooltip="FM running. State: OFF"
             tooltip-placement="top-left"></span>
-      <span ng-if="node._state==='GoingOff'"
+      <span ng-if="ctrl.pathToState[node._path] ==='GoingOff'"
             class="fa fa-cog"
-            uib-tooltip="Running. State: GoingOff "
-            tooltip-placement="top-left">
-      </span>
-      <span ng-if="node._state==='Error'"
+            uib-tooltip="FM running. State: GoingOff "
+            tooltip-placement="top-left"></span>
+      <span ng-if="ctrl.pathToState[node._path] ==='Error'"
             class="fa fa-exclamation-circle text-danger"
-            uib-tooltip="Running. Error or unknown state."
+            uib-tooltip="FM running. Error or unknown state."
             tooltip-placement="top-left"></span>
-      <span ng-if="!ctrl.isSuccessGetStates"
+      <span ng-if="!ctrl.successGetStates"
             class="fa fa-exclamation-triangle text-warning"
-            uib-tooltip="Failed get state"
-            tooltip-placement="top-left">
-      </span>
+            uib-tooltip="Failed to get state"
+            tooltip-placement="top-left"></span>
     </span>
-    <span ng-if="!node._running"
+    <span ng-if="!ctrl.runningDetails[node._path]"
           class="fa fa-stop text-muted"
-          uib-tooltip="Not running (not created)"
+          uib-tooltip="FM not running"
           tooltip-placement="top-left">
     </span>
   </span>
-  <span ng-if="!ctrl.isSuccessGetRunning"
+  <span ng-if="!ctrl.successGetRunning"
         class="fa fa-exclamation-triangle text-warning"
         uib-tooltip="Failed 'getRunningConfigurations'"
         tooltip-placement="top-left">
   </span>
-  <span ng-if="node._flags.DANGER"
+  <span ng-if="ctrl.configFlags[node._path].DANGER"
         class="fa fa-exclamation-circle text-danger"
-        uib-tooltip="DANGER flags: {{node._flags.DANGER}}"
+        uib-tooltip="DANGER flags: {{ctrl.configFlags[node._path].DANGER}}"
         tooltip-placement="top-left"></span>
 </script>
 
+
 <script type="text/ng-template" id="old-version-indicator.html">
-  <span ng-if="ctrl.runningDetails[path].version < ctrl.versions[path]"
+  <span ng-if="ctrl.runningDetails[path].version < ctrl.pathToVersion[path]"
         class="fa fa-exclamation-triangle text-warning"
         uib-tooltip="Running configuration
                      (v{{ctrl.runningDetails[path].version}}) is not
-                     the newest configuration (v{{ctrl.versions[path]}}).
+                     the newest configuration (v{{ctrl.pathToVersion[path]}}).
                      Do 'Destroy' then 'Create'"
         tooltip-placement="top-left"
         tooltip-append-to-body="true"

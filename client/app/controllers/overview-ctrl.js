@@ -1,144 +1,179 @@
 /* jshint esnext: true */
-angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CONSTS", "Timers", "Modals", "Alerts", "Configurations", function($rootScope, $http, $timeout, CONSTS, Timers, Modals, Alerts, Cfgs) {
+angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", "$timeout", "CONST", "Timers", "Modals", "Alerts", "Alarm", "Configurations", function($rootScope, $http, $timeout, CONST, Timers, Modals, Alerts, Alarm, Configs) {
     var me = this;
-    var srvendp = CONSTS.server_endpoint;
-    var scheduledRefresh = false;
-    // var ssEvents = new EventSource('http://srv-s2d16-22-01:5009/event_stream');
-    // ssEvents.onmessage = function (event) {
-    //     console.log(event);
-    //     alert(event.data);
-    // };
-    var alarm = new Audio('vendor/alarm.ogg');
-    alarm.onended = function() {
-        $rootScope.$apply(function() {
-            me.alarmIsPlaying = false;
-        });
-    };
-    this.alarmIsPlaying = false;
-    this.alarmIsMute = false;
-    // all configurations' paths
-    this.paths = [];
-    // map path to newest configuration version
-    this.versions = {};
-    this.tree = {};
-    this.owners = [];
-    // running configurations' paths
-    this.running = [];
-    // map path to {URI: ..., version: ..., resGID: ... }
-    this.runningConfigsDetails = {};
-    // Running query was successful
-    this.isSuccessGetRunning = false;
-    // map path to state
-    this.states = {};
-    this.isSuccessGetStates = false;
-    // array of active (running and state is "ON" or "Error) cfg paths
-    this.active = [];
-    this.configData = {};
-    // flag if there is configuration in state 'GoingOn', 'GoingOff', 'Resetting'
-    me.hasChangingStates = false;
+    var srvendp = CONST.server_endpoint;
+    var scheduledUpdate = false;
+    var scheduledUpdateTimeout = 4000;
+    var whitelist = null;
+    var blacklist = null;
+    var configs = {};
+    var states = {};
 
+    console.log(Alarm);
+
+    this.alarmIsMute = Alarm.isMute();
+    this.alarmIsPlaying = Alarm.isPlaying();
     this.refreshTimer = null;
+    this.paths = null;
+    this.tree = null;
+    this.owners = null;
+    this.pathToVersion = null;
+    this.pathToState = null;
+    this.activePaths = null;
+    this.runningDetails = null;
+    this.activeConfigDetails = null;
+    this.successGetConfigs = false;
+    this.successGetRunning = false;
+    this.successGetStates = false;
 
     this.init = function() {
-        me.refreshConfigurations().then(function() {
-            me.refreshTimer = Timers.create(56000);
-            me.refreshTimer.addAction({callable: refresher});
-        });
+        whitelist = CONST.profiles[$rootScope.globals.profileName].whitelist || null;
+        blacklist = CONST.profiles[$rootScope.globals.profileName].blacklist || null;
+        me.updateConfigs();
+        me.refreshTimer = Timers.create(56000);
+        me.refreshTimer.addAction({callable: refresher});
         console.log(document.cookie);
         if (document.cookie.indexOf('clientname') < 0) {
             Alerts.pushNameAlert();
         }
     };
 
-    this.refreshConfigurations = function() {
-        // ask confgigurations service to update info about existing
-        // configurations
-        return Cfgs.update().then(function(paths) {
-            // construct configuration tree
-            var path, pArr, node, head, flags, cfg;
-            me.paths = paths;
-            me.versions = {};
-            me.tree = {};
-            for (path of paths) {
-                me.versions[path] = Cfgs.getVersion(path);
-                pArr = path.split("/");
-                pArr.shift();
-                head = me.tree;
-                for (node of pArr) {
-                    if (!head.hasOwnProperty(node)) {
-                        head[node] = {};
-                    }
-                    head = head[node];
+    this.updateConfigs = function() {
+        return Configs.getConfigs(whitelist, blacklist)
+            .then(function(newConfigs) {
+                var path;
+                configs = newConfigs;
+                me.paths = configs.paths;
+                me.pathToVersion = {};
+                for (path of me.paths) {
+                    me.pathToVersion[path] = configs.configs[path].version;
                 }
-                head._isLeaf = true;
-                head._path = path;
-                cfg = Cfgs.get(path);
-                console.log(cfg);
-                flags = cfg.flags;
-                console.log(flags);
-                if (typeof flags !== "undefined") {
-                    head._flags = flags;
-                }
+                me.tree = buildTree(me.paths);
+                me.owners = Object.keys(me.tree.childNodes);
+                me.successGetConfigs = true;
+                return me.updateStates();
+            }, function() {
+                me.successGetConfigs = false;
+                return Promise.reject();
+            });
+    };
+
+    this.updateStates = function() {
+        scheduledUpdate = false;
+        return getRunning().then(getStates).then(function(newStates) {
+            if (needAlarm(states, newStates)) {
+                me.playAlarm();
             }
-            // end of construct configuration tree
-            // determine owners
-            me.owners = Object.keys(me.tree);
-            console.log(me.tree);
-            return me.refreshStatuses();
-        }, function() {
-            me.isSuccessGetRunning = false;
-            me.active = [];
+            states = newStates;
+            me.pathToState = configs.pathKeys(states.states);
+            me.activePaths = configs.getPaths(states.active);
+            if (states.hasChangingStates && !scheduledUpdate) {
+                me.scheduleStatusUpdate();
+                return;
+            }
+            me.getActiveConfigDetails();
         });
     };
 
-    this.refreshStatuses = function() {
-        scheduledRefresh = false;
-        return getRunning().then(function() {
-            return getStates(me.running);
-        }).then(function() {
-            me.getActiveConfigData();
-            var path;
-            var putRunningFlag = function(leaf) {
-                if (me.isSuccessGetRunning) {
-                    leaf._running = me.running.indexOf(leaf._path) > -1;
-                    leaf._state = me.states[leaf._path];
-                } else {
-                    leaf._running = null;
-                }
-            };
-            itterateConfigTree(me.tree, putRunningFlag);
-            if (me.hasChangingStates && !scheduledRefresh) {
-                scheduledRefresh = true;
-                $timeout(me.refreshStatuses, 4000);
-            }
-        });
-    };
-
-    this.playAlarm = function(){
-        if (!me.alarmIsMute) {
-            this.alarmIsPlaying = true;
-            alarm.play();
+    this.scheduleStatusUpdate = function() {
+        if (scheduledUpdate) {
+            return Promise.reject();
         }
+        scheduledUpdate = true;
+        return $timeout(me.updateStates, scheduledUpdateTimeout);
     };
 
-    this.toggleAlarmMute = function(){
-        me.alarmIsMute = !me.alarmIsMute;
-        alarm.muted = me.alarmIsMute;
+    function getRunning() {
+        return Configs.getRunning($rootScope.globals.owner)
+            .then(function(running) {
+                var path, runningPaths = [];
+                var paths = Object.keys(running);
+                me.runningDetails = running;
+                for (path of paths) {
+                    if (me.paths.indexOf(path) >= 0) {
+                        runningPaths.push(path);
+                    }
+                }
+                me.successGetRunning = true;
+                return configs.getUris(runningPaths);
+            }, function(response) {
+                me.successGetRunning = false;
+                return Promise.reject();
+            });
+    }
+
+    function getStates(paths) {
+        return Configs.getStates(paths).then(function(newStates) {
+            me.successGetStates = true;
+            return newStates;
+        }, function() {
+            console.log('failed get states');
+            me.successGetStates = false;
+            return Promise.reject();
+        });
+    }
+
+    function needAlarm(oldStates, newStates) {
+        var uri;
+        for (uri of Object.keys(newStates)) {
+            if (oldStates[uri] && oldStates[uri] === "ON") {
+                if (newStates[uri] === "Error") {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function buildTree(paths) {
+        var path, pArr, node, head, flags, cfg, lastId = 0;
+        me.tree = {
+            _id: ++lastId,
+            childNodes: {}
+        };
+        for (path of paths) {
+            pArr = path.split("/");
+            pArr.shift();
+            head = me.tree;
+            for (node of pArr) {
+                if (!head.childNodes.hasOwnProperty(node)) {
+                    head.childNodes[node] = {
+                        _id: ++lastId,
+                        childNodes: {}
+                    };
+                }
+                head = head.childNodes[node];
+            }
+            head._isLeaf = true;
+            head._path = path;
+        }
+        return me.tree;
+    }
+
+    this.getActiveConfigDetails = function() {
+        var path, promises = [];
+        function getConfigClosure (p) {
+            return Configs.getConfigDetails(p, me.runningDetails[p].version, false)
+                .then(function(details) {
+                    me.activeConfigDetails[p] = details;
+                });
+        }
+        me.activeConfigDetails = {};
+        for (path of me.activePaths) {
+            promises.push(getConfigClosure(path));
+        }
+        return Promise.all(promises);
     };
 
     this.sendCommand = function(cmd, path) {
-        return $http.post(srvendp + "/send/" + cmd,
-                          JSON.stringify(Cfgs.path2URI(path)))
-            .then(dummyHttpHandler)
-            .catch(dummyHttpHandler);
+        return Configs.sendCommand(cmd, configs.pathToUri[path])
+            .then(afterActionHandler, afterActionHandler);
     };
 
     this.create = function(path) {
-        return $http.post(srvendp + "/create", JSON.stringify(Cfgs.path2URI(path)))
-            .then(dummyHttpHandler)
-            .catch(dummyHttpHandler);
+        return Configs.create(configs.pathToUri[path])
+            .then(afterActionHandler, afterActionHandler);
     };
-
 
     this.destroy = function(path) {
         var modal = Modals.confirmModal(
@@ -148,121 +183,23 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
                 + "enough for restarting processes.",
             "Destroy", "Cancel");
         return modal.result.then(function() {
-            return $http.post(srvendp + "/destroy", JSON.stringify(Cfgs.path2URI(path)))
-                .then(dummyHttpHandler)
-                .catch(dummyHttpHandler);
+            return Configs.destroy(configs.pathToUri[path])
+                .then(afterActionHandler, afterActionHandler);
         });
     };
 
-    this.getDangerFlags = function(path) {
-        var flags = Cfgs.get(path).flags;
-        if (!flags) {
-            return undefined;
-        }
-        return flags.DANGER;
+    this.toggleAlarmMute = function() {
+        Alarm.toggleMute();
+        me.alarmIsMute = Alarm.isMute();
     };
 
-    this.getActiveConfigData = function() {
-        var path;
-        function getConfigClosure (p) {
-            $http.get(srvendp + "/config" + p + "/v=" + me.runningDetails[p].version + '/noxml')
-                .then(function(response) {
-                    me.configData[p] = response.data;
-                }).catch(function(response) {
-                    console.log(response);
-                    me.configData[p] = null;
-                });
-        }
-        for (path of me.active) {
-            getConfigClosure(path);
-        }
+    this.playAlarm = function() {
+        Alarm.play();
     };
 
-    function getRunning() {
-        return $http.get(srvendp + "/running/" + $rootScope.globals.owner)
-            .then(function(response) {
-                var path;
-                me.runningDetails = response.data;
-                me.running = [];
-                for (path in response.data) {
-                    if (response.data.hasOwnProperty(path)) {
-                        me.running.push(path);
-                    }
-                }
-                me.isSuccessGetRunning = true;
-                return true;
-            }).catch(function(response) {
-                me.running = [];
-                me.isSuccessGetRunning = false;
-                return false;
-            });
-    }
-
-    function getStates(paths) {
-        var running, uris =[];
-        var prevStates = angular.copy(me.states);
-        var needAlarm = false;
-        me.states = {};
-        me.active = [];
-        if (paths.length < 1) {
-            return Promise.resolve();
-        }
-        for (running of paths) {
-            uris.push(Cfgs.path2URI(running));
-        }
-        return $http.post(srvendp + "/states", uris).then(function(response) {
-            var uri, path;
-            me.hasChangingStates = false;
-            for (uri in response.data) {
-                if (response.data.hasOwnProperty(uri)) {
-                    path = Cfgs.URI2path(uri);
-                    me.states[path] = response.data[uri];
-                    if (response.data[uri] === "ON" ||
-                        response.data[uri] === "Error") {
-                        me.active.push(path);
-                    }
-                    if (response.data[uri] === "GoingOn" ||
-                        response.data[uri] === "GoingOff" ||
-                        response.data[uri] === "Resetting") {
-                        me.hasChangingStates = true;;
-                    }
-                    if (prevStates[path] &&
-                        prevStates[path] === "ON"
-                        && me.states[path] === "Error") {
-                        needAlarm = true;
-                    }
-                }
-            }
-            me.isSuccessGetStates = true;
-            if (needAlarm) {
-                me.playAlarm();
-            }
-        }).catch(function(response) {
-            me.isSuccessGetStates = false;
-            console.log("Failed getting states", response);
-        });
-    }
-
-    function itterateConfigTree(node, visit) {
-        var stack = [node];
-        var key;
-        while(stack.length !== 0) {
-            node = stack.pop();
-            if (node._isLeaf) {
-                visit(node);
-            } else {
-                for (key in node) {
-                    if (node.hasOwnProperty(key)) {
-                        stack.push(node[key]);
-                    }
-                }
-            }
-        }
-    }
-
-    function dummyHttpHandler(response) {
-        console.log(response);
-        me.refreshStatuses();
+    function afterActionHandler(data) {
+        console.log(data);
+        me.updateStates();
     }
 
     function checkAppVersion() {
@@ -281,7 +218,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
             if (counter > 240) {
                 counter = 0;
                 console.log("Check for new configurations");
-                me.refreshConfigurations();
+                me.updateConfigs();
                 if (document.cookie.indexOf('clientname') < 0) {
                     if (Alerts.alertByTypeExists('name')) {
                         Alerts.pushNameAlert();
@@ -291,8 +228,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
                 if (counter % 10 == 0) {
                     checkAppVersion();
                 }
-                console.log("Refreshing states");
-                me.refreshStatuses();
+                me.updateStates();
             }
         };
     })();

@@ -1,27 +1,29 @@
-angular.module("web-config").controller("MainCtrl", ["$rootScope", "$http", "CONSTS", "Timers", "Alerts", function($rootScope, $http, CONSTS, Timers, Alerts) {
+angular.module("web-config").controller("MainCtrl", ["$rootScope", "$http", "$stateParams", "CONST", "Timers", "Alerts", "config", function($rootScope, $http, $stateParams, CONST, Timers, Alerts, config) {
 
     var me = this;
 
-    // globals to be used by other controllers for global variables
     $rootScope.globals = {
-        owner: "",
         app_time: APP_TIME
     };
 
-    // load configuration constants
-    $http.get("const.json?" + APP_TIME).then(function(response) {
-        console.log(response);
-        angular.copy(response.data, CONSTS);
-        console.log(CONSTS);
-        $rootScope.globals.owner = CONSTS.default_owner;
-    });
+    console.log('Setting configuration from const.json');
+    console.log(config);
+    angular.copy(config.data, CONST); // fill CONST from const.json
+    $rootScope.globals.owner = CONST.default_owner || "lumipro";
+    $rootScope.globals.logs_endpoint = CONST.logs_endpoint || null;
 
-    console.log('default owner', CONSTS.default_owner);
-    console.log('owner', $rootScope.globals.owner);
+    console.log('Setting profile');
+    var p = $stateParams.profileName || "bril";
+    p = p.split("/")[0];
+    $rootScope.globals.profileName = p;
+    $rootScope.globals.illegalProfile = !CONST.profiles.hasOwnProperty(p);
+
+    console.log($stateParams);
+    console.log($rootScope.globals);
+    console.log(CONST);
 
     $rootScope.$on('$stateChangeStart', function(){
         Alerts.clear();
         Timers.clear();
     });
-
 }]);
