@@ -1,0 +1,10 @@
+<div class="modal-header">
+    <h4>{{ctrl.title}}</h4>
+</div>
+<div class="modal-body">
+  {{ctrl.message}}
+</div>
+<div class="modal-footer">
+    <button class="btn btn-default" ng-click="$close()">{{ctrl.confirmText}}</button>
+    <button class="btn btn-default" ng-click="$dismiss()">{{ctrl.cancelText}}</button>
+</div>
