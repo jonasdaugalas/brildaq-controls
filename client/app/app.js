@@ -1,5 +1,5 @@
 /* jshint esnext: true */
-angular.module("web-config", ['sly', 'ui.router', 'ui.bootstrap', 'ui.ace', 'prettyXml']);
+angular.module("web-config", ['ui.router', 'ui.bootstrap', 'ui.ace', 'prettyXml']);
 
 // CONST will be filled by main controller
 angular.module("web-config").constant("CONST", {});

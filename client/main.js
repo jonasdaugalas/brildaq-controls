@@ -1,5 +1,4 @@
 require("./node_modules/angular/angular");
-require("./vendor/sly/scalyr.js");
 require("./node_modules/angular-ui-router/release/angular-ui-router.min");
 require("./node_modules/angular-ui-bootstrap/dist/ui-bootstrap");
 require("./node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls");
