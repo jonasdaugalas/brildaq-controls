@@ -67,7 +67,8 @@
       </h2>
     </div>
 
-    <div style="display: flex; flex-wrap: wrap;">
+    <div style="display: flex; flex-wrap: wrap;"
+         ng-if="ctrl.successGetConfigs && ctrl.successGetRunning && ctrl.successGetStates">
       <!-- hack again to keep 'central' and 'dip' first -->
       <div class="wc-config-panel-group panel-group"
            style="flex: 1 1 auto;"
@@ -160,17 +161,17 @@
   <div style="width: 200px;">
     <button class="list-group-item btn" ui-sref="main.editor({profileName: $root.globals.profileName, path:path})">
       <b>Edit</b> <small>configuration</small></button>
-    <fieldset ng-if="!ctrl.confgiFlags[path].DANGER">
+    <fieldset ng-if="!ctrl.configFlags[path].DANGER">
       <button class="list-group-item btn"
-              ng-disabled="ctrl.pathToState[path] !== 'OFF'"
+              ng-disabled="ctrl.pathToState[path] !== 'OFF' || !ctrl.runningDetails[path]"
               ng-click="ctrl.sendCommand('TurnON', path)">
         <b>TurnON</b> <small>executive</small></button>
       <button class="list-group-item btn"
-              ng-disabled="ctrl.pathToState[path] !=='ON'"
+              ng-disabled="ctrl.pathToState[path] !== 'ON' || !ctrl.runningDetails[path]"
               ng-click="ctrl.sendCommand('TurnOFF', path)">
         <b>TurnOFF</b> <small>executive</small></button>
       <button class="list-group-item btn"
-              ng-disabled="!ctrl.pathToState[path]"
+              ng-disabled="!ctrl.pathToState[path] || !ctrl.runningDetails[path]"
               ng-click="ctrl.sendCommand('Reset', path)">
         <b>Reset</b> <small>executive</small></button>
       <button class="list-group-item btn"
@@ -219,9 +220,9 @@
             class="fa fa-cog"
             uib-tooltip="FM running. State: OFF"
             tooltip-placement="top-left"></span>
-      <span ng-if="ctrl.pathToState[node._path] ==='GoingOff'"
+      <span ng-if="ctrl.pathToState[node._path] ==='GoingOff' || ctrl.pathToState[node._path] ==='Resetting'"
             class="fa fa-cog"
-            uib-tooltip="FM running. State: GoingOff "
+            uib-tooltip="FM running. State: GoingOff/Resetting"
             tooltip-placement="top-left"></span>
       <span ng-if="ctrl.pathToState[node._path] ==='Error'"
             class="fa fa-exclamation-circle text-danger"

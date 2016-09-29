@@ -32,7 +32,7 @@
     border-radius: 1em;
 }
 
-.panel {
+.wc-config-panel-group .panel {
     min-width: 240px;
     max-width: 460px;
     word-wrap:break-word;

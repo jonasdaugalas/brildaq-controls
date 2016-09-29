@@ -21,7 +21,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
     this.pathToState = null;
     this.activePaths = null;
     this.runningDetails = null;
-    this.activeConfigDetails = null;
+    this.activeConfigDetails = {};
     this.successGetConfigs = false;
     this.successGetRunning = false;
     this.successGetStates = false;
@@ -67,17 +67,47 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
             states = newStates;
             me.pathToState = configs.pathKeys(states.states);
             me.activePaths = configs.getPaths(states.active);
+            me.getActiveConfigDetails(me.activePaths);
             if (states.hasChangingStates && !scheduledUpdate) {
                 me.scheduleStatusUpdate();
                 return;
             }
-            me.getActiveConfigDetails();
+        });
+    };
+
+    this.updateState = function(uri) {
+        var path = configs.uriToPath[uri];
+        return getStates([uri]).then(function(newStates) {
+            var state = newStates.states[uri];
+            var isActive = newStates.active.indexOf(uri) >= 0;
+            var activeIndex = me.activePaths.indexOf(path);
+            console.log(newStates, me.runningDetails);
+            if (!state) {
+                console.error('uri not in getStates response', uri, newStates);
+                me.scheduleStatusUpdate();
+                return;
+            }
+            if (needAlarm(states, newStates)) {
+                me.playAlarm();
+            }
+            me.pathToState[configs.uriToPath[uri]] = state;
+            states.states[uri] = state;
+            if (isActive && activeIndex < 0) {
+                me.activePaths.push(path);
+            } else if (!isActive && activeIndex >= 0) {
+                me.activePaths.splice(activeIndex, 1);
+            }
+            if (newStates.hasChangingStates) {
+                me.scheduleStatusUpdate();
+                return;
+            }
+            me.getActiveConfigDetails([path]);
         });
     };
 
     this.scheduleStatusUpdate = function() {
         if (scheduledUpdate) {
-            return Promise.reject();
+            return Promise.resolve();
         }
         scheduledUpdate = true;
         return $timeout(me.updateStates, scheduledUpdateTimeout);
@@ -102,8 +132,8 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
             });
     }
 
-    function getStates(paths) {
-        return Configs.getStates(paths).then(function(newStates) {
+    function getStates(uris) {
+        return Configs.getStates(uris).then(function(newStates) {
             me.successGetStates = true;
             return newStates;
         }, function() {
@@ -111,6 +141,14 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
             me.successGetStates = false;
             return Promise.reject();
         });
+    }
+
+    function removeActive(path) {
+        var activeIndex = me.activePaths.indexOf(path);
+        if (activeIndex >= 0) {
+            me.activePaths.splice(activeIndex, 1);
+            me.pathToState[path] = null;
+        }
     }
 
     function needAlarm(oldStates, newStates) {
@@ -150,7 +188,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
         return me.tree;
     }
 
-    this.getActiveConfigDetails = function() {
+    this.getActiveConfigDetails = function(paths) {
         var path, promises = [];
         function getConfigClosure (p) {
             return Configs.getConfigDetails(p, me.runningDetails[p].version, false)
@@ -158,8 +196,11 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
                     me.activeConfigDetails[p] = details;
                 });
         }
-        me.activeConfigDetails = {};
-        for (path of me.activePaths) {
+        if (!paths) {
+            me.activeConfigDetails = {};
+            paths = me.activePaths;
+        }
+        for (path of paths) {
             promises.push(getConfigClosure(path));
         }
         return Promise.all(promises);
@@ -167,12 +208,17 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
 
     this.sendCommand = function(cmd, path) {
         return Configs.sendCommand(cmd, configs.pathToUri[path])
-            .then(afterActionHandler, afterActionHandler);
+            .then(function() {
+                return me.updateState(configs.pathToUri[path]);
+            }, me.updateStates);
     };
 
     this.create = function(path) {
         return Configs.create(configs.pathToUri[path])
-            .then(afterActionHandler, afterActionHandler);
+            .then(getRunning, me.updateStates)
+            .then(function() {
+                return me.updateState(configs.pathToUri[path]);
+            });
     };
 
     this.destroy = function(path) {
@@ -184,7 +230,10 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
             "Destroy", "Cancel");
         return modal.result.then(function() {
             return Configs.destroy(configs.pathToUri[path])
-                .then(afterActionHandler, afterActionHandler);
+                .then(function() {
+                    removeActive(path);
+                    return getRunning();
+                }, me.updateStates);
         });
     };
 
@@ -199,7 +248,7 @@ angular.module("web-config").controller("OverviewCtrl", ["$rootScope", "$http", 
 
     function afterActionHandler(data) {
         console.log(data);
-        me.updateStates();
+        me.scheduleStatusUpdate();
     }
 
     function checkAppVersion() {

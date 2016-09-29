@@ -20,7 +20,6 @@ angular.module("web-config").service("Configurations", ["$http", "CONST", functi
                 continue;
             }
             cfg = configs[path];
-            console.log(path, cfg);
             this.configs[path] = cfg;
             uri = "http://" + cfg.host + ":" + cfg.port + cfg.urn;
             this.uriToPath[uri] = path;

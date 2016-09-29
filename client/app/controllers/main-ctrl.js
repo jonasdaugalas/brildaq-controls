@@ -26,4 +26,8 @@ angular.module("web-config").controller("MainCtrl", ["$rootScope", "$http", "$st
         Alerts.clear();
         Timers.clear();
     });
+
+    window.onerror = function(msg, file, line, col, error) {
+        console.log(msg, file, line, col, error);
+    };
 }]);
