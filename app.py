@@ -2,8 +2,6 @@ import functools
 import json
 import flask
 import utils
-import re
-import time
 import rcmsws
 import config
 import configurator_errors as err
@@ -197,10 +195,10 @@ def get_config_xml(path, version=None):
     return flask.Response(r, mimetype='text/xml')
 
 
-@app.route('/config/<path:path>')
-@app.route('/config/<path:path>/noxml')
-@app.route('/config/<path:path>/v=<int:version>')
 @app.route('/config/<path:path>/v=<int:version>/noxml')
+@app.route('/config/<path:path>/v=<int:version>')
+@app.route('/config/<path:path>/noxml')
+@app.route('/config/<path:path>')
 @default_configurator_error_response
 def get_config(path, version=None):
     log.debug(flask.request.url)
@@ -250,7 +248,7 @@ def submit_fields():
         r = utils.populate_RSDB_with_DUCK(final, comment)
         if r[0]:
             return flask.Response('Successfully submitted', status=200)
-        else :
+        else:
             return flask.Response(r[1], status=500)
     else:
         return flask.Response('Failed to build final xml', status=500)
@@ -269,7 +267,7 @@ def submit_xml():
         r = utils.populate_RSDB_with_DUCK(final, comment)
         if r[0]:
             return flask.Response('Successfully submitted', status=200)
-        else :
+        else:
             return flask.Response(r[1], status=500)
     else:
         return flask.Response('Failed to build final xml', status=500)
@@ -282,14 +280,14 @@ def submit_full():
     try:
         comment = data['comment']
         final = data['xml']
-    except ValueError as e:
+    except ValueError:
         raise err.ConfiguratorUserError(
             '/submitfull request data must be {comment:..., xml:...}',
             details=data)
     r = utils.populate_RSDB_with_DUCK(final, comment)
     if r[0]:
         return flask.Response('Successfully submitted', status=200)
-    else :
+    else:
         return flask.Response(r[1], status=500)
 
 

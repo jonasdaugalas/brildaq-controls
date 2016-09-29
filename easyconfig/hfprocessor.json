@@ -8,6 +8,13 @@
             "name": "sigmaVis",
             "type": "integer",
             "xpath": ".//xc:Application[@id='121']/hfp:properties/hfp:sigmaVis"
+        },
+        {
+            "name": "Selected bunches",
+            "type": "string",
+            "help": "Comma separated string of bunch indices",
+            "hideInOverview": true,
+            "xpath": ".//xc:Application[@id='121']/hfp:properties/hfp:m_selectBunches"
         }
     ]
 }
