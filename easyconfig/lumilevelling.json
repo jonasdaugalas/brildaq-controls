@@ -1,0 +1,23 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "ll": "urn:xdaq-application:bril::dip::LumiLeveling"
+    },
+    "fields": [
+        {
+            "name": "Target lumi",
+            "type": "float",
+            "xpath": ".//xc:Application[@class='bril::dip::LumiLeveling']/ll:properties/ll:targetLumi"
+        },
+        {
+            "name": "Lumi step",
+            "type": "float",
+            "xpath": ".//xc:Application[@class='bril::dip::LumiLeveling']/ll:properties/ll:lumiStep"
+        },
+        {
+            "name": "Enable leveling",
+            "type": "bool",
+            "xpath": ".//xc:Application[@class='bril::dip::LumiLeveling']/ll:properties/ll:enableLeveling"
+        }
+    ]
+}

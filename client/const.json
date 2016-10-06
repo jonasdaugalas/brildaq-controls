@@ -7,7 +7,7 @@
             "blacklist": null
         },
         "cms": {
-            "whitelist": ["/lumipro/central/global/BunchPatternProcessor"],
+            "whitelist": ["/lumipro/dip/global/LumiLevelling"],
             "blacklist": null
         }
     }
