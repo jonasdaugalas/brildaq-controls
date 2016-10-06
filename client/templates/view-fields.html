@@ -3,7 +3,7 @@
        ng-if="!field.hideInOverview"
        ng-switch="field.type">
     <label><b>{{field.name}}:</b></label>
-    <span ng-switch-when="unsignedInt"><span ng-include="number.html'"></span></span>
+    <span ng-switch-when="unsignedInt"><span ng-include="'number.html'"></span></span>
     <span ng-switch-when="integer"><span ng-include="'number.html'"></span></span>
     <span ng-switch-when="float"><span ng-include="'number.html'"></span></span>
     <span ng-switch-when="string"><span ng-include="'string.html'"></span></span>
