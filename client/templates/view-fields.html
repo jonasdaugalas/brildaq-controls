@@ -3,8 +3,9 @@
        ng-if="!field.hideInOverview"
        ng-switch="field.type">
     <label><b>{{field.name}}:</b></label>
-    <span ng-switch-when="unsignedInt"><span ng-include="'int.html'"></span></span>
-    <span ng-switch-when="integer"><span ng-include="'int.html'"></span></span>
+    <span ng-switch-when="unsignedInt"><span ng-include="number.html'"></span></span>
+    <span ng-switch-when="integer"><span ng-include="'number.html'"></span></span>
+    <span ng-switch-when="float"><span ng-include="'number.html'"></span></span>
     <span ng-switch-when="string"><span ng-include="'string.html'"></span></span>
     <span ng-switch-when="commaSeparatedString"><span ng-include="'comma-separated-string.html'"></span></span>
     <span ng-switch-when="stringArray"><span ng-include="'string-array.html'"></span></span>
@@ -13,7 +14,7 @@
   </div>
 </div>
 
-<script type="text/ng-template" id="int.html">
+<script type="text/ng-template" id="number.html">
   <code>{{field.value}}</code>
 </script>
 

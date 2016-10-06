@@ -35,6 +35,10 @@
       <span ng-include="'int.html'"></span>
     </span>
 
+    <span ng-switch-when="float">
+      <span ng-include="'float.html'"></span>
+    </span>
+
     <span ng-switch-when="commaSeparatedString">
       <span ng-include="'comma-separated-string.html'"></span>
     </span>
@@ -79,6 +83,10 @@
 
 <script type="text/ng-template" id="int.html">
   <input type="number" class="form-control" ng-model="field.value"></script>
+</script>
+
+<script type="text/ng-template" id="float.html">
+  <input type="number" step="0.1" class="form-control" ng-model="field.value"></script>
 </script>
 
 <script type="text/ng-template" id="string.html">

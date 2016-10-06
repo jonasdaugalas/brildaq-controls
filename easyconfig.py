@@ -59,6 +59,8 @@ def parse_fields(configpath, xml):
         f = {'name': field['name'], 'type': field['type']}
         if f['type'] in ('integer', 'Integer', 'unsignedInt'):
             f['value'] = int(node.text)
+        elif f['type'] == 'float':
+            f['value'] = float(node.text)
         elif f['type'] == 'commaSeparatedString':
             t = node.text
             f['value'] = str(t).split(',') if t is not None else []
@@ -199,8 +201,10 @@ def _modify_xml_value(root, xpath, dtype, val, ns, multi):
         nodes = [root.find(xpath, ns)]
     for node in nodes:
         log.debug(node.attrib)
-        if dtype in ('Integer', 'unsignedInt'):
+        if dtype in ('integer', 'Integer', 'unsignedInt'):
             node.text = str(int(val))
+        elif dtype == 'float':
+            node.text = str(float(val))
         elif dtype == 'commaSeparatedString':
             node.text = ','.join(
                 map((lambda x: x if x is not None else ''), val))
