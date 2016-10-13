@@ -24,5 +24,6 @@
     "/lumipro/hf/local/hfocprocessor":                  "hfprocessor.json",
     "/lumipro/bptx/global/bptxScopeProcessor":          "bptxprocessor.json",
     "/lumipro/bptx/local/bptxScopeProcessor":           "bptxprocessor.json",
-    "/lumipro/dip/global/LumiLevelling":                "lumilevelling.json"
+    "/lumipro/dip/global/LumiLevelling":                "lumilevelling.json",
+    "/lumipro/plt/global/pltprocessor":                 "pltprocessor.json"
 }
