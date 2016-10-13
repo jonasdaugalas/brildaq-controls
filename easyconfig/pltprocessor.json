@@ -1,0 +1,38 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "ll": "urn:xdaq-application:bril::pltprocessor::Application"
+    },
+    "fields": [
+        {
+            "name": "calibtag",
+            "type": "string",
+            "xpath": ".//xc:Application[@class='bril::pltprocessor::Application']/ll:properties/ll:calibtag",
+            "hideInOverview": false           
+        },
+        {
+            "name": "calibzerotag",
+            "type": "string",
+            "xpath": ".//xc:Application[@class='bril::pltprocessor::Application']/ll:properties/ll:calibzerotag",
+	    "hideInOverview": false
+        },
+        {
+            "name": "use mask",
+            "type": "unsignedInt",
+            "xpath": ".//xc:Application[@class='bril::pltprocessor::Application']/ll:properties/ll:usemask",
+	    "hideInOverview": false  
+        },
+	{
+            "name": "accidentalspzero",
+            "type": "float",
+            "xpath": ".//xc:Application[@class='bril::pltprocessor::Application']/ll:properties/ll:accidentalspzero",
+	    "hideInOverview": false
+        },
+	{
+            "name": "accidentalspone",
+            "type": "float",
+            "xpath": ".//xc:Application[@class='bril::pltprocessor::Application']/ll:properties/ll:accidentalspone",
+	    "hideInOverview": false
+        }
+    ]
+}
