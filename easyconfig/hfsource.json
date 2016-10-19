@@ -5,6 +5,13 @@
     },
     "fields": [
         {
+            "name": "luts_path",
+            "hideInOverview": true,
+            "type": "string",
+            "multiple": true,
+            "xpath": ".//xc:Application[@class='bril::hfsource::Application']/hfs:properties/hfs:luts_path"
+        },
+        {
             "name": "topics",
             "hideInOverview": true,
             "type": "commaSeparatedString",
