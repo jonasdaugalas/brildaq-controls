@@ -22,6 +22,12 @@
             "xpath": ".//xc:Application[@class='bril::pltprocessor::Application']/ll:properties/ll:usemask",
 	    "hideInOverview": false  
         },
+        {
+            "name": "excludechannels",
+            "type": "string",
+            "xpath": ".//xc:Application[@class='bril::pltprocessor::Application']/ll:properties/ll:excludechannels",
+	    "hideInOverview": false
+        },
 	{
             "name": "accidentalspzero",
             "type": "float",

@@ -1,0 +1,13 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "lm": "urn:xdaq-application:bril::supervisor::LuminosityMonitor"
+    },
+    "fields": [
+        {
+            "name": "Lumi topics",
+            "type": "commaSeparatedString",
+            "xpath": ".//xc:Application[@class='bril::supervisor::LuminosityMonitor']/lm:properties/lm:lumitopics"
+        }
+    ]
+}

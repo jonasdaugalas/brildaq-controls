@@ -25,5 +25,6 @@
     "/lumipro/bptx/global/bptxScopeProcessor":          "bptxprocessor.json",
     "/lumipro/bptx/local/bptxScopeProcessor":           "bptxprocessor.json",
     "/lumipro/dip/global/LumiLevelling":                "lumilevelling.json",
-    "/lumipro/plt/global/pltprocessor":                 "pltprocessor.json"
+    "/lumipro/plt/global/pltprocessor":                 "pltprocessor.json",
+    "/lumipro/central/global/LuminosityMonitor":        "lumimonitor.json"
 }
