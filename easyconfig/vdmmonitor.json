@@ -1,0 +1,18 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "vm": "urn:xdaq-application:bril::vdmmonitor::VDMMonitor"
+    },
+    "fields": [
+        {
+            "name": "lumiTopics",
+            "type": "commaSeparatedString",
+            "xpath": ".//xc:Application[@class='bril::vdmmonitor::VDMMonitor']/vm:properties/vm:lumiTopics"
+        },
+        {
+            "name": "sleepBeforeSigma",
+            "type": "unsignedInt",
+            "xpath": ".//xc:Application[@class='bril::vdmmonitor::VDMMonitor']/vm:properties/vm:sleepBeforeSigma"
+        }
+    ]
+}
