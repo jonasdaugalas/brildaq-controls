@@ -29,12 +29,6 @@ def main():
     if server:
         deploy_server()
 
-    print('Deploy client? (y/n)')
-    line = readline()
-    client = True if line.lower() == 'y' else False
-    if client:
-        deploy_client()
-
     if not client and not server:
         print('Nothing to do.')
         return

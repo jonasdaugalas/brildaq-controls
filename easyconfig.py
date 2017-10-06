@@ -68,6 +68,8 @@ def parse_fields(configpath, xml):
             f['value'] = _parse_string_array(node)
         elif f['type'] == 'stringMap':
             f['value'] = _parse_string_map(node)
+        elif f['type'] == 'bool':
+            f['value'] = bool(node.text)
         else:
             f['value'] = node.text
 
@@ -212,5 +214,7 @@ def _modify_xml_value(root, xpath, dtype, val, ns, multi):
             _set_string_array(node, val)
         elif dtype == 'stringMap':
             _set_string_map(node, val)
+        elif dtype == 'bool':
+            node.text = str(bool(val)).lower()
         else:
             node.text = str(val)

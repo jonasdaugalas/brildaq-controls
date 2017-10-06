@@ -13,6 +13,7 @@
     "/lumipro/dip/global/commondataexchange":           "commondataexchange.json",
     "/lumidev/central/global/commondataexchange":       "commondataexchange.json",
     "/lumipro/central/global/lumistore":                "lumistore.json",
+    "/lumipro/central/global/vdmstore":                 "lumistore.json",
     "/lumidev/central/global/lumistore":                "lumistore.json",
     "/lumidev/hf/global/hfsource":                      "hfsource.json",
     "/lumipro/hf/global/lumistore":                     "hflumistore.json",
@@ -27,5 +28,6 @@
     "/lumipro/dip/global/LumiLevelling":                "lumilevelling.json",
     "/lumipro/plt/global/pltprocessor":                 "pltprocessor.json",
     "/lumipro/central/global/LuminosityMonitor":        "lumimonitor.json",
-    "/lumipro/central/global/VDMMonitor":               "vdmmonitor.json"
+    "/lumipro/central/global/VDMMonitor":               "vdmmonitor.json",
+    "/lumipro/dt/global/dtprocessor":                   "dtprocessor.json"
 }
