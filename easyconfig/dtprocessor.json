@@ -1,0 +1,13 @@
+{
+    "namespaces": {
+        "xc": "http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30",
+        "dt": "urn:xdaq-application:bril::supervisor::DTLumiProcessor"
+    },
+    "fields": [
+        {
+            "name": "sigmaVis",
+            "type": "integer",
+            "xpath": ".//xc:Application[@class='bril::supervisor::DTLumiProcessor']/dt:properties/dt:sigmaVis"
+        }
+    ]
+}

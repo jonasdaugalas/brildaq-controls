@@ -7,19 +7,19 @@
         {
             "name": "Bestlumi priority",
             "type": "commaSeparatedString",
-            "xpath": ".//xc:Application[@class='bril::supervisor::BestLumiProcessor']/bl:properties/bl:lumiPriority",
-            "typeahead": ["pltlumizero", "bcm1flumi", "hflumi"]
+            "xpath": ".//xc:Application[@service='supervisor']/bl:properties/bl:lumiPriority",
+            "typeahead": ["pltlumizero", "bcm1flumi", "hflumi", "hfetlumi"]
 
         },
         {
             "name": "Minbias",
             "type": "unsignedInt",
-            "xpath": ".//xc:Application[@class='bril::supervisor::BestLumiProcessor']/bl:properties/bl:minbias"
+            "xpath": ".//xc:Application[@service='supervisor']/bl:properties/bl:minbias"
         },
         {
             "name": "inTopics",
             "type": "commaSeparatedString",
-            "xpath": ".//xc:Application[@class='bril::supervisor::BestLumiProcessor']/bl:properties/bl:inTopics",
+            "xpath": ".//xc:Application[@service='supervisor']/bl:properties/bl:inTopics",
             "typeahead": ["tcds", "beam", "pltlumi", "pltlumizero", "bcm1flumi", "hflumi"]
         }
     ]
