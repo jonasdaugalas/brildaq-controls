@@ -6,7 +6,7 @@
     "fields": [
         {
             "name": "sigmaVis",
-            "type": "integer",
+            "type": "float",
             "xpath": ".//xc:Application[@class='bril::hfprocessor::HFProcessor']/hfp:properties/hfp:sigmaVis"
         }
     ]

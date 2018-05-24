@@ -6,7 +6,7 @@
     "fields": [
         {
             "name": "sigmaVis",
-            "type": "integer",
+            "type": "float",
             "xpath": ".//xc:Application[@id='121']/hfp:properties/hfp:sigmaVis"
         }
     ]
