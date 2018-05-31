@@ -368,7 +368,9 @@ def populate_RSDB_with_DUCK(xml, comment=None):
         cwd = os.path.join(fdir, 'tools')
         log.debug('subprocess (duck.jar) cwd: {}'.format(cwd))
         out = subprocess.check_output(cmd, cwd=cwd)
-        if 'ERROR' in out:
+        err_lines = [l for l in out.splitlines() if 'ERROR' in l]
+        err_lines = [l for l in err_lines if not l.startswith('Comment')]
+        if len(err_lines):
             log.debug('duck.jar output: {}'.format(out))
             skip = out.find('Continueing...')
             if skip < 0:
